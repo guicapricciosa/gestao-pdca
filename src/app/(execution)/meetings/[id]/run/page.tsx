@@ -6,6 +6,7 @@ import {
   resolveProfileNames,
 } from "@/modules/execution/application/detail-context";
 import { loadMeetingDetail } from "@/modules/meetings/application/detail";
+import { MeetingLive } from "@/ui/components/meeting-live";
 import { MeetingMode } from "@/ui/patterns/meeting-mode";
 import { objectTypeLabel } from "@/ui/labels";
 
@@ -42,7 +43,7 @@ export default async function RunMeetingPage({
     ]);
   const { data: myProfile } = await client
     .from("profiles")
-    .select("id")
+    .select("id,display_name")
     .eq("auth_user_id", me.data.user?.id ?? "")
     .maybeSingle();
   const names = await resolveProfileNames(client, [
@@ -86,6 +87,13 @@ export default async function RunMeetingPage({
         names.get(detail.session.chair_profile_id) ?? "Chair sem perfil visível"
       }
       isChair={myProfile?.id === detail.session.chair_profile_id}
+      live={
+        <MeetingLive
+          meetingId={detail.session.id}
+          profileId={myProfile?.id ?? null}
+          displayName={myProfile?.display_name ?? "Participante"}
+        />
+      }
       participantCount={detail.participants.length}
       scopeSummary={scopeSummary}
       agenda={detail.agenda}

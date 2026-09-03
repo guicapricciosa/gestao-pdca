@@ -42,7 +42,8 @@ interface MeetingNotesProps {
   }) => Promise<CreateNoteResult>;
 }
 
-type SaveState = "idle" | "dirty" | "saving" | "saved" | "conflict" | "error";
+type SaveState =
+  "idle" | "dirty" | "saving" | "saved" | "conflict" | "stale" | "error";
 
 const stateText: Record<SaveState, string> = {
   idle: "",
@@ -50,6 +51,7 @@ const stateText: Record<SaveState, string> = {
   saving: "A guardar…",
   saved: "Guardado",
   conflict: "Conflito — rever",
+  stale: "Versão mais recente — rever",
   error: "Não guardado",
 };
 
@@ -74,6 +76,32 @@ function NoteEditor({
   useEffect(() => {
     latest.current = content;
   }, [content]);
+  // What this editor last saw from the server, to notice newer versions that
+  // arrive through Realtime while the person is typing.
+  const [seen, setSeen] = useState({
+    version: note.version,
+    content: note.content,
+  });
+  const [incoming, setIncoming] = useState<string | null>(null);
+  if (note.version > seen.version) {
+    setSeen({ version: note.version, content: note.content });
+    if (content === seen.content || content === note.content) {
+      // Nothing typed locally: adopt the newer text quietly.
+      setContent(note.content);
+      setVersion(note.version);
+      setIncoming(null);
+    } else {
+      setVersion(note.version);
+      setIncoming(note.content);
+      setState("stale");
+    }
+  }
+  useEffect(() => {
+    if (state === "stale" && timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }, [state]);
 
   const flush = async () => {
     if (timer.current) clearTimeout(timer.current);
@@ -84,6 +112,8 @@ function NoteEditor({
     const result = await saveNote({ noteId: note.id, version, content: text });
     if (result.ok) {
       setVersion(result.version);
+      setSeen({ version: result.version, content: text });
+      setIncoming(null);
       setState("saved");
       setMessage(null);
       return;
@@ -100,7 +130,7 @@ function NoteEditor({
 
   const onChange = (value: string) => {
     setContent(value);
-    if (state === "conflict") return;
+    if (state === "conflict" || state === "stale") return;
     setState("dirty");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void flush(), 1200);
@@ -142,7 +172,9 @@ function NoteEditor({
           className={
             state === "conflict" || state === "error"
               ? "font-medium text-red-700"
-              : "text-muted-foreground"
+              : state === "stale"
+                ? "font-medium text-amber-800"
+                : "text-muted-foreground"
           }
           data-testid="note-save-state"
           aria-live="polite"
@@ -150,6 +182,44 @@ function NoteEditor({
           {stateText[state]}
         </span>
       </div>
+      {state === "stale" && incoming !== null && (
+        <div
+          className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+          data-testid="note-stale"
+        >
+          <p>
+            Existe uma versão mais recente desta nota. O teu texto está em cima;
+            a versão mais recente é esta:
+          </p>
+          <p className="mt-2 rounded border bg-white p-2 whitespace-pre-wrap text-neutral-800">
+            {incoming}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              className="rounded-full border bg-white px-3 py-1"
+              onClick={() => {
+                setContent(incoming);
+                setIncoming(null);
+                setState("saved");
+              }}
+              type="button"
+            >
+              Usar a versão mais recente
+            </button>
+            <button
+              className="rounded-full border bg-white px-3 py-1"
+              onClick={() => {
+                setIncoming(null);
+                setState("dirty");
+                void flush();
+              }}
+              type="button"
+            >
+              Manter o meu texto
+            </button>
+          </div>
+        </div>
+      )}
       {(state === "conflict" || state === "error") && (
         <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-900">
           <p>

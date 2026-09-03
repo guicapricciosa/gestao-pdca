@@ -144,10 +144,11 @@ export default async function MyWorkPage() {
       meeting.status === "REVIEW" && meeting.relationship === "CHAIR",
   );
   const live = meetings.filter((meeting) => meeting.status === "IN_PROGRESS");
-  const upcoming = meetings.filter(
-    (meeting) =>
-      meeting.status !== "REVIEW" && meeting.status !== "IN_PROGRESS",
-  );
+  const upcoming = meetings.filter((meeting) => meeting.status !== "REVIEW");
+  const soon = (start: string) => {
+    const diff = new Date(start).getTime() - now.getTime();
+    return diff > 0 && diff <= 60 * 60 * 1000;
+  };
   const attention = [
     ...toValidate.map((meeting) => ({
       key: `m-${meeting.meeting_session_id}`,
@@ -321,7 +322,31 @@ export default async function MyWorkPage() {
                         : "participo"}
                     </p>
                   </div>
-                  <StatusBadge value={meeting.status} kind="meeting" />
+                  <span className="flex items-center gap-2">
+                    {meeting.status === "IN_PROGRESS" ? (
+                      <span className="text-xs font-medium text-emerald-800">
+                        ● A decorrer agora
+                      </span>
+                    ) : soon(meeting.scheduled_start_at) ? (
+                      <span className="text-xs font-medium text-amber-800">
+                        Começa em breve
+                      </span>
+                    ) : (
+                      <StatusBadge value={meeting.status} kind="meeting" />
+                    )}
+                    <Link
+                      className={`rounded-full px-3 py-1.5 text-xs ${
+                        meeting.status === "IN_PROGRESS" ||
+                        soon(meeting.scheduled_start_at)
+                          ? "bg-black text-white"
+                          : "border bg-white"
+                      }`}
+                      data-testid="enter-meeting"
+                      href={`/meetings/${meeting.meeting_session_id}/run`}
+                    >
+                      Entrar na reunião
+                    </Link>
+                  </span>
                 </li>
               ))}
             </ul>

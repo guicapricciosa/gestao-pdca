@@ -3,9 +3,9 @@ import { loginAction } from "./actions";
 export default async function LoginPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ error?: string }>;
+  readonly searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
   return (
     <main className="grid min-h-screen place-items-center p-6">
       <section className="w-full max-w-md rounded-3xl border bg-white p-8 shadow-sm">
@@ -29,6 +29,7 @@ export default async function LoginPage({
           </p>
         )}
         <form action={loginAction} className="mt-8 grid gap-4">
+          {next && <input type="hidden" name="next" value={next} />}
           <label className="text-sm font-medium">
             Email
             <input

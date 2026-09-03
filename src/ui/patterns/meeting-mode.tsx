@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { CopyLinkButton } from "@/ui/components/copy-link-button";
+
 import {
   addMeetingAgendaItemAction,
   createMeetingNoteAction,
@@ -38,6 +40,7 @@ interface MeetingModeProps {
   };
   readonly chairName: string;
   readonly isChair: boolean;
+  readonly live?: React.ReactNode;
   readonly participantCount: number;
   readonly scopeSummary: string;
   readonly agenda: readonly {
@@ -140,6 +143,7 @@ export function MeetingMode(props: MeetingModeProps) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <CopyLinkButton path={`/meetings/${meeting.id}/run`} />
             <Link
               className="rounded-full border px-4 py-2 text-sm"
               href={`/meetings/${meeting.id}`}
@@ -198,6 +202,7 @@ export function MeetingMode(props: MeetingModeProps) {
             acções antes de distribuir.
           </p>
         )}
+        {props.live && <div className="mt-2">{props.live}</div>}
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">

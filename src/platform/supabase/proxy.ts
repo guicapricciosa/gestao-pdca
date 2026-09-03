@@ -26,6 +26,22 @@ export async function refreshSupabaseSession(request: NextRequest) {
   );
 
   // Validates and refreshes the token before protected server components run.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const { pathname, search } = request.nextUrl;
+  const isPublic =
+    pathname === "/login" ||
+    pathname === "/offline" ||
+    pathname.startsWith("/api/") ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/sw.js";
+  if (!data?.claims && !isPublic && pathname !== "/") {
+    // Deep links (shared meeting links, notifications) come back here after
+    // login. Only same-origin relative paths are ever honoured.
+    const target = `${pathname}${search}`;
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = `?next=${encodeURIComponent(target)}`;
+    return NextResponse.redirect(url);
+  }
   return response;
 }
