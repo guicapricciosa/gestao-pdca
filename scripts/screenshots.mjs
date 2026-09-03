@@ -40,16 +40,15 @@ async function firstLink(prefix) {
   const hrefs = await page
     .locator(`a[href^="${prefix}/"]`)
     .evaluateAll((anchors) => anchors.map((a) => a.getAttribute("href")));
-  return (
-    hrefs.find((href) =>
-      new RegExp(`^${prefix}/[0-9a-f-]{36}$`).test(href ?? ""),
-    ) ?? null
+  const match = hrefs.find((href) =>
+    new RegExp(`^${prefix}/[0-9a-f-]{36}(/run)?$`).test(href ?? ""),
   );
+  return match ? match.replace(/\/run$/, "") : null;
 }
 
 await shot("01-login", "/login", { fullPage: false });
 await page.getByLabel("Email").fill(user);
-await page.getByLabel("Password").fill(password);
+await page.getByLabel("Palavra-passe").fill(password);
 await page.getByRole("button", { name: "Entrar" }).click();
 await page.waitForURL("**/my-work");
 
@@ -73,11 +72,19 @@ if (live) {
 }
 await page.goto(`${base}/meetings?period=all&status=REVIEW`);
 const review = await firstLink("/meetings");
-if (review) await shot("12-review-meeting", `${review}/review`);
+if (review) await shot("12-finish-meeting", `${review}/finish`);
 await shot("13-new-task", "/tasks/new");
 await shot("14-new-pdca", "/pdcas/new");
 await shot("15-new-meeting", "/meetings/new");
+if (live)
+  await shot("17-meeting-mode-task-sheet", `${live}/run`, {
+    fullPage: false,
+    after: () => page.getByTestId("open-task-sheet").click(),
+  });
 await page.setViewportSize({ width: 390, height: 844 });
 await shot("16-my-work-mobile", "/my-work");
+if (live) await shot("18-meeting-mode-mobile", `${live}/run`);
+if (task) await shot("19-task-detail-mobile", task);
+if (review) await shot("20-finish-meeting-mobile", `${review}/finish`);
 
 await browser.close();

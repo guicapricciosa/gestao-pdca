@@ -41,7 +41,7 @@ npm run dev
 
 Development users, the permission walkthrough and the recommended demo flow are in
 [docs/demo-guide.md](docs/demo-guide.md). Screenshots of every screen are in
-`docs/screenshots/` and can be regenerated with `node scripts/screenshots.mjs`
+`docs/screenshots/` and can be regenerated with `node scripts/screenshots.mjs`. The user manual (PT-PT) lives in `docs/manual/README.md`
 while `npm run dev` is running.
 
 AI is disabled unless `AI_PROVIDER` is set: use `fake` for a deterministic local

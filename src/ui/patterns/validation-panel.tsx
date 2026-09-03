@@ -52,9 +52,12 @@ export function FindingList({
           </span>
           {finding.message}
           {finding.evidence.length > 0 && (
-            <span className="mt-1 block text-xs opacity-80">
-              Evidência: {finding.evidence.join(" · ")}
-            </span>
+            <details className="mt-1 text-xs opacity-80">
+              <summary className="cursor-pointer">Detalhe técnico</summary>
+              <span className="block" data-evidence>
+                {finding.evidence.join(" · ")}
+              </span>
+            </details>
           )}
         </li>
       ))}
