@@ -555,3 +555,8 @@ Still excluded and blocked pending approval: Executive Analytics, global Managem
 - Private meeting channels with content-free signals, presence, reconnect convergence, per-person access signals, direct links with safe `?next=`.
 - Installable PWA with shell-only caching, offline page, quiet update and install guidance per platform; branding from environment.
 - Next: Notification Center on the transactional outbox (Gate C), Web Push (Gate D), polish and manual (Gate E).
+
+## 2026-09-03 — Notification Center (Gate C)
+
+- Audit events feed the transactional outbox; `process_outbox` (pg_cron or the secured job route) creates authorized, coalesced in-app notifications; reminders and deadlines are scheduled.
+- Bell with live unread count, inbox with Não lidas/Todas and deep links, preferences in Definições.

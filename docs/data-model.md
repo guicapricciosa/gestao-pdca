@@ -581,3 +581,11 @@ Publication keeps an immutable JSONB snapshot of the session, agenda and notes. 
 - `ai_proposals`: `proposal_type` (DECISION, TASK, PDCA, SUMMARY, FINDING), validated `payload` plus `payload_version`, `status` (PENDING, CONFIRMED, REJECTED), reviewer, `review_reason`, `confirmed_payload` (the human-edited version actually executed), `executed_record_type`/`executed_record_id` and optimistic `version`.
 
 Deletion is prevented by trigger; audit actions `ai.run.started`, `ai.run.completed`, `ai.proposal.created`, `ai.proposal.confirmed` and `ai.proposal.rejected` appear in the meeting and execution activity views.
+
+## Notifications (2026-09-03)
+
+`notifications` (recipient, type, category, title, metadata, security object,
+target, href, sensitive, dedupe key, source outbox event, created/read) and
+`notification_preferences` (per profile). `audit_events` now feed
+`outbox_events` through a trigger. Gate D adds `push_subscriptions` and
+`notification_deliveries`. See `docs/notifications.md`.

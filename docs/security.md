@@ -251,3 +251,22 @@ Threats considered and controls (details in `docs/realtime.md`):
   logout; the session cookie is cleared by Supabase sign-out as before.
 - **Updates** — a new worker only takes over after the person accepts
   "Actualizar" (or on the next start); old caches are deleted on activation.
+
+## Notifications and outbox (2026-09-03)
+
+- **IDOR in deep links** — links are relative paths re-authorized by the target
+  page; a notification carries no capability.
+- **Recipient spoofing / enumeration / reading others' notifications** — rows
+  are created only by the service-role processor; RLS exposes a person's own
+  rows; the read/mark functions filter by the current profile.
+- **Source object no longer accessible** — creation checks the central rule at
+  that moment; opening re-checks; nothing is revealed beyond the stored title
+  the recipient was authorized to see when it was created.
+- **Outbox replay / duplicate delivery** — idempotency key per audit event and
+  unread coalescing; reprocessing is a no-op.
+- **Poison events** — caught per event, retried with backoff, parked after 5
+  attempts with the error message; they never block the queue.
+- **Privilege escalation through the dispatcher** — the processor runs as
+  definer but only ever inserts into `notifications` after the central
+  authorization check for the recipient; the HTTP job route needs
+  `CRON_SECRET` and is disabled without it.
