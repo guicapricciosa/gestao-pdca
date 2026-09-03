@@ -121,6 +121,12 @@ export default async function ExecutionLayout({
               Cobre {restaurants.join(", ")}
             </p>
           )}
+          <Link
+            className="mb-2 block text-xs text-white/70 hover:text-white"
+            href="/definicoes"
+          >
+            Definições
+          </Link>
           <form action={logoutAction} className="mt-4">
             <SubmitButton
               className="!px-0 !py-0 !text-xs !font-normal !text-white/50 hover:!text-white"
