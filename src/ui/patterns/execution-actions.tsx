@@ -12,6 +12,7 @@ import {
 import type { CreationOptions } from "@/modules/execution/application/creation-options";
 import { canTransition } from "@/modules/execution/domain/lifecycle";
 import type { ExecutionStatus } from "@/modules/execution/domain/types";
+import { FilePicker } from "@/ui/components/file-picker";
 import { SubmitButton } from "@/ui/components/submit-button";
 import { ScopeFields } from "@/ui/patterns/scope-fields";
 
@@ -367,7 +368,7 @@ export function ExecutionActions({
           encType="multipart/form-data"
         >
           <Panel
-            title="Adicionar attachment"
+            title="Anexar ficheiro"
             hint="PDF, PNG, JPEG ou texto. Fica privado e só quem lê o registo o pode descarregar."
           >
             <div className="grid gap-3">
@@ -377,18 +378,7 @@ export function ExecutionActions({
                 value={securityObjectId}
               />
               <input type="hidden" name="returnPath" value={path} />
-              <input
-                aria-label="Ficheiro"
-                className={input}
-                type="file"
-                name="file"
-                required
-              />
-              <div>
-                <button className="rounded-full border bg-white px-4 py-2 text-sm">
-                  Enviar ficheiro
-                </button>
-              </div>
+              <FilePicker submitLabel="Enviar ficheiro" />
             </div>
           </Panel>
         </form>

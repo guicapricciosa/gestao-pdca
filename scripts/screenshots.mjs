@@ -81,10 +81,23 @@ if (live)
     fullPage: false,
     after: () => page.getByTestId("open-task-sheet").click(),
   });
+await shot("21-notifications", "/notificacoes?tab=all");
+await shot("22-settings", "/definicoes");
+if (live)
+  await shot("23-meeting-mode-presence", `${live}/run`, {
+    fullPage: false,
+    after: () =>
+      page
+        .getByTestId("presence")
+        .filter({ hasText: "Na reunião" })
+        .waitFor({ timeout: 10_000 })
+        .catch(() => undefined),
+  });
 await page.setViewportSize({ width: 390, height: 844 });
 await shot("16-my-work-mobile", "/my-work");
 if (live) await shot("18-meeting-mode-mobile", `${live}/run`);
 if (task) await shot("19-task-detail-mobile", task);
 if (review) await shot("20-finish-meeting-mobile", `${review}/finish`);
+await shot("24-notifications-mobile", "/notificacoes?tab=all");
 
 await browser.close();

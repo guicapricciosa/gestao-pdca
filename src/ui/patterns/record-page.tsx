@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { FilePicker } from "@/ui/components/file-picker";
+
 import { addCommentAction } from "@/app/actions/execution";
 import {
   DueDate,
@@ -186,16 +188,7 @@ export function ProgressSection({
             value={securityObjectId}
           />
           <input type="hidden" name="returnPath" value={returnPath} />
-          <input
-            aria-label="Ficheiro"
-            className="text-sm"
-            type="file"
-            name="file"
-            required
-          />
-          <button className="rounded-full border bg-white px-3 py-1.5 text-xs">
-            Anexar ficheiro
-          </button>
+          <FilePicker />
         </form>
       </div>
     </section>

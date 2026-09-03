@@ -93,6 +93,16 @@ export default async function TasksPage({
         items={result.items.map((item) => ({
           ...item,
           responsible: nameOf(item.responsibleProfileId),
+          warnings: [
+            ...(!item.dueDate &&
+            !["COMPLETED", "CANCELLED", "ARCHIVED"].includes(item.status)
+              ? ["Sem prazo"]
+              : []),
+            ...(!item.ownerProfileId &&
+            !["COMPLETED", "CANCELLED", "ARCHIVED"].includes(item.status)
+              ? ["Sem Owner"]
+              : []),
+          ],
         }))}
         badgeKind="task"
         basePath="/tasks"

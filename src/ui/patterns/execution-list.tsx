@@ -17,6 +17,8 @@ export interface ExecutionListItem {
   readonly responsible?: string | null;
   readonly secondary?: string | null;
   readonly updatedAt: string;
+  /** Quality hints such as "Sem prazo" — discreet, never errors. */
+  readonly warnings?: readonly string[];
 }
 
 export function ExecutionList({
@@ -108,6 +110,15 @@ export function ExecutionList({
                 <p className="text-muted-foreground mt-0.5 text-xs">
                   {item.secondary ??
                     `Actualizado ${formatDate(item.updatedAt.slice(0, 10))}`}
+                  {(item.warnings ?? []).map((warning) => (
+                    <span
+                      className="ml-2 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[11px] text-amber-900"
+                      data-testid="list-warning"
+                      key={warning}
+                    >
+                      {warning}
+                    </span>
+                  ))}
                 </p>
               </td>
               {showPeople && (

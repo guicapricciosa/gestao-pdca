@@ -105,11 +105,11 @@ export default async function ExecutionLayout({
             </div>
           ))}
         </nav>
-        <div className="hidden border-t border-white/10 px-6 py-5 lg:block">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 px-4 py-3 lg:block lg:px-6 lg:py-5">
           <p className="truncate text-sm font-medium" data-testid="viewer-name">
             {viewer.profile?.display_name ?? viewer.email}
           </p>
-          <ul className="mt-2 space-y-1 text-xs text-white/55">
+          <ul className="mt-2 hidden space-y-1 text-xs text-white/55 lg:block">
             {assignments.length === 0 && <li>Sem função activa</li>}
             {assignments.map((assignment, index) => (
               <li className="truncate" key={index}>
@@ -119,23 +119,23 @@ export default async function ExecutionLayout({
             ))}
           </ul>
           {restaurants.length > 0 && (
-            <p className="mt-2 truncate text-xs text-white/40">
+            <p className="mt-2 hidden truncate text-xs text-white/40 lg:block">
               Cobre {restaurants.join(", ")}
             </p>
           )}
-          <div className="mb-3">
+          <div className="lg:mb-3">
             <NotificationBell
               profileId={viewer.profile?.id ?? null}
               initialCount={viewer.unread}
             />
           </div>
           <Link
-            className="mb-2 block text-xs text-white/70 hover:text-white"
+            className="text-xs text-white/70 hover:text-white lg:mb-2 lg:block"
             href="/definicoes"
           >
             Definições
           </Link>
-          <form action={logoutAction} className="mt-4">
+          <form action={logoutAction} className="lg:mt-4">
             <SubmitButton
               className="!px-0 !py-0 !text-xs !font-normal !text-white/50 hover:!text-white"
               variant="secondary"
