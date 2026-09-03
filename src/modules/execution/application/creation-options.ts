@@ -112,3 +112,51 @@ export async function loadListOptions(
     })),
   };
 }
+
+export interface ViewerContext {
+  readonly companyWide: boolean;
+  readonly restaurantIds: readonly string[];
+  readonly unitIds: readonly string[];
+  readonly profileId: string | null;
+}
+
+/**
+ * What the current person covers for a given permission: used to pre-fill
+ * "Onde se aplica?" outside meetings. Ambiguous cases stay open.
+ */
+export async function loadViewerContext(
+  permissionKey: PermissionKey,
+): Promise<ViewerContext> {
+  const client = await createSupabaseServerClient();
+  const [{ data: paths }, { data: profile }] = await Promise.all([
+    client.rpc("get_accessible_scope"),
+    client
+      .from("profiles")
+      .select("id")
+      .eq("auth_user_id", (await client.auth.getUser()).data.user?.id ?? "")
+      .maybeSingle(),
+  ]);
+  const relevant = (paths ?? []).filter(
+    (path) => path.permission_key === permissionKey,
+  );
+  return {
+    companyWide: relevant.some(
+      (path) => path.restaurant_scope === "COMPANY_WIDE",
+    ),
+    restaurantIds: [
+      ...new Set(
+        relevant
+          .map((path) => path.restaurant_id)
+          .filter((id): id is string => id !== null),
+      ),
+    ],
+    unitIds: [
+      ...new Set(
+        relevant
+          .map((path) => path.organizational_unit_id)
+          .filter((id): id is string => id !== null),
+      ),
+    ],
+    profileId: profile?.id ?? null,
+  };
+}

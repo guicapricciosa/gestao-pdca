@@ -36,7 +36,7 @@ export default async function MeetingAssistantPage({
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-accent text-sm font-medium">AI Meeting Assistant</p>
+        <p className="text-accent text-sm font-medium">Assistente da reunião</p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-4xl font-semibold tracking-tight">
             {detail.session.title}
@@ -50,31 +50,31 @@ export default async function MeetingAssistantPage({
           >
             {availability.enabled
               ? `AI: ${availability.provider}/${availability.model}`
-              : "AI desativada"}
+              : "Assistente desactivado"}
           </span>
         </div>
         <p className="text-muted-foreground mt-2">
-          A AI propõe; uma pessoa revê, edita e confirma. O modelo só vê o que
-          este utilizador pode ler e nunca escreve diretamente na plataforma.
+          O assistente propõe; uma pessoa revê, edita e confirma. Só vê o que tu
+          podes ler e nunca escreve directamente na plataforma.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             className="rounded-full border px-4 py-2 text-sm"
             href={`/meetings/${id}`}
           >
-            Sessão
+            Reunião
           </Link>
           <Link
             className="rounded-full border px-4 py-2 text-sm"
             href={`/meetings/${id}/run`}
           >
-            Meeting Mode
+            Entrar na reunião
           </Link>
           <Link
             className="rounded-full border px-4 py-2 text-sm"
-            href={`/meetings/${id}/review`}
+            href={`/meetings/${id}/finish`}
           >
-            Review Meeting
+            Terminar reunião
           </Link>
         </div>
       </header>
@@ -88,8 +88,8 @@ export default async function MeetingAssistantPage({
       )}
       {!availability.enabled && (
         <p className="rounded-lg border p-3 text-sm">
-          A AI está desativada neste ambiente (AI_PROVIDER=disabled). Reuniões,
-          decisões, Tasks e PDCAs continuam a funcionar normalmente.
+          O assistente está desactivado neste ambiente. Reuniões, decisões,
+          tarefas e PDCAs funcionam normalmente sem ele.
         </p>
       )}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -98,7 +98,7 @@ export default async function MeetingAssistantPage({
           className="rounded-2xl border bg-white p-5"
         >
           <input type="hidden" name="meetingSessionId" value={id} />
-          <h2 className="font-semibold">Propor Decisions, Tasks e PDCAs</h2>
+          <h2 className="font-semibold">Propor decisões, tarefas e PDCAs</h2>
           <p className="text-muted-foreground mt-1 text-sm">
             Usa a agenda, as notas e os objetos ligados desta reunião. Podes
             colar texto adicional (transcrição, apontamentos).
@@ -147,7 +147,7 @@ export default async function MeetingAssistantPage({
       {runs.length > 0 && (
         <section className="rounded-2xl border bg-white">
           <h2 className="border-b p-5 text-lg font-semibold">
-            Execuções AI recentes
+            Pedidos recentes ao assistente
           </h2>
           {runs.map((run) => (
             <div

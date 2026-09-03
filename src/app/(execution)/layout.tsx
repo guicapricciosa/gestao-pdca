@@ -3,7 +3,6 @@ import {
   CheckSquare2,
   ClipboardCheck,
   Gauge,
-  Repeat2,
   Scale,
 } from "lucide-react";
 import Link from "next/link";
@@ -18,21 +17,18 @@ import { SubmitButton } from "@/ui/components/submit-button";
 const groups = [
   {
     label: "Trabalho",
-    items: [{ href: "/my-work", label: "My Work", icon: Gauge }],
+    items: [{ href: "/my-work", label: "O meu trabalho", icon: Gauge }],
   },
   {
     label: "Reuniões",
-    items: [
-      { href: "/meetings", label: "Meetings", icon: CalendarDays },
-      { href: "/meeting-series", label: "Meeting Series", icon: Repeat2 },
-    ],
+    items: [{ href: "/meetings", label: "Reuniões", icon: CalendarDays }],
   },
   {
     label: "Execução",
     items: [
-      { href: "/tasks", label: "Tasks", icon: CheckSquare2 },
       { href: "/pdcas", label: "PDCAs", icon: ClipboardCheck },
-      { href: "/decisions", label: "Decisions", icon: Scale },
+      { href: "/tasks", label: "Tarefas", icon: CheckSquare2 },
+      { href: "/decisions", label: "Decisões", icon: Scale },
     ],
   },
 ] as const;
@@ -65,7 +61,7 @@ export default async function ExecutionLayout({
     ...new Set(
       assignments.flatMap((assignment) =>
         assignment.restaurant_scope_mode === "COMPANY_WIDE"
-          ? ["Todos os restaurantes"]
+          ? ["todos os restaurantes"]
           : assignment.restaurants
               .filter((row) => row.valid_to === null)
               .map((row) => row.restaurant.name),
@@ -112,17 +108,17 @@ export default async function ExecutionLayout({
             {viewer.profile?.display_name ?? viewer.email}
           </p>
           <ul className="mt-2 space-y-1 text-xs text-white/55">
-            {assignments.length === 0 && <li>Sem atribuição activa</li>}
+            {assignments.length === 0 && <li>Sem função activa</li>}
             {assignments.map((assignment, index) => (
               <li className="truncate" key={index}>
-                {assignment.title ?? "Atribuição"}
+                {assignment.title ?? "Função"}
                 {assignment.unit ? ` · ${assignment.unit.name}` : ""}
               </li>
             ))}
           </ul>
           {restaurants.length > 0 && (
             <p className="mt-2 truncate text-xs text-white/40">
-              Âmbito: {restaurants.join(", ")}
+              Cobre {restaurants.join(", ")}
             </p>
           )}
           <form action={logoutAction} className="mt-4">

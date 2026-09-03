@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { createMeetingSessionAction } from "@/app/actions/meetings";
+import { loadViewerContext } from "@/modules/execution/application/creation-options";
 import { loadMeetingCreationOptions } from "@/modules/meetings/application/options";
 import { MeetingForm } from "@/ui/patterns/meeting-form";
 
@@ -9,17 +12,28 @@ export default async function NewMeetingPage({
   readonly searchParams: Promise<{ seriesId?: string }>;
 }) {
   const { seriesId } = await searchParams;
-  const options = await loadMeetingCreationOptions();
+  const [options, viewer] = await Promise.all([
+    loadMeetingCreationOptions(),
+    loadViewerContext("meeting.create"),
+  ]);
   return (
     <section className="mx-auto max-w-3xl">
-      <h1 className="mb-8 text-4xl font-semibold tracking-tight">
-        Nova Meeting Session
+      <p className="text-accent text-sm font-medium">
+        <Link className="hover:underline" href="/meetings">
+          Reuniões
+        </Link>
+        {" › "}Nova
+      </p>
+      <h1 className="mt-2 mb-8 text-4xl font-semibold tracking-tight">
+        Marcar reunião
       </h1>
       <MeetingForm
-        kind="Session"
         options={options}
         action={createMeetingSessionAction}
         selectedSeriesId={seriesId}
+        contextRestaurantIds={viewer.restaurantIds}
+        contextUnitIds={viewer.unitIds}
+        companyWide={viewer.companyWide}
       />
     </section>
   );

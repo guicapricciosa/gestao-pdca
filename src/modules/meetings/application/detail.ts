@@ -15,6 +15,7 @@ export type MeetingLinkedRecord =
       security_object_id: string;
       title: string;
       status: string;
+      priority: string;
       owner_profile_id: string | null;
       responsible_profile_id: string | null;
       due_date: string | null;
@@ -27,6 +28,9 @@ export type MeetingLinkedRecord =
       status: string;
       problem_statement: string | null;
       objective: string | null;
+      root_cause_or_hypothesis: string | null;
+      kpi_name: string | null;
+      priority: string;
       owner_profile_id: string | null;
       responsible_profile_id: string | null;
       due_date: string | null;
@@ -102,7 +106,7 @@ export async function loadMeetingDetail(id: string) {
       : client
           .from("tasks")
           .select(
-            "id,security_object_id,title,status,owner_profile_id,responsible_profile_id,due_date",
+            "id,security_object_id,title,status,priority,owner_profile_id,responsible_profile_id,due_date",
           )
           .in("security_object_id", objectIds),
     objectIds.length === 0
@@ -110,7 +114,7 @@ export async function loadMeetingDetail(id: string) {
       : client
           .from("pdcas")
           .select(
-            "id,security_object_id,title,status,problem_statement,objective,owner_profile_id,responsible_profile_id,due_date",
+            "id,security_object_id,title,status,problem_statement,objective,root_cause_or_hypothesis,kpi_name,priority,owner_profile_id,responsible_profile_id,due_date",
           )
           .in("security_object_id", objectIds),
   ]);

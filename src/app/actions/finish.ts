@@ -12,6 +12,7 @@ export function finish(
   path: string,
   error: { readonly message: string } | Error | null | undefined,
   alsoRevalidate: readonly string[] = [],
+  options: { readonly silent?: boolean } = {},
 ): never {
   for (const route of [path, ...alsoRevalidate]) revalidatePath(route);
   if (error) {
@@ -20,7 +21,10 @@ export function finish(
       `${path}?error=${encodeURIComponent(describeCommandError(error.message))}`,
     );
   }
-  redirect(`${path}?saved=1`);
+  // Meeting Mode and other live screens show the new state itself; a
+  // `?saved=1` there would also change the URL and remount the page segment
+  // (closing open side sheets). Errors always surface.
+  redirect(options.silent ? path : `${path}?saved=1`);
 }
 
 export function errorOf(error: unknown): Error {

@@ -1,8 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { finish } from "@/app/actions/finish";
+import { describeCommandError } from "@/shared/errors/describe";
 
 import {
   createMeetingSeriesSchema,
@@ -59,21 +61,52 @@ export async function createMeetingSeriesAction(formData: FormData) {
 }
 
 export async function createMeetingSessionAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const companyId = String(formData.get("companyId"));
+  const title = String(formData.get("title"));
+  const unitIds = values(formData, "unitIds");
+  const restaurantIds = values(formData, "restaurantIds");
+  const visibility = optional(formData, "visibility") ?? "NORMAL";
+  const chairProfileId = String(formData.get("chairProfileId"));
+  let seriesId =
+    optional(formData, "meetingSeriesId") ??
+    optional(formData, "existingSeriesId");
+  const repeat = optional(formData, "repeat") ?? "NONE";
+  const repeatLabel: Record<string, string> = {
+    WEEKLY: "Semanalmente",
+    BIWEEKLY: "Quinzenalmente",
+    MONTHLY: "Mensalmente",
+  };
+  if (seriesId === null && repeatLabel[repeat] !== undefined) {
+    const { data, error } = await client.rpc("create_meeting_series", {
+      company_id: companyId,
+      title,
+      description: null as never,
+      meeting_type: "OPERATIONS",
+      default_chair_profile_id: chairProfileId as never,
+      recurrence_rule: repeatLabel[repeat] as never,
+      recurrence_metadata: { repeat },
+      visibility: visibility as never,
+      unit_ids: unitIds,
+      restaurant_ids: restaurantIds,
+    });
+    if (error !== null) finish("/meetings/new", error);
+    seriesId = data;
+  }
   const parsed = createMeetingSessionSchema.safeParse({
-    companyId: String(formData.get("companyId")),
-    title: String(formData.get("title")),
-    meetingSeriesId: optional(formData, "meetingSeriesId"),
-    chairProfileId: String(formData.get("chairProfileId")),
+    companyId,
+    title,
+    meetingSeriesId: seriesId,
+    chairProfileId,
     scheduledStartAt: iso(formData, "scheduledStartAt"),
     scheduledEndAt: iso(formData, "scheduledEndAt"),
-    visibility: String(formData.get("visibility")),
-    unitIds: values(formData, "unitIds"),
-    restaurantIds: values(formData, "restaurantIds"),
+    visibility,
+    unitIds,
+    restaurantIds,
   });
   if (!parsed.success)
     finish("/meetings/new", new Error(parsed.error.issues[0]?.message));
   const command = parsed.data;
-  const client = await createSupabaseServerClient();
   const { data, error } = await client.rpc("create_meeting_session", {
     company_id: command.companyId,
     title: command.title,
@@ -86,7 +119,24 @@ export async function createMeetingSessionAction(formData: FormData) {
     restaurant_ids: command.restaurantIds,
   });
   if (error !== null) finish("/meetings/new", error);
-  redirect(`/meetings/${data}`);
+  const skipped: string[] = [];
+  for (const profileId of values(formData, "participantIds")) {
+    if (profileId === chairProfileId) continue;
+    const participant = await client.rpc("add_meeting_participant", {
+      meeting_session_id: data,
+      profile_id: profileId,
+      participant_role: "PARTICIPANT",
+    });
+    if (participant.error !== null) skipped.push(profileId);
+  }
+  revalidatePath("/meetings");
+  if (skipped.length > 0)
+    redirect(
+      `/meetings/${data}/run?error=${encodeURIComponent(
+        `${skipped.length} pessoa(s) não foram adicionadas porque não têm acesso ao âmbito desta reunião. Ajusta o âmbito e volta a adicioná-las.`,
+      )}`,
+    );
+  redirect(`/meetings/${data}/run`);
 }
 
 export async function updateMeetingSeriesAction(formData: FormData) {
@@ -207,10 +257,12 @@ export async function addMeetingAgendaItemAction(formData: FormData) {
       "carriedForwardFromId",
     ) as never,
   });
-  finish(optional(formData, "returnPath") ?? `/meetings/${id}/run`, error, [
-    `/meetings/${id}`,
-    `/meetings/${id}/review`,
-  ]);
+  finish(
+    optional(formData, "returnPath") ?? `/meetings/${id}/run`,
+    error,
+    [`/meetings/${id}`, `/meetings/${id}/review`],
+    { silent: true },
+  );
 }
 
 export async function setMeetingAgendaStatusAction(formData: FormData) {
@@ -226,6 +278,7 @@ export async function setMeetingAgendaStatusAction(formData: FormData) {
     optional(formData, "returnPath") ?? `/meetings/${meetingId}/run`,
     error,
     [`/meetings/${meetingId}`, `/meetings/${meetingId}/review`],
+    { silent: true },
   );
 }
 
@@ -248,10 +301,12 @@ export async function addMeetingNoteAction(formData: FormData) {
     meeting_agenda_item_id: optional(formData, "agendaItemId") as never,
     content: String(formData.get("content")),
   });
-  finish(optional(formData, "returnPath") ?? `/meetings/${id}/run`, error, [
-    `/meetings/${id}`,
-    `/meetings/${id}/review`,
-  ]);
+  finish(
+    optional(formData, "returnPath") ?? `/meetings/${id}/run`,
+    error,
+    [`/meetings/${id}`, `/meetings/${id}/review`],
+    { silent: true },
+  );
 }
 
 export async function updateMeetingNoteAction(formData: FormData) {
@@ -266,6 +321,7 @@ export async function updateMeetingNoteAction(formData: FormData) {
     optional(formData, "returnPath") ?? `/meetings/${meetingId}/run`,
     error,
     [`/meetings/${meetingId}`, `/meetings/${meetingId}/review`],
+    { silent: true },
   );
 }
 
@@ -279,10 +335,12 @@ export async function linkMeetingObjectAction(formData: FormData) {
     meeting_agenda_item_id: optional(formData, "agendaItemId") as never,
     outcome_notes: optional(formData, "outcomeNotes") as never,
   });
-  finish(optional(formData, "returnPath") ?? `/meetings/${id}/run`, error, [
-    `/meetings/${id}`,
-    `/meetings/${id}/review`,
-  ]);
+  finish(
+    optional(formData, "returnPath") ?? `/meetings/${id}/run`,
+    error,
+    [`/meetings/${id}`, `/meetings/${id}/review`],
+    { silent: true },
+  );
 }
 
 export async function createMeetingObjectAction(formData: FormData) {
@@ -291,45 +349,146 @@ export async function createMeetingObjectAction(formData: FormData) {
   const common = {
     meeting_session_id: meetingId,
     company_id: String(formData.get("companyId")),
-    title: String(formData.get("title")),
+    title: optional(formData, "title") ?? "",
     visibility: String(formData.get("visibility")) as never,
     unit_ids: values(formData, "unitIds"),
     restaurant_ids: values(formData, "restaurantIds"),
     meeting_agenda_item_id: optional(formData, "agendaItemId") as never,
   };
   const kind = String(formData.get("kind"));
+  const problem = optional(formData, "description") ?? "";
   const result =
     kind === "DECISION"
       ? await client.rpc("create_meeting_decision", {
           ...common,
-          description: String(formData.get("description")),
-          decision_date: String(formData.get("decisionDate")),
+          description: optional(formData, "description") ?? "",
+          decision_date:
+            optional(formData, "decisionDate") ??
+            new Date().toISOString().slice(0, 10),
         })
       : kind === "TASK"
         ? await client.rpc("create_meeting_task", {
             ...common,
-            description: String(formData.get("description")),
-            priority: String(formData.get("priority")),
-            owner_profile_id: String(formData.get("ownerProfileId")),
+            description: optional(formData, "description") ?? "",
+            priority: optional(formData, "priority") ?? "MEDIUM",
+            owner_profile_id: optional(formData, "ownerProfileId") as never,
             responsible_profile_id: String(
               formData.get("responsibleProfileId"),
             ),
-            due_date: String(formData.get("dueDate")),
+            due_date: optional(formData, "dueDate") as never,
           })
         : await client.rpc("create_meeting_pdca", {
             ...common,
-            problem_statement: String(formData.get("description")),
+            title:
+              optional(formData, "title") ??
+              problem.split(/[.\n]/)[0]?.trim().slice(0, 240) ??
+              problem.slice(0, 240),
+            problem_statement: problem,
             objective: String(formData.get("objective")),
-            priority: String(formData.get("priority")),
+            priority: optional(formData, "priority") ?? "MEDIUM",
             owner_profile_id: String(formData.get("ownerProfileId")),
             responsible_profile_id: String(
               formData.get("responsibleProfileId"),
             ),
-            due_date: String(formData.get("dueDate")),
+            due_date: optional(formData, "dueDate") as never,
           });
   finish(
     optional(formData, "returnPath") ?? `/meetings/${meetingId}/run`,
     result.error,
     [`/meetings/${meetingId}`, `/meetings/${meetingId}/review`],
   );
+}
+
+// ---------------------------------------------------------------------------
+// Meeting Mode helpers that return results instead of redirecting: used by
+// client components (autosaved notes, terminar e distribuir).
+
+export async function saveMeetingNoteAction(input: {
+  noteId: string;
+  version: number;
+  content: string;
+}): Promise<
+  | { ok: true; version: number }
+  | { ok: false; reason: "conflict" | "error"; message: string }
+> {
+  const client = await createSupabaseServerClient();
+  const { data, error } = await client.rpc("update_meeting_note", {
+    note_id: input.noteId,
+    expected_version: input.version,
+    content: input.content,
+  });
+  if (error !== null) {
+    const conflict = /optimistic concurrency conflict/i.test(error.message);
+    return {
+      ok: false,
+      reason: conflict ? "conflict" : "error",
+      message: describeCommandError(error.message),
+    };
+  }
+  return { ok: true, version: Number(data.version) };
+}
+
+export async function createMeetingNoteAction(input: {
+  meetingId: string;
+  content: string;
+  agendaItemId: string | null;
+}): Promise<{ ok: true; id: string } | { ok: false; message: string }> {
+  const client = await createSupabaseServerClient();
+  const { data, error } = await client.rpc("add_meeting_note", {
+    meeting_session_id: input.meetingId,
+    content: input.content,
+    meeting_agenda_item_id: input.agendaItemId as never,
+  });
+  if (error !== null)
+    return { ok: false, message: describeCommandError(error.message) };
+  revalidatePath(`/meetings/${input.meetingId}/run`);
+  return { ok: true, id: data };
+}
+
+/** Abrir reunião: agenda (se ainda em rascunho) e começa, numa só acção. */
+export async function openMeetingAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const id = String(formData.get("meetingSessionId"));
+  let version = Number(formData.get("version"));
+  let status = String(formData.get("status"));
+  const path = `/meetings/${id}/run`;
+  if (status === "DRAFT") {
+    const { data, error } = await client.rpc("transition_meeting_session", {
+      meeting_session_id: id,
+      expected_version: version,
+      new_status: "SCHEDULED",
+    });
+    if (error !== null) finish(path, error, [`/meetings/${id}`]);
+    version = Number(data.version);
+    status = "SCHEDULED";
+  }
+  if (status === "SCHEDULED") {
+    const { error } = await client.rpc("transition_meeting_session", {
+      meeting_session_id: id,
+      expected_version: version,
+      new_status: "IN_PROGRESS",
+    });
+    if (error !== null) finish(path, error, [`/meetings/${id}`]);
+  }
+  finish(path, null, [`/meetings/${id}`, "/my-work"]);
+}
+
+/** Terminar e distribuir: uma operação transaccional no servidor. */
+export async function finishMeetingAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const id = String(formData.get("meetingSessionId"));
+  const outcomes = [] as { agenda_item_id: string; outcome: string }[];
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("agenda:") && typeof value === "string")
+      outcomes.push({ agenda_item_id: key.slice(7), outcome: value });
+  }
+  const { error } = await client.rpc("finish_meeting", {
+    meeting_session_id: id,
+    expected_version: Number(formData.get("version")),
+    agenda_outcomes: outcomes as never,
+  });
+  if (error !== null) finish(`/meetings/${id}/finish`, error);
+  for (const route of [`/meetings/${id}`, `/meetings/${id}/run`, "/my-work"])
+    revalidatePath(route);
+  redirect(`/meetings/${id}?finished=1`);
 }

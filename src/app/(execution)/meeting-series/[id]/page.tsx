@@ -10,6 +10,8 @@ import { loadCreationOptions } from "@/modules/execution/application/creation-op
 import { loadExecutionDetailContext } from "@/modules/execution/application/detail-context";
 import { ScopeFields } from "@/ui/patterns/scope-fields";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
+import { StatusBadge } from "@/ui/components/status-badge";
+import { meetingTypeLabel } from "@/ui/labels";
 
 const field = "rounded-lg border bg-white px-3 py-2 text-sm";
 export const dynamic = "force-dynamic";
@@ -43,23 +45,23 @@ export default async function MeetingSeriesDetailPage({
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-accent text-sm font-medium">Meeting Series</p>
+        <p className="text-accent text-sm font-medium">Reunião recorrente</p>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight">
           {series.title}
         </h1>
         <p className="text-muted-foreground mt-2">
-          {series.meeting_type} ·{" "}
-          {series.recurrence_rule ?? "sem recorrência automática"}
+          {meetingTypeLabel(series.meeting_type)} ·{" "}
+          {series.recurrence_rule ?? "sem repetição definida"}
         </p>
       </header>
       <Link
         className="inline-flex rounded-full bg-black px-4 py-2 text-sm text-white"
         href={`/meetings/new?seriesId=${id}`}
       >
-        Criar próxima sessão
+        Marcar próxima reunião
       </Link>
       <section className="rounded-2xl border bg-white">
-        <h2 className="border-b p-5 font-semibold">Sessões</h2>
+        <h2 className="border-b p-5 font-semibold">Reuniões desta série</h2>
         {(sessions ?? []).map((session) => (
           <Link
             className="flex justify-between border-b p-4 last:border-0"
@@ -67,7 +69,7 @@ export default async function MeetingSeriesDetailPage({
             key={session.id}
           >
             <span>{session.title}</span>
-            <span className="text-xs">{session.status}</span>
+            <StatusBadge value={session.status} kind="meeting" />
           </Link>
         ))}
       </section>
@@ -75,7 +77,7 @@ export default async function MeetingSeriesDetailPage({
         action={updateMeetingSeriesAction}
         className="grid gap-3 rounded-2xl border bg-white p-5"
       >
-        <h2 className="font-semibold">Editar série</h2>
+        <h2 className="font-semibold">Editar</h2>
         <input type="hidden" name="meetingSeriesId" value={id} />
         <input type="hidden" name="version" value={series.version} />
         <input
@@ -96,7 +98,9 @@ export default async function MeetingSeriesDetailPage({
         >
           {["OPERATIONS", "MANAGEMENT", "SUPPORT", "ONE_TO_ONE", "AD_HOC"].map(
             (type) => (
-              <option key={type}>{type}</option>
+              <option key={type} value={type}>
+                {meetingTypeLabel(type)}
+              </option>
             ),
           )}
         </select>
@@ -105,7 +109,7 @@ export default async function MeetingSeriesDetailPage({
           name="defaultChairProfileId"
           defaultValue={series.default_chair_profile_id ?? ""}
         >
-          <option value="">Sem Chair</option>
+          <option value="">Sem Chair habitual</option>
           {(profiles ?? []).map((profile) => (
             <option value={profile.id} key={profile.id}>
               {profile.display_name}
@@ -125,7 +129,7 @@ export default async function MeetingSeriesDetailPage({
         action={replaceScopeAction}
         className="grid gap-3 rounded-2xl border bg-white p-5"
       >
-        <h2 className="font-semibold">Default scope da série</h2>
+        <h2 className="font-semibold">Onde se aplica por omissão</h2>
         <input
           type="hidden"
           name="securityObjectId"
@@ -155,7 +159,7 @@ export default async function MeetingSeriesDetailPage({
           placeholder="Motivo"
         />
         <button className="w-fit rounded-full border px-4 py-2 text-sm">
-          Guardar default scope
+          Guardar
         </button>
       </form>
       {series.is_active && (
@@ -173,7 +177,7 @@ export default async function MeetingSeriesDetailPage({
             placeholder="Motivo da desativação"
           />
           <button className="rounded-full border px-4 py-2 text-sm">
-            Desativar série
+            Desactivar repetição
           </button>
         </form>
       )}
