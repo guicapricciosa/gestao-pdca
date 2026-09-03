@@ -136,7 +136,7 @@ select extensions.results_eq(
   $$,
   'query filter foundation returns the same authorized population'
 );
-select extensions.is((select count(*)::integer from public.get_accessible_scope() where restaurant_id = '40000000-0000-0000-0000-000000000001'), 33, 'effective scope exposes one row per permission for manager restaurant');
+select extensions.is((select count(*)::integer from public.get_accessible_scope() where restaurant_id = '40000000-0000-0000-0000-000000000001'), 35, 'effective scope exposes one row per permission for manager restaurant');
 
 select * from extensions.finish();
 rollback;

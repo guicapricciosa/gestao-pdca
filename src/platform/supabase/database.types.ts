@@ -34,6 +34,210 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_proposals: {
+        Row: {
+          ai_run_id: string;
+          company_id: string;
+          confirmed_payload: Json | null;
+          created_at: string;
+          executed_record_id: string | null;
+          executed_record_type: string | null;
+          id: string;
+          payload: Json;
+          payload_version: number;
+          proposal_type: string;
+          review_reason: string | null;
+          reviewed_at: string | null;
+          reviewed_by_profile_id: string | null;
+          status: string;
+          target_security_object_id: string;
+          updated_at: string;
+          version: number;
+        };
+        Insert: {
+          ai_run_id: string;
+          company_id: string;
+          confirmed_payload?: Json | null;
+          created_at?: string;
+          executed_record_id?: string | null;
+          executed_record_type?: string | null;
+          id?: string;
+          payload: Json;
+          payload_version?: number;
+          proposal_type: string;
+          review_reason?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by_profile_id?: string | null;
+          status?: string;
+          target_security_object_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          ai_run_id?: string;
+          company_id?: string;
+          confirmed_payload?: Json | null;
+          created_at?: string;
+          executed_record_id?: string | null;
+          executed_record_type?: string | null;
+          id?: string;
+          payload?: Json;
+          payload_version?: number;
+          proposal_type?: string;
+          review_reason?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by_profile_id?: string | null;
+          status?: string;
+          target_security_object_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_proposals_ai_run_id_fkey";
+            columns: ["ai_run_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_runs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_proposals_company_id_fkey";
+            columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_proposals_reviewed_by_profile_id_fkey";
+            columns: ["reviewed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_proposals_target_security_object_id_fkey";
+            columns: ["target_security_object_id"];
+            isOneToOne: false;
+            referencedRelation: "security_objects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_run_sources: {
+        Row: {
+          ai_run_id: string;
+          context_role: string;
+          security_object_id: string;
+          source_version: number;
+        };
+        Insert: {
+          ai_run_id: string;
+          context_role: string;
+          security_object_id: string;
+          source_version: number;
+        };
+        Update: {
+          ai_run_id?: string;
+          context_role?: string;
+          security_object_id?: string;
+          source_version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_run_sources_ai_run_id_fkey";
+            columns: ["ai_run_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_runs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_run_sources_security_object_id_fkey";
+            columns: ["security_object_id"];
+            isOneToOne: false;
+            referencedRelation: "security_objects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_runs: {
+        Row: {
+          company_id: string;
+          error_category: string | null;
+          finished_at: string | null;
+          id: string;
+          input_tokens: number | null;
+          latency_ms: number | null;
+          model_name: string;
+          model_provider: string;
+          output_tokens: number | null;
+          prompt_template_version: string;
+          requested_by_profile_id: string;
+          started_at: string;
+          status: string;
+          target_security_object_id: string;
+          target_version: number;
+          use_case: string;
+        };
+        Insert: {
+          company_id: string;
+          error_category?: string | null;
+          finished_at?: string | null;
+          id?: string;
+          input_tokens?: number | null;
+          latency_ms?: number | null;
+          model_name: string;
+          model_provider: string;
+          output_tokens?: number | null;
+          prompt_template_version: string;
+          requested_by_profile_id: string;
+          started_at?: string;
+          status?: string;
+          target_security_object_id: string;
+          target_version: number;
+          use_case: string;
+        };
+        Update: {
+          company_id?: string;
+          error_category?: string | null;
+          finished_at?: string | null;
+          id?: string;
+          input_tokens?: number | null;
+          latency_ms?: number | null;
+          model_name?: string;
+          model_provider?: string;
+          output_tokens?: number | null;
+          prompt_template_version?: string;
+          requested_by_profile_id?: string;
+          started_at?: string;
+          status?: string;
+          target_security_object_id?: string;
+          target_version?: number;
+          use_case?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_runs_company_id_fkey";
+            columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_runs_requested_by_profile_id_fkey";
+            columns: ["requested_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_runs_target_security_object_id_fkey";
+            columns: ["target_security_object_id"];
+            isOneToOne: false;
+            referencedRelation: "security_objects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       attachments: {
         Row: {
           created_at: string;
@@ -3885,6 +4089,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      add_ai_proposal: {
+        Args: { ai_run_id: string; payload: Json; proposal_type: string };
+        Returns: string;
+      };
       add_comment: {
         Args: { body: string; security_object_id: string };
         Returns: string;
@@ -4153,6 +4361,21 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      complete_ai_run: {
+        Args: {
+          ai_run_id: string;
+          error_category?: string;
+          input_tokens?: number;
+          latency_ms?: number;
+          output_tokens?: number;
+          status: string;
+        };
+        Returns: undefined;
+      };
+      confirm_ai_proposal: {
+        Args: { expected_version: number; payload: Json; proposal_id: string };
+        Returns: string;
+      };
       create_decision: {
         Args: {
           company_id: string;
@@ -4420,6 +4643,10 @@ export type Database = {
           title: string;
         }[];
       };
+      record_ai_run_sources: {
+        Args: { ai_run_id: string; sources: Json };
+        Returns: undefined;
+      };
       register_attachment: {
         Args: {
           filename: string;
@@ -4429,6 +4656,10 @@ export type Database = {
           storage_path: string;
         };
         Returns: string;
+      };
+      reject_ai_proposal: {
+        Args: { expected_version: number; proposal_id: string; reason: string };
+        Returns: undefined;
       };
       remove_meeting_participant: {
         Args: { participant_id: string; reason?: string };
@@ -4525,6 +4756,17 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      start_ai_run: {
+        Args: {
+          company_id: string;
+          model_name: string;
+          model_provider: string;
+          prompt_template_version: string;
+          target_security_object_id: string;
+          use_case: string;
+        };
+        Returns: string;
       };
       transition_meeting_session: {
         Args: {

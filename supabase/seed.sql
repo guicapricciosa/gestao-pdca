@@ -198,7 +198,8 @@ where permission.permission_key in (
   'comment.create', 'attachment.read', 'attachment.upload',
   'meeting.create', 'meeting.read', 'meeting.update', 'meeting.scope.update',
   'meeting.publish', 'meeting.close', 'meeting.reopen', 'meeting.participant.manage',
-  'meeting.agenda.manage', 'meeting.note.create', 'meeting.link.manage'
+  'meeting.agenda.manage', 'meeting.note.create', 'meeting.link.manage',
+  'ai.meeting.assist', 'ai.execution.validate'
 )
 on conflict do nothing;
 
