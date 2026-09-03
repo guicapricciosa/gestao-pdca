@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import type { Database } from "@/platform/supabase/database.types";
 
@@ -26,6 +26,24 @@ export function adminClient() {
   return createClient<Database>(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+}
+
+/**
+ * Clicks a Server Action submit button and resolves only after the action
+ * response has arrived. Server Actions commit their RPC before responding, so
+ * a test may navigate elsewhere immediately afterwards without racing the
+ * mutation. This never depends on compile speed or arbitrary timeouts.
+ */
+export async function submitAction(page: Page, button: Locator) {
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        response.request().headers()["next-action"] !== undefined &&
+        response.status() < 400,
+    ),
+    button.click(),
+  ]);
 }
 
 export async function submitForm(page: Page, label: string) {

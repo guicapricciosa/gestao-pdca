@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { adminClient, login, logout } from "./support";
+import { adminClient, login, logout, submitAction } from "./support";
 
 test.describe.serial("authenticated Execution Core hardening", () => {
   test("Task editing, assignments, due date, scope, lifecycle, memberships and attachment", async ({
@@ -171,7 +171,7 @@ test.describe.serial("authenticated Execution Core hardening", () => {
     await page.getByLabel("Título").fill("E2E PDCA child task");
     await page.getByText("Operations and Logistics", { exact: true }).click();
     await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar Task" }).click();
+    await submitAction(page, page.getByRole("button", { name: "Criar Task" }));
     await page.goto(pdcaUrl);
     await expect(page.getByText("E2E PDCA child task")).toBeVisible();
 

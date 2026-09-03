@@ -22,7 +22,9 @@ export default async function LoginPage({
             role="alert"
             className="mt-5 rounded-lg bg-red-50 p-3 text-sm text-red-800"
           >
-            Não foi possível iniciar sessão.
+            {error === "service_unavailable"
+              ? "O serviço de autenticação não respondeu. Não é um problema das credenciais; tenta novamente dentro de instantes."
+              : "Não foi possível iniciar sessão. Verifica o email e a password."}
           </p>
         )}
         <form action={loginAction} className="mt-8 grid gap-4">

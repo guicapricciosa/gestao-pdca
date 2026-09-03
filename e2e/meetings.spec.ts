@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { adminClient, login, logout } from "./support";
+import { adminClient, login, logout, submitAction } from "./support";
 
 test.describe.serial("Meeting to execution and follow-up", () => {
   let seriesId = "";
@@ -141,10 +141,18 @@ test.describe.serial("Meeting to execution and follow-up", () => {
       .single();
     pdcaId = pdcaRecord!.id;
 
-    await page.getByRole("button", { name: "Review" }).click();
+    await submitAction(page, page.getByRole("button", { name: "Review" }));
     await page.goto(`/meetings/${firstSessionId}/review`);
     await expect(page.getByText("E2E Meeting Task")).toBeVisible();
-    await page.getByRole("button", { name: "Publish Meeting" }).click();
+    await submitAction(
+      page,
+      page.getByRole("button", { name: "Publish Meeting" }),
+    );
+    // The review page only renders the Publish form while the session is in
+    // REVIEW, so its disappearance proves the publication was committed.
+    await expect(
+      page.getByRole("button", { name: "Publish Meeting" }),
+    ).toBeHidden();
     await page.goto(`/meetings/${firstSessionId}`);
     await expect(
       page.getByText("PUBLISHED", { exact: true }).first(),

@@ -24,6 +24,31 @@ Meetings, Decisions, PDCAs, Tasks, Projects, analytics and AI are intentionally 
 
 The local seed credentials use `DevelopmentOnly123!` and `.test` email addresses. They are development fixtures only and must never be used outside a disposable local environment.
 
+## Local troubleshooting
+
+### Every login fails right after `supabase db reset`
+
+`supabase db reset` (also run by `npm run test:e2e`) recreates the Auth (GoTrue),
+Storage and Realtime containers. Kong can keep the previous container IP in its
+DNS cache, so every `/auth/v1/*` request returns `502 An invalid response was
+received from the upstream server` while GoTrue itself is healthy and receives
+nothing. The login page reports this as a temporary service error, not as
+invalid credentials.
+
+Diagnose it with a direct request (values from `supabase status -o env`):
+
+```bash
+curl -s -X POST "$API_URL/auth/v1/token?grant_type=password" -H "apikey: $ANON_KEY" -H "Content-Type: application/json" -d '{"email":"ceo@example.test","password":"DevelopmentOnly123!"}'
+```
+
+A `502` with the message above confirms the stale route. Restart only Kong:
+
+```bash
+docker restart supabase_kong_execution-management-platform
+```
+
+`supabase stop && supabase start` also clears it, at the cost of a full restart.
+
 ## Quality commands
 
 ```bash
@@ -33,9 +58,14 @@ npm run typecheck
 npm test
 npm run test:coverage
 npm run build
-supabase test db
+npm run test:db
 supabase db lint --level warning
+npm run test:e2e
 ```
+
+`npm run test:db` and `npm run test:e2e` both start with `supabase db reset`. The
+pgTAP suites assert against the seed only, so running `supabase test db` on a
+database that already holds e2e or manual data reports spurious failures.
 
 ## Database changes
 
