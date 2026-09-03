@@ -208,3 +208,12 @@ Attachments are fixed to private Storage with server authorization and short-liv
 - Local password identities and sign-up-capable provider configuration exist only for deterministic development/E2E. Production remains an invitation/admin-provisioned environment and must not inherit local auth settings blindly.
 
 Malware scanning/quarantine, rate-limited upload reservations and external tamper-evident audit retention remain pre-production hardening work.
+
+## 14. Implemented AI controls
+
+- The model never receives data the actor cannot read: context is built from the RLS-filtered meeting detail or record, candidates come from `get_meeting_accessible_profiles`, and `record_ai_run_sources` refuses unreadable sources.
+- Instructions and data are separated at the gateway; segment content is rendered inside `<segment>` tags and the versioned instructions state that it is never an instruction.
+- Structured output is validated server-side; unknown IDs, past deadlines, unknown enums and unknown citations are stripped with warnings, unusable items are rejected, and schema failures close the run as FAILED without persisting proposals.
+- High-impact effects only happen through `confirm_ai_proposal`, which re-authorizes the reviewer, refuses stale or already reviewed proposals and reuses the normal commands; findings cannot be executed.
+- `OPENAI_API_KEY` is server-only, requests use `store: false`, and no prompt or response body is logged; `ai_runs` keeps operational metadata only.
+- `AI_PROVIDER=disabled` is the default; the e2e suite runs with the deterministic `fake` provider so no data leaves the machine.

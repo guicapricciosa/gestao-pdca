@@ -6,13 +6,25 @@ import { loadCreationOptions } from "@/modules/execution/application/creation-op
 import { ExecutionDetail } from "@/ui/patterns/execution-detail";
 import { ExecutionActions } from "@/ui/patterns/execution-actions";
 import { ExecutionEditForm } from "@/ui/patterns/execution-edit-form";
+import { describeAiAvailability } from "@/modules/ai/application/provider";
+import {
+  listProposals,
+  listRuns,
+  loadExecutionValidation,
+} from "@/modules/ai/application/services";
+import { ValidationPanel } from "@/ui/patterns/validation-panel";
 export const dynamic = "force-dynamic";
 export default async function PdcaDetailPage({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ id: string }>;
+  readonly searchParams: Promise<{ ai_error?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, { ai_error: aiError }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const client = await createSupabaseServerClient();
   const { data: pdca } = await client
     .from("pdcas")
@@ -29,6 +41,9 @@ export default async function PdcaDetailPage({
     context,
     { data: dueDateHistory },
     scopeOptions,
+    validation,
+    aiProposals,
+    aiRuns,
   ] = await Promise.all([
     client
       .from("comments")
@@ -55,6 +70,9 @@ export default async function PdcaDetailPage({
       .eq("pdca_id", id)
       .order("changed_at", { ascending: false }),
     loadCreationOptions("pdca.scope.update"),
+    loadExecutionValidation(client, "PDCA", id),
+    listProposals(client, pdca.security_object_id),
+    listRuns(client, pdca.security_object_id, 1),
   ]);
   return (
     <>
@@ -117,6 +135,18 @@ export default async function PdcaDetailPage({
         ownerProfileId={pdca.owner_profile_id}
         responsibleProfileId={pdca.responsible_profile_id}
         startDate={pdca.start_date}
+      />
+      <ValidationPanel
+        kind="PDCA"
+        recordId={pdca.id}
+        findings={validation?.findings ?? []}
+        aiFindings={aiProposals.filter(
+          (proposal) =>
+            proposal.status === "PENDING" && proposal.type === "FINDING",
+        )}
+        aiEnabled={describeAiAvailability().enabled}
+        aiError={aiError ?? null}
+        lastRun={aiRuns[0] ?? null}
       />
     </>
   );

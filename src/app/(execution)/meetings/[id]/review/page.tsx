@@ -45,6 +45,12 @@ export default async function ReviewMeetingPage({
         <p className="text-muted-foreground mt-2">
           Validar ações antes da publicação.
         </p>
+        <Link
+          className="mt-4 inline-block rounded-full border px-4 py-2 text-sm"
+          href={`/meetings/${id}/assistant`}
+        >
+          AI Assistant
+        </Link>
       </header>
       {issues.length > 0 && (
         <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5">

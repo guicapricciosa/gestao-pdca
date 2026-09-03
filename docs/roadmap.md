@@ -530,3 +530,13 @@ Execution Core hardening and Meetings are implemented and validated as one relea
 - Increment 16: Upcoming/Needs Review/Follow-up additions to My Work, without Executive Analytics.
 
 The next gate remains explicitly blocked pending human approval. No AI, Executive Analytics, semantic search, Calendar, email, Teams, WhatsApp or other external notification integration is part of this implementation.
+
+## 20. Completed implementation gate — AI Foundation, Meeting Assistant, Meeting Summary and Execution Validator
+
+- provider-neutral gateway with `disabled`, `fake` and `openai` providers; application remains fully usable with AI disabled;
+- `ai_runs`, `ai_run_sources`, `ai_proposals` with target-bound read policies and command-only writes;
+- Meeting Assistant proposals (Decision/Task/PDCA) and Meeting Summary, reviewed and confirmed through the normal domain commands;
+- deterministic Execution Validator on detail pages and My Work, with optional AI findings;
+- unit, pgTAP and end-to-end coverage for authorization, staleness, idempotent confirmation and provider failure.
+
+Still excluded and blocked pending approval: Executive Analytics, global Management Chat, automatic Executive Brief, Teams, WhatsApp, email, Calendar, semantic search and autonomous actions.

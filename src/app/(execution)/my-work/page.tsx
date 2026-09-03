@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { loadMyWorkValidation } from "@/modules/ai/application/services";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
+import { FindingList } from "@/ui/patterns/validation-panel";
 export const dynamic = "force-dynamic";
 const groups = ["RESPONSIBLE", "OWNER", "COLLABORATOR", "WATCHER"] as const;
 export default async function MyWorkPage() {
@@ -9,6 +11,13 @@ export default async function MyWorkPage() {
     client.rpc("my_meetings"),
   ]);
   const items = data ?? [];
+  const validation = await loadMyWorkValidation(
+    client,
+    items.filter(
+      (item) =>
+        item.relationship === "RESPONSIBLE" || item.relationship === "OWNER",
+    ),
+  );
   const attention = items.filter(
     (item) =>
       item.status === "BLOCKED" ||
@@ -33,6 +42,35 @@ export default async function MyWorkPage() {
           <p className="mt-1 text-sm text-white/60">
             {attention.length} item(ns) overdue ou blocked.
           </p>
+        </section>
+      )}
+      {validation.length > 0 && (
+        <section
+          className="mb-8 rounded-2xl border bg-white"
+          data-testid="my-work-validation"
+        >
+          <h2 className="border-b p-5 text-lg font-semibold">
+            Execution Validator
+          </h2>
+          <p className="text-muted-foreground px-5 pt-4 text-sm">
+            Alertas determinísticos sobre o que é teu (Responsible ou Owner).
+            Nada é alterado automaticamente.
+          </p>
+          <div className="grid gap-4 p-5">
+            {validation.map((entry) => (
+              <div key={`${entry.objectType}-${entry.objectId}`}>
+                <Link
+                  className="text-sm font-medium hover:underline"
+                  href={`/${entry.objectType === "TASK" ? "tasks" : "pdcas"}/${entry.objectId}`}
+                >
+                  {entry.objectType} · {entry.title}
+                </Link>
+                <div className="mt-2">
+                  <FindingList findings={entry.findings} />
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       )}
       <section className="mb-8 rounded-2xl border bg-white">

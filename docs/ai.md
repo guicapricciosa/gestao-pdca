@@ -180,3 +180,37 @@ Audit distinguishes AI suggestion, human reviewer and executing actor. Model tok
 | Approved provider deployment and data residency | Use the provider abstraction; an initial OpenAI adapter is acceptable after security/legal review | Another approved provider or deployment | Affects retention, regionality, contracts and model features            |
 | Transcript retention values                     | Make policy configurable; define concrete default periods before transcripts are enabled          | Process then discard; fixed retention   | Affects provenance, privacy and later re-analysis                       |
 | Scheduled Executive Brief                       | Introduce after deterministic analytics and recipient-scoped job authorization are stable         | Build alongside first dashboard         | Prevents premature AI dependence and leakage through scheduled delivery |
+
+## 14. Implementation status — AI Foundation, Meeting Assistant, Meeting Summary and Execution Validator
+
+Implemented in migration `202609030010` and the `src/modules/ai` module.
+
+### Provider abstraction
+
+`AI_PROVIDER` selects the gateway: `disabled` (default; every workflow stays usable, AI controls are shown disabled), `fake` (deterministic local provider used by development and end-to-end tests; it only echoes marked lines such as `Tarefa: … | responsável: … | prazo: AAAA-MM-DD`) and `openai` (Responses API with strict JSON-schema output, `store: false`, server-side key only, configurable model and timeout). Domain code depends on the `ModelGateway` contract, never on provider types. Prompt templates and output schemas are versioned (`v1`).
+
+### Pipeline
+
+```text
+start_ai_run (permission ai.meeting.assist / ai.execution.validate on the target)
+-> record_ai_run_sources (every source must be readable by the actor now)
+-> minimized labelled context from the RLS-filtered detail
+-> gateway (instructions separated from <segment> data)
+-> strict output validation (unknown IDs, past deadlines, unknown enums, foreign citations removed with warnings; unusable items rejected)
+-> add_ai_proposal (PENDING)
+-> complete_ai_run (SUCCEEDED/FAILED with error category and telemetry)
+```
+
+Candidate people come from `get_meeting_accessible_profiles`, so the model can only reference identities that already have access; unmatched names are reported in `unresolvedNames` and the reviewer chooses.
+
+### Confirmation
+
+`confirm_ai_proposal(proposal_id, expected_version, payload)` re-authorizes the reviewer, rejects reviewed or stale proposals (the meeting security object changed since the run), and executes once through the normal commands: `create_meeting_decision`, `create_meeting_task`, `create_meeting_pdca` or `add_meeting_note` (summaries). The reviewer's edited payload wins; the created object is a Draft linked as `CREATED` and the reviewer is the audited actor. `reject_ai_proposal` requires a reason. Findings are recommendations and cannot be executed.
+
+### Execution Validator
+
+Deterministic rules run without any provider on every Task/PDCA detail page and, in a two-query form, on My Work: missing Owner/Responsible/deadline, PDCA problem/objective/expected result, overdue with and without update, stale, repeated postponement, long blockers, completed PDCA without evidence and possible duplicates among visible open items. The optional AI pass produces `FINDING` proposals with confidence and citations that the reader can dismiss.
+
+### Not implemented in this gate
+
+Management Assistant, Executive Brief, tool registry with read tools, transcript ingestion/retention, scheduled or delivered outputs, semantic search, autonomous actions and every external channel remain unstarted and require separate approval.

@@ -10,9 +10,12 @@ Secure modular-monolith foundation for the execution management platform describ
 - deterministic permission engine in TypeScript and PostgreSQL;
 - NORMAL, RESTRICTED and PRIVATE visibility;
 - explicit grants, audit foundations and transactional outbox;
-- RLS policies and security tests.
+- RLS policies and security tests;
+- Decisions, Tasks, PDCAs, comments, attachments and audit trail;
+- Meeting Series, Sessions, Meeting Mode, review/publish/close and follow-up;
+- AI Foundation: provider-neutral gateway (`disabled`, `fake`, `openai`), Meeting Assistant proposals, Meeting Summary, deterministic Execution Validator with optional AI findings; every AI effect requires human confirmation through the normal domain commands.
 
-Meetings, Decisions, PDCAs, Tasks, Projects, analytics and AI are intentionally not implemented yet.
+Projects, Executive Analytics, Management Assistant, Executive Brief and external notification channels are intentionally not implemented yet.
 
 ## Local setup
 
@@ -21,6 +24,11 @@ Meetings, Decisions, PDCAs, Tasks, Projects, analytics and AI are intentionally 
 3. Run `supabase start`.
 4. Run `supabase db reset` to apply migrations and development seed data.
 5. Run `npm install` and `npm run dev`.
+
+AI is disabled unless `AI_PROVIDER` is set: use `fake` for a deterministic local
+provider (it recognises lines such as `Tarefa: … | responsável: … | prazo: AAAA-MM-DD`
+pasted into the Meeting Assistant) or `openai` with a server-side `OPENAI_API_KEY`.
+`npm run test:e2e` always uses the `fake` provider.
 
 The local seed credentials use `DevelopmentOnly123!` and `.test` email addresses. They are development fixtures only and must never be used outside a disposable local environment.
 

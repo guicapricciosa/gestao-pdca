@@ -73,6 +73,12 @@ export default async function MeetingDetailPage({
         >
           Review Meeting
         </Link>
+        <Link
+          className="rounded-full border px-4 py-2 text-sm"
+          href={`/meetings/${id}/assistant`}
+        >
+          AI Assistant
+        </Link>
       </div>
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border bg-white p-5">

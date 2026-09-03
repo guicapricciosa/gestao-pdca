@@ -15,6 +15,8 @@ for (const line of localEnvironment.split("\n")) {
 process.env.NEXT_PUBLIC_SUPABASE_URL = process.env.API_URL;
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.ANON_KEY;
 process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SERVICE_ROLE_KEY;
+// End-to-end runs use the deterministic provider so nothing leaves the machine.
+process.env.AI_PROVIDER = "fake";
 
 export default defineConfig({
   testDir: "./e2e",

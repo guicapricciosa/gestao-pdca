@@ -573,3 +573,11 @@ Migrations `202609030008_meetings_schema.sql` and `202609030009_meetings_command
 Statuses and agenda statuses use lookup tables because lifecycle definitions may gain metadata without changing authorization labels. Participant and link relation types use small PostgreSQL enums. Recurrence metadata is deliberately minimal (`recurrence_rule` plus JSONB metadata) and does not attempt to model a calendar engine.
 
 Publication keeps an immutable JSONB snapshot of the session, agenda and notes. JSONB is appropriate here because this is a historical rendering artifact, not the source of current domain truth. Current operational data remains normalized.
+
+## 16. Implemented AI schema
+
+- `ai_runs`: `company_id`, `requested_by_profile_id`, `use_case` (MEETING_ASSISTANT, MEETING_SUMMARY, EXECUTION_VALIDATOR), `target_security_object_id`, `target_version` (staleness check), `model_provider`, `model_name`, `prompt_template_version`, `status` (RUNNING, SUCCEEDED, FAILED), `error_category`, token/latency telemetry, `started_at`, `finished_at`.
+- `ai_run_sources`: composite key (`ai_run_id`, `security_object_id`) with `source_version` and `context_role` (TARGET, AGENDA, NOTE, LINK, INPUT). The target is always recorded; other sources must be readable by the actor at recording time.
+- `ai_proposals`: `proposal_type` (DECISION, TASK, PDCA, SUMMARY, FINDING), validated `payload` plus `payload_version`, `status` (PENDING, CONFIRMED, REJECTED), reviewer, `review_reason`, `confirmed_payload` (the human-edited version actually executed), `executed_record_type`/`executed_record_id` and optimistic `version`.
+
+Deletion is prevented by trigger; audit actions `ai.run.started`, `ai.run.completed`, `ai.proposal.created`, `ai.proposal.confirmed` and `ai.proposal.rejected` appear in the meeting and execution activity views.

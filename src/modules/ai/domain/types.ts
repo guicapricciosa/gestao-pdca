@@ -28,7 +28,8 @@ export interface ContextCandidates {
 /** A record actually supplied to the model, for provenance. */
 export interface ContextSource {
   readonly securityObjectId: string;
-  readonly sourceVersion: number;
+  /** Null lets the server record the object's current version. */
+  readonly sourceVersion: number | null;
   readonly contextRole: ContextRole;
 }
 
@@ -36,6 +37,8 @@ export interface AiContext {
   readonly segments: readonly ContextSegment[];
   readonly candidates: ContextCandidates;
   readonly sources: readonly ContextSource[];
+  /** True when material was cut to respect the input budget. */
+  readonly truncated: boolean;
 }
 
 export interface ExecutionProposalPayload {

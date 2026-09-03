@@ -42,6 +42,7 @@ export class GatewayError extends Error {
 
 export interface ModelGateway {
   readonly provider: string;
+  readonly model: string;
   complete(request: GatewayRequest): Promise<GatewayResult>;
 }
 

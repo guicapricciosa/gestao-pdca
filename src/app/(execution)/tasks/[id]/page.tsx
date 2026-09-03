@@ -5,13 +5,25 @@ import { loadCreationOptions } from "@/modules/execution/application/creation-op
 import { ExecutionDetail } from "@/ui/patterns/execution-detail";
 import { ExecutionActions } from "@/ui/patterns/execution-actions";
 import { ExecutionEditForm } from "@/ui/patterns/execution-edit-form";
+import { describeAiAvailability } from "@/modules/ai/application/provider";
+import {
+  listProposals,
+  listRuns,
+  loadExecutionValidation,
+} from "@/modules/ai/application/services";
+import { ValidationPanel } from "@/ui/patterns/validation-panel";
 export const dynamic = "force-dynamic";
 export default async function TaskDetailPage({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ id: string }>;
+  readonly searchParams: Promise<{ ai_error?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, { ai_error: aiError }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const client = await createSupabaseServerClient();
   const { data: task } = await client
     .from("tasks")
@@ -27,6 +39,9 @@ export default async function TaskDetailPage({
     context,
     { data: dueDateHistory },
     scopeOptions,
+    validation,
+    aiProposals,
+    aiRuns,
   ] = await Promise.all([
     client
       .from("comments")
@@ -52,6 +67,9 @@ export default async function TaskDetailPage({
       .eq("task_id", id)
       .order("changed_at", { ascending: false }),
     loadCreationOptions("task.scope.update"),
+    loadExecutionValidation(client, "TASK", id),
+    listProposals(client, task.security_object_id),
+    listRuns(client, task.security_object_id, 1),
   ]);
   return (
     <>
@@ -95,6 +113,18 @@ export default async function TaskDetailPage({
         ownerProfileId={task.owner_profile_id}
         responsibleProfileId={task.responsible_profile_id}
         startDate={task.start_date}
+      />
+      <ValidationPanel
+        kind="TASK"
+        recordId={task.id}
+        findings={validation?.findings ?? []}
+        aiFindings={aiProposals.filter(
+          (proposal) =>
+            proposal.status === "PENDING" && proposal.type === "FINDING",
+        )}
+        aiEnabled={describeAiAvailability().enabled}
+        aiError={aiError ?? null}
+        lastRun={aiRuns[0] ?? null}
       />
     </>
   );

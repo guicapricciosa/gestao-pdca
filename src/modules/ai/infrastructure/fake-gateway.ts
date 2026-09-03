@@ -124,6 +124,7 @@ function validator(segments: readonly ContextSegment[]) {
  */
 export class FakeModelGateway implements ModelGateway {
   readonly provider = "fake";
+  readonly model = "fake";
 
   async complete(request: GatewayRequest): Promise<GatewayResult> {
     const started = Date.now();

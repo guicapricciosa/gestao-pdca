@@ -294,3 +294,7 @@ Authenticated browser traffic uses the user's Supabase session. Lists and detail
 Attachment upload is server mediated: authorize parent, validate configured MIME/size/count, upload to private Storage, register metadata/audit, and delete the stored object if metadata registration fails. Download re-authorizes the parent and issues a short-lived signed URL. This is the accepted cross-system compensation boundary until malware quarantine/scanning is introduced.
 
 Playwright is now part of the test foundation. Its local configuration waits for the Supabase REST schema to be ready, starts Next.js on an isolated port and exercises real password sessions against development-only identities. Local self-sign-up support exists only in `supabase/config.toml`; production must continue to use invitation/admin provisioning policy.
+
+## 22. Implementation status — AI Foundation
+
+`src/modules/ai` follows the module layout: `domain` (types, deterministic validators, strict output validation), `application` (gateway contract, prompts, context builders, `runUseCase` pipeline, services, repository contract, provider resolution) and `infrastructure` (fake and OpenAI gateways, Supabase repository over the `*_ai_*` commands). Server Actions in `src/app/actions/ai.ts` are transport adapters; pages under `/meetings/[id]/assistant`, the Task/PDCA detail pages and My Work render proposals and findings. Provider failures surface as non-destructive errors with a category (TIMEOUT, PROVIDER, SCHEMA, CONFIGURATION, DISABLED) and never block the deterministic workflows.
