@@ -1698,6 +1698,63 @@ export type Database = {
         };
         Relationships: [];
       };
+      notification_deliveries: {
+        Row: {
+          attempt_count: number;
+          available_at: string;
+          channel: string;
+          created_at: string;
+          id: string;
+          last_error: string | null;
+          notification_id: string;
+          provider_status: number | null;
+          status: string;
+          subscription_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          attempt_count?: number;
+          available_at?: string;
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          last_error?: string | null;
+          notification_id: string;
+          provider_status?: number | null;
+          status?: string;
+          subscription_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          attempt_count?: number;
+          available_at?: string;
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          last_error?: string | null;
+          notification_id?: string;
+          provider_status?: number | null;
+          status?: string;
+          subscription_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_notification_id_fkey";
+            columns: ["notification_id"];
+            isOneToOne: false;
+            referencedRelation: "notifications";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notification_deliveries_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "push_subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       notification_preferences: {
         Row: {
           collaboration: boolean;
@@ -2906,6 +2963,56 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          failure_count: number;
+          id: string;
+          last_seen_at: string;
+          p256dh: string;
+          profile_id: string;
+          revoked_at: string | null;
+          revoked_reason: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          auth: string;
+          created_at?: string;
+          endpoint: string;
+          failure_count?: number;
+          id?: string;
+          last_seen_at?: string;
+          p256dh: string;
+          profile_id: string;
+          revoked_at?: string | null;
+          revoked_reason?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          auth?: string;
+          created_at?: string;
+          endpoint?: string;
+          failure_count?: number;
+          id?: string;
+          last_seen_at?: string;
+          p256dh?: string;
+          profile_id?: string;
+          revoked_at?: string | null;
+          revoked_reason?: string | null;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       restaurant_assignments: {
         Row: {
@@ -4494,6 +4601,24 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      claim_push_deliveries: {
+        Args: { p_limit?: number };
+        Returns: {
+          attempt_count: number;
+          auth: string;
+          delivery_id: string;
+          endpoint: string;
+          href: string;
+          metadata: Json;
+          notification_id: string;
+          p256dh: string;
+          read_at: string;
+          sensitive: boolean;
+          subscription_id: string;
+          title: string;
+          type: string;
+        }[];
+      };
       complete_ai_run: {
         Args: {
           ai_run_id: string;
@@ -4502,6 +4627,17 @@ export type Database = {
           latency_ms?: number;
           output_tokens?: number;
           status: string;
+        };
+        Returns: undefined;
+      };
+      complete_push_delivery: {
+        Args: {
+          p_delivery_id: string;
+          p_error?: string;
+          p_provider_status?: number;
+          p_retry_in_seconds?: number;
+          p_status: string;
+          p_subscription_gone?: boolean;
         };
         Returns: undefined;
       };
@@ -4862,6 +4998,15 @@ export type Database = {
         };
         Returns: string;
       };
+      register_push_subscription: {
+        Args: {
+          auth: string;
+          endpoint: string;
+          p256dh: string;
+          user_agent?: string;
+        };
+        Returns: string;
+      };
       reject_ai_proposal: {
         Args: { expected_version: number; proposal_id: string; reason: string };
         Returns: undefined;
@@ -4932,6 +5077,14 @@ export type Database = {
       resolve_task_blocker: {
         Args: { blocker_id: string; resolution_notes?: string };
         Returns: undefined;
+      };
+      revoke_push_subscription: {
+        Args: { endpoint: string };
+        Returns: boolean;
+      };
+      revoke_push_subscription_by_id: {
+        Args: { subscription_id: string };
+        Returns: boolean;
       };
       save_notification_preferences: {
         Args: {
