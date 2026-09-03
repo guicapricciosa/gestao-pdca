@@ -356,12 +356,16 @@ test.describe.serial("Tasks and PDCAs in the simplified UI", () => {
     // the restricted task nor holds restricted read.
     await login(page, "kitchen.manager.a@example.test");
     await page.goto(restrictedUrl);
-    await expect(page.getByText("This page could not be found.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Não tens acesso a este conteúdo" }),
+    ).toBeVisible();
     await logout(page);
 
     await login(page, "manager.a@example.test");
     await page.goto(privateUrl);
-    await expect(page.getByText("This page could not be found.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Não tens acesso a este conteúdo" }),
+    ).toBeVisible();
 
     const admin = adminClient();
     const { data: task } = await admin
@@ -399,7 +403,9 @@ test.describe.serial("Tasks and PDCAs in the simplified UI", () => {
       })
       .eq("id", grant!.id);
     await page.goto(privateUrl);
-    await expect(page.getByText("This page could not be found.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Não tens acesso a este conteúdo" }),
+    ).toBeVisible();
 
     // No silent grant was created for the restricted creator.
     const { data: restricted } = await admin

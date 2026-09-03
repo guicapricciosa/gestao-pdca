@@ -211,6 +211,21 @@ test.describe
 
     await login(page, "manager.a@example.test");
     await page.goto(`/meetings/${firstId}`);
-    await expect(page.getByText("This page could not be found.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Não tens acesso a este conteúdo" }),
+    ).toBeVisible();
+
+    // Leave the seed as we found it for the specs that follow.
+    await admin
+      .from("restaurant_assignments")
+      .update({ valid_to: null })
+      .in(
+        "organizational_assignment_id",
+        (assignments ?? []).map((row) => row.id),
+      );
+    await admin
+      .from("organizational_assignments")
+      .update({ valid_to: null })
+      .eq("profile_id", profiles.managerA);
   });
 });

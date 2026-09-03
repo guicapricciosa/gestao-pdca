@@ -6,7 +6,7 @@ test("authentication, persisted session, logout and protected redirect", async (
   page,
 }) => {
   await page.goto("/tasks");
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Ftasks$/);
 
   await login(page);
   await expect(
@@ -19,5 +19,23 @@ test("authentication, persisted session, logout and protected redirect", async (
 
   await logout(page);
   await page.goto("/pdcas");
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fpdcas$/);
+});
+
+test("a deep link survives login and unsafe targets are ignored", async ({
+  page,
+}) => {
+  await page.goto("/tasks?status=OPEN");
+  await expect(page).toHaveURL(/\/login\?next=/);
+  await page.getByLabel("Email").fill("ceo@example.test");
+  await page.getByLabel("Palavra-passe").fill("DevelopmentOnly123!");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.waitForURL("**/tasks?status=OPEN");
+
+  await logout(page);
+  await page.goto("/login?next=https://example.com/evil");
+  await page.getByLabel("Email").fill("ceo@example.test");
+  await page.getByLabel("Palavra-passe").fill("DevelopmentOnly123!");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.waitForURL("**/my-work");
 });
