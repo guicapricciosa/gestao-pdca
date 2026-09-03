@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/login/actions";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { NavLink } from "@/ui/components/nav-link";
+import { NotificationBell } from "@/ui/components/notification-bell";
 import { Notice } from "@/ui/components/notice";
 import { SubmitButton } from "@/ui/components/submit-button";
 
@@ -46,7 +47,8 @@ async function loadViewer() {
     )
     .eq("auth_user_id", user.id)
     .single();
-  return { email: user.email ?? "", profile };
+  const { data: unread } = await client.rpc("unread_notification_count");
+  return { email: user.email ?? "", profile, unread: unread ?? 0 };
 }
 
 export default async function ExecutionLayout({
@@ -121,6 +123,12 @@ export default async function ExecutionLayout({
               Cobre {restaurants.join(", ")}
             </p>
           )}
+          <div className="mb-3">
+            <NotificationBell
+              profileId={viewer.profile?.id ?? null}
+              initialCount={viewer.unread}
+            />
+          </div>
           <Link
             className="mb-2 block text-xs text-white/70 hover:text-white"
             href="/definicoes"
