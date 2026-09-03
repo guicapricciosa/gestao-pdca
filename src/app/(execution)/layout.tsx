@@ -15,6 +15,9 @@ import { NotificationBell } from "@/ui/components/notification-bell";
 import { Notice } from "@/ui/components/notice";
 import { SubmitButton } from "@/ui/components/submit-button";
 
+// Everything inside the shell depends on the session: never prerender it.
+export const dynamic = "force-dynamic";
+
 const groups = [
   {
     label: "Trabalho",
