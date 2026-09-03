@@ -1698,6 +1698,139 @@ export type Database = {
         };
         Relationships: [];
       };
+      notification_preferences: {
+        Row: {
+          collaboration: boolean;
+          deadline_days: number;
+          meeting_changes: boolean;
+          meeting_participation: boolean;
+          meeting_reminders: boolean;
+          pdcas: boolean;
+          profile_id: string;
+          push_enabled: boolean;
+          tasks: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          collaboration?: boolean;
+          deadline_days?: number;
+          meeting_changes?: boolean;
+          meeting_participation?: boolean;
+          meeting_reminders?: boolean;
+          pdcas?: boolean;
+          profile_id: string;
+          push_enabled?: boolean;
+          tasks?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          collaboration?: boolean;
+          deadline_days?: number;
+          meeting_changes?: boolean;
+          meeting_participation?: boolean;
+          meeting_reminders?: boolean;
+          pdcas?: boolean;
+          profile_id?: string;
+          push_enabled?: boolean;
+          tasks?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          category: string;
+          company_id: string;
+          created_at: string;
+          dedupe_key: string;
+          href: string;
+          id: string;
+          metadata: Json;
+          read_at: string | null;
+          recipient_profile_id: string;
+          security_object_id: string | null;
+          sensitive: boolean;
+          source_event_id: string | null;
+          target_id: string;
+          target_kind: string;
+          title: string;
+          type: string;
+        };
+        Insert: {
+          category: string;
+          company_id: string;
+          created_at?: string;
+          dedupe_key: string;
+          href: string;
+          id?: string;
+          metadata?: Json;
+          read_at?: string | null;
+          recipient_profile_id: string;
+          security_object_id?: string | null;
+          sensitive?: boolean;
+          source_event_id?: string | null;
+          target_id: string;
+          target_kind: string;
+          title: string;
+          type: string;
+        };
+        Update: {
+          category?: string;
+          company_id?: string;
+          created_at?: string;
+          dedupe_key?: string;
+          href?: string;
+          id?: string;
+          metadata?: Json;
+          read_at?: string | null;
+          recipient_profile_id?: string;
+          security_object_id?: string | null;
+          sensitive?: boolean;
+          source_event_id?: string | null;
+          target_id?: string;
+          target_kind?: string;
+          title?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_company_id_fkey";
+            columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_recipient_profile_id_fkey";
+            columns: ["recipient_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_security_object_id_fkey";
+            columns: ["security_object_id"];
+            isOneToOne: false;
+            referencedRelation: "security_objects";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_source_event_id_fkey";
+            columns: ["source_event_id"];
+            isOneToOne: false;
+            referencedRelation: "outbox_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       object_memberships: {
         Row: {
           added_by_profile_id: string;
@@ -4598,6 +4731,11 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      generate_deadline_notifications: { Args: never; Returns: number };
+      generate_meeting_reminders: {
+        Args: { p_minutes?: number };
+        Returns: number;
+      };
       get_accessible_scope: {
         Args: never;
         Returns: {
@@ -4624,6 +4762,27 @@ export type Database = {
           profile_id: string;
         }[];
       };
+      get_notification_preferences: {
+        Args: never;
+        Returns: {
+          collaboration: boolean;
+          deadline_days: number;
+          meeting_changes: boolean;
+          meeting_participation: boolean;
+          meeting_reminders: boolean;
+          pdcas: boolean;
+          profile_id: string;
+          push_enabled: boolean;
+          tasks: boolean;
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "notification_preferences";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       has_active_hierarchy_path: {
         Args: { from_assignment_id: string; to_assignment_id: string };
         Returns: boolean;
@@ -4641,6 +4800,11 @@ export type Database = {
           security_object_id: string;
         };
         Returns: string;
+      };
+      mark_all_notifications_read: { Args: never; Returns: number };
+      mark_notifications_read: {
+        Args: { notification_ids: string[] };
+        Returns: number;
       };
       meeting_previous_followups: {
         Args: { current_session_id: string };
@@ -4674,6 +4838,14 @@ export type Database = {
           security_object_id: string;
           status: string;
           title: string;
+        }[];
+      };
+      process_outbox: {
+        Args: { p_limit?: number };
+        Returns: {
+          failed: number;
+          notifications_created: number;
+          processed: number;
         }[];
       };
       record_ai_run_sources: {
@@ -4760,6 +4932,36 @@ export type Database = {
       resolve_task_blocker: {
         Args: { blocker_id: string; resolution_notes?: string };
         Returns: undefined;
+      };
+      save_notification_preferences: {
+        Args: {
+          collaboration: boolean;
+          deadline_days: number;
+          meeting_changes: boolean;
+          meeting_participation: boolean;
+          meeting_reminders: boolean;
+          pdcas: boolean;
+          push_enabled: boolean;
+          tasks: boolean;
+        };
+        Returns: {
+          collaboration: boolean;
+          deadline_days: number;
+          meeting_changes: boolean;
+          meeting_participation: boolean;
+          meeting_reminders: boolean;
+          pdcas: boolean;
+          profile_id: string;
+          push_enabled: boolean;
+          tasks: boolean;
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "notification_preferences";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       set_meeting_agenda_status: {
         Args: {
@@ -4935,6 +5137,7 @@ export type Database = {
         Args: { link_id: string; reason: string };
         Returns: undefined;
       };
+      unread_notification_count: { Args: never; Returns: number };
       update_decision: {
         Args: {
           decided_by_profile_id: string;
