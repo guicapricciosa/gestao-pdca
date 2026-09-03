@@ -270,3 +270,22 @@ Threats considered and controls (details in `docs/realtime.md`):
   definer but only ever inserts into `notifications` after the central
   authorization check for the recipient; the HTTP job route needs
   `CRON_SECRET` and is disabled without it.
+
+## Web Push (2026-09-03)
+
+- **Forged subscription / hijacking** — subscriptions are registered only for
+  the signed-in profile; endpoints must be `https`; an endpoint re-registered
+  by another person moves to them (the previous owner stops receiving).
+- **Endpoint abuse / enumeration** — endpoints are never listed back in full
+  (only a suffix); other people's devices are invisible and cannot be revoked.
+- **Sensitive payloads** — PRIVATE/RESTRICTED notifications are pushed as
+  "Assunto reservado" with a generic body; no titles, names, comments or
+  attachments ever travel to the push service.
+- **Replay** — deliveries are unique per (notification, device) and claimed
+  with `for update skip locked`; a re-run sends nothing twice.
+- **Lock screen / shared devices** — content beyond the generic text appears
+  only after opening the app, authenticating and being authorized; logging out
+  does not delete the subscription automatically (a later login by the same
+  person keeps their devices; another person registering the same endpoint
+  takes it over), so shared devices should revoke in Definições before handing
+  over.

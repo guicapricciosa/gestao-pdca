@@ -103,6 +103,39 @@ accountability change, anything the person did themself.
   deep link) and "Marcar como lida"; "Marcar todas como lidas".
 - `/definicoes`: preferences.
 
+## Web Push (Gate D)
+
+```
+person → grants browser permission → PushManager subscription
+       → POST /api/push/subscriptions (own profile, endpoint must be https)
+notification insert → notification_deliveries (one per active device, only if push_enabled)
+job route → claim_push_deliveries → provider.send → complete_push_delivery
+```
+
+- **Devices.** `push_subscriptions` is per endpoint; re-registering an endpoint
+  moves it to the person registering now (shared devices), revoking is by the
+  owner (Definições → Remover / Desactivar neste dispositivo) or automatically
+  when the push service answers 404/410 (`revoked_reason = 'gone'`).
+- **Provider abstraction.** `PushProvider` (`src/modules/notifications/application/push.ts`)
+  with `webpush` (VAPID keys from `NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY`,
+  `WEB_PUSH_PRIVATE_KEY`, `WEB_PUSH_SUBJECT`), `fake` (tests; deterministic by
+  endpoint and logged to `PUSH_LOG_FILE`) and `disabled` (deliveries are
+  recorded as skipped).
+- **Retries.** Transient failures (429/5xx/network) retry at 1, 2 and 4
+  minutes, at most 3 attempts; rejections fail once; gone endpoints revoke the
+  device. A notification already read in the app is skipped.
+- **Payload policy.** NORMAL: heading + object title + short context (e.g.
+  "Nova tarefa atribuída — Rever proposta · Prazo: 10/09/2026"). RESTRICTED
+  and PRIVATE: always "Assunto reservado — Tem uma nova actualização num
+  assunto reservado." The deep link is relative; the app authenticates and
+  authorizes on tap, so a push is never a capability.
+- **Where it runs.** Sending needs Node, so it happens in the job route
+  (`/api/jobs/process`, `CRON_SECRET`), called by Vercel Cron or any
+  scheduler; `pg_cron` can also trigger it with `pg_net` if the host prefers a
+  single scheduler. In-app notifications never depend on it.
+- **Multiple devices.** Every active device of the recipient gets its own
+  delivery row and outcome; Definições lists them.
+
 ## Retention (to decide later; expected growth)
 
 - `outbox_events`: one row per audited domain action (hundreds per day for a
@@ -124,3 +157,9 @@ None of this deletes audit history.
   preferences, mentions, poison event retry/backoff, RLS isolation, mark read.
 - `e2e/notifications.spec.ts` — bell, inbox, deep links, live badge update
   after a mention, mark all, preferences, job route secret.
+- `supabase/tests/web_push_test.sql` — device registration/update, RLS,
+  queueing per device, single claim, sent/gone/retry outcomes, preference off,
+  user revocation, browser cannot claim.
+- `e2e/push.spec.ts` (fake provider) — API registration and validation,
+  isolation between people, delivery with title for NORMAL, gone-device
+  cleanup, generic payload for RESTRICTED, push preference off, wrong secret.
