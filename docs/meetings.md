@@ -198,3 +198,11 @@ Agenda items are separate ordered rows with `PENDING`, `DISCUSSED`, `POSTPONED` 
 Meeting Mode now offers quick Decision, Task and PDCA creation through the normal domain commands. These objects are linked as `CREATED` and remain DRAFT until meeting publication. Existing accessible objects can be linked as `DISCUSSED`, `REVIEWED`, `FOLLOW_UP` or `CLOSED_IN_MEETING`. Publication rejects pending agenda outcomes, invalid/inaccessible linked targets, incomplete Tasks/PDCAs, invalid assignees and stale versions. It activates the created objects through their normal lifecycle commands and writes a publication snapshot.
 
 The operational UI includes `/meeting-series`, `/meetings`, session detail, `/meetings/[id]/run` and `/meetings/[id]/review`. My Work includes accessible upcoming meetings, Chair review queues and authorized execution follow-ups. All lists are server-filtered and paginated where the operational population can grow.
+
+### Live Meeting Mode, presence and links (2026-09-03)
+
+Participants see each other's changes without refreshing, "Na reunião" lists
+who is present, "Copiar ligação" shares a navigation-only link, and notes
+signal newer versions instead of merging. Details: `docs/realtime.md`.
+Participation still creates no explicit grants; everyone sees the meeting
+within their own permissions.

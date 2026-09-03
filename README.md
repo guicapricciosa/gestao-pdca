@@ -103,3 +103,6 @@ All schema changes belong in versioned files under `supabase/migrations/`. `supa
 - Live Meeting Mode and presence: `docs/realtime.md`.
 - Installable PWA, caching and offline policy, branding variables: `docs/pwa.md`
   (`node scripts/icons.mjs` regenerates the icons from the configured name).
+- Notification Center and Web Push, outbox dispatcher and job route:
+  `docs/notifications.md`. Local development: `CRON_SECRET`, `PUSH_PROVIDER`
+  and VAPID keys in `.env.local` (see `.env.example`).

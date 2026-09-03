@@ -560,3 +560,9 @@ Still excluded and blocked pending approval: Executive Analytics, global Managem
 
 - Audit events feed the transactional outbox; `process_outbox` (pg_cron or the secured job route) creates authorized, coalesced in-app notifications; reminders and deadlines are scheduled.
 - Bell with live unread count, inbox with Não lidas/Todas and deep links, preferences in Definições.
+
+## 2026-09-03 — Web Push and polish (Gates D and E)
+
+- Per-device push subscriptions, delivery queue with retries and cleanup, provider abstraction (webpush/fake/disabled), reserved-subject payload policy, device management in Definições.
+- Polish: "Adicionar ficheiro" picker, discreet Sem prazo / Sem Owner hints in lists, dead `execution-form.tsx` removed, bell/Definições reachable on phones, manual chapters 10–12, screenshots refreshed.
+- Awaiting: real-meeting validation before Deterministic Executive Analytics; Microsoft 365 integration documented as future work only.

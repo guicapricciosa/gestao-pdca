@@ -379,3 +379,10 @@ Publication requires the current Chair and `meeting.publish`, checks assignments
 Two configurable permissions gate the use cases: `ai.meeting.assist` (Meeting Assistant and Meeting Summary, INTERSECT scope on the meeting session) and `ai.execution.validate` (Execution Validator, INTERSECT scope on the Task/PDCA). Starting a run requires both the use-case permission and read access to the target; read policies on `ai_runs`, `ai_run_sources` and `ai_proposals` derive from the current ability to read the target object, and a source row is hidden when the source object itself is not readable. Confirmation and rejection re-run the same checks at review time, and the created Decision/Task/PDCA inherits nothing from the proposal: the normal create commands validate full-scope coverage and assignee access again.
 
 Operational rule learnt while implementing: any function referenced from a row-level policy must grant EXECUTE to `authenticated` (as `private.can_access_security_object` does). A helper without that grant does not fail cleanly; it crashed the local PostgreSQL 17 backend during policy evaluation.
+
+## Realtime, notifications and push (2026-09-03)
+
+The central rule also governs joining a meeting's Realtime channel
+(`private.can_join_meeting_channel`), creating a notification for a recipient
+(checked at creation time) and opening any deep link (checked by the page).
+A Realtime signal, a notification or a push never carries a capability.

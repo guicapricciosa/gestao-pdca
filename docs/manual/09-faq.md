@@ -26,3 +26,11 @@ Terminada; a aplicação trata do resto.
 **Uma tarefa precisa de Owner?**
 Não. Precisa de Responsável. O Owner é recomendado para assuntos que alguém
 deve acompanhar. Nos PDCAs o Owner é obrigatório.
+
+**Recebi uma ligação para uma reunião e diz que não tenho acesso.**
+A ligação não dá acesso; só te leva lá. Pede a quem gere a reunião para
+confirmar o teu âmbito ou adicionar-te como participante.
+
+**Não recebo notificações push no iPhone.**
+Instala primeiro a aplicação (Partilhar → Adicionar ao ecrã principal) e activa
+em Definições › Push a partir da aplicação instalada.

@@ -298,3 +298,45 @@ Playwright is now part of the test foundation. Its local configuration waits for
 ## 22. Implementation status — AI Foundation
 
 `src/modules/ai` follows the module layout: `domain` (types, deterministic validators, strict output validation), `application` (gateway contract, prompts, context builders, `runUseCase` pipeline, services, repository contract, provider resolution) and `infrastructure` (fake and OpenAI gateways, Supabase repository over the `*_ai_*` commands). Server Actions in `src/app/actions/ai.ts` are transport adapters; pages under `/meetings/[id]/assistant`, the Task/PDCA detail pages and My Work render proposals and findings. Provider failures surface as non-destructive errors with a category (TIMEOUT, PROVIDER, SCHEMA, CONFIGURATION, DISABLED) and never block the deterministic workflows.
+
+## Live meetings, PWA and notifications (2026-09-03)
+
+- Realtime: private Broadcast channels with content-free signals and
+  authorized re-render; see `docs/realtime.md`.
+- PWA: shell-only caching, offline page, quiet updates; see `docs/pwa.md`.
+- Notifications: `audit_events → outbox_events → process_outbox → notifications
+→ push deliveries`, scheduled by `pg_cron` and/or the secured job route; see
+  `docs/notifications.md`.
+
+## Future: Microsoft 365 integration (not implemented)
+
+**Objective.** A GCPAi meeting session or series ↔ an Outlook calendar event,
+optionally with a Teams meeting. Outlook represents the calendar event; GCPAi
+remains the source of truth for PDCAs, tasks, decisions, permissions, scope,
+the operational agenda and the audit trail.
+
+**Future capabilities** (via Microsoft Graph): create the event when a meeting
+is marked ("Adicionar ao Outlook"), update it when date/time or participants
+change, cancel it, invite participants, create a Teams meeting and keep its
+URL, map recurrence, and put two links in the invitation: "Abrir reunião no
+GCPAi" (the direct link, which authorizes as today) and "Participar no Teams".
+
+**Prepared relationship** (no tables yet, to be added when the work starts):
+`meeting_sessions` / `meeting_series` → external calendar event with
+`provider`, `external_event_id`, `calendar_id`, `sync_status`, `last_synced_at`,
+`teams_join_url`, plus a per-user token/consent record. Nothing in Realtime,
+PWA or notifications depends on identity providers, so Entra ID can be added
+later as a Supabase Auth provider.
+
+**Open questions to decide before implementing** (not decided silently now):
+
+1. Who owns date/time — GCPAi, Outlook, or last write wins with an audit note?
+2. Participants: does adding someone in Outlook add them in GCPAi (they still
+   need scope) and vice versa?
+3. Cancellations on either side; recurring series ↔ Outlook recurrence
+   mapping and exceptions.
+4. Changes made in Outlook to a synced event: mirror, warn, or ignore?
+5. Conflict resolution and idempotent re-sync after failures.
+6. Teams meeting URL lifecycle when a meeting is rescheduled.
+7. Delegated (per-user consent) vs application permissions; Entra ID as the
+   sign-in strategy and how it maps to profiles.

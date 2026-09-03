@@ -14,6 +14,9 @@ Capítulos:
 7. [Quem vê o quê](07-visibilidade.md)
 8. [Exemplos práticos](08-exemplos.md)
 9. [Perguntas frequentes](09-faq.md)
+10. [Participar numa reunião](10-participar-numa-reuniao.md)
+11. [Instalar a aplicação](11-instalar-a-aplicacao.md)
+12. [Notificações](12-notificacoes.md)
 
 As imagens vêm de `docs/screenshots/` e são regeneradas com
 `node scripts/screenshots.mjs` (ambiente de desenvolvimento com dados de demonstração).

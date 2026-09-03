@@ -30,6 +30,11 @@ Tudo acontece num ecrã:
 
 ![Painel + Tarefa](../screenshots/17-meeting-mode-task-sheet.png)
 
+**Copiar ligação** copia o endereço da reunião para enviares por Teams,
+WhatsApp ou email; a ligação só leva à reunião, não dá acesso. **Na reunião ·
+…** mostra quem está com a reunião aberta. O que os outros fazem aparece no teu
+ecrã sem recarregar (ver o capítulo 10).
+
 **Mais** leva à página da reunião: participantes, Chair, repetição, assistente e
 opções avançadas.
 
