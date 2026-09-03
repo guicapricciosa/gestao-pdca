@@ -217,3 +217,21 @@ Malware scanning/quarantine, rate-limited upload reservations and external tampe
 - High-impact effects only happen through `confirm_ai_proposal`, which re-authorizes the reviewer, refuses stale or already reviewed proposals and reuses the normal commands; findings cannot be executed.
 - `OPENAI_API_KEY` is server-only, requests use `store: false`, and no prompt or response body is logged; `ai_runs` keeps operational metadata only.
 - `AI_PROVIDER=disabled` is the default; the e2e suite runs with the deterministic `fake` provider so no data leaves the machine.
+
+## Realtime (2026-09-03)
+
+Threats considered and controls (details in `docs/realtime.md`):
+
+- **Joining another meeting's or company's channel** — RLS on `realtime.messages`
+  allows only topics `meeting:<uuid>` whose session the subscriber can read
+  (`private.can_join_meeting_channel`). Unknown or malformed topics are denied.
+- **Payload leakage** — the database only broadcasts `{ area, at }`; no ids,
+  titles or content ever travel over the socket. All content comes from an
+  authorized server render.
+- **Stale permissions / scope change mid-session** — every signal triggers a
+  re-authorized render; lost access shows the neutral not-found page. A shared
+  link never grants access (`/login?next=` accepts same-origin paths only).
+- **RLS bypass** — no `postgres_changes` subscriptions; triggers run as
+  definer but send no data.
+- **Presence** — carries display names only and requires the same join rule to
+  write.
