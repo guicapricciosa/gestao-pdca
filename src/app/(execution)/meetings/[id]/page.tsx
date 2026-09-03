@@ -13,6 +13,7 @@ import {
 import { replaceScopeAction } from "@/app/actions/execution";
 import { loadCreationOptions } from "@/modules/execution/application/creation-options";
 import { loadExecutionDetailContext } from "@/modules/execution/application/detail-context";
+import { ScopeFields } from "@/ui/patterns/scope-fields";
 import { loadMeetingDetail } from "@/modules/meetings/application/detail";
 
 const field = "rounded-lg border bg-white px-3 py-2 text-sm";
@@ -86,7 +87,7 @@ export default async function MeetingDetailPage({
           <p className="mt-2 font-medium">
             {detail.participants.find(
               (participant) => participant.participant_role === "CHAIR",
-            )?.profile.display_name ?? session.chair_profile_id}
+            )?.profile.display_name ?? "Chair sem perfil visível"}
           </p>
         </div>
         <div className="rounded-2xl border bg-white p-5">
@@ -317,36 +318,12 @@ export default async function MeetingDetailPage({
             value={context.securityVersion}
           />
           <input type="hidden" name="returnPath" value={`/meetings/${id}`} />
-          <fieldset>
-            <legend className="text-xs uppercase">Unidades</legend>
-            {scopeOptions.units.map((unit) => (
-              <label className="mt-1 flex gap-2 text-sm" key={unit.id}>
-                <input
-                  type="checkbox"
-                  name="unitIds"
-                  value={unit.id}
-                  defaultChecked={context.unitScopeIds.includes(unit.id)}
-                />
-                {unit.name}
-              </label>
-            ))}
-          </fieldset>
-          <fieldset>
-            <legend className="text-xs uppercase">Restaurantes</legend>
-            {scopeOptions.restaurants.map((restaurant) => (
-              <label className="mt-1 flex gap-2 text-sm" key={restaurant.id}>
-                <input
-                  type="checkbox"
-                  name="restaurantIds"
-                  value={restaurant.id}
-                  defaultChecked={context.restaurantScopeIds.includes(
-                    restaurant.id,
-                  )}
-                />
-                {restaurant.name}
-              </label>
-            ))}
-          </fieldset>
+          <ScopeFields
+            options={scopeOptions}
+            unitIds={context.unitScopeIds}
+            restaurantIds={context.restaurantScopeIds}
+            dense
+          />
           <input
             className={field}
             name="reason"

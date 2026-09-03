@@ -5,7 +5,12 @@ import { createSupabaseServerClient } from "@/platform/supabase/server";
 
 export interface CreationOptions {
   readonly companies: readonly { id: string; name: string }[];
-  readonly units: readonly { id: string; companyId: string; name: string }[];
+  readonly units: readonly {
+    id: string;
+    companyId: string;
+    name: string;
+    unitType: "DEPARTMENT" | "SHARED_SERVICE";
+  }[];
   readonly restaurants: readonly {
     id: string;
     companyId: string;
@@ -40,7 +45,7 @@ export async function loadCreationOptions(
         .order("name"),
       client
         .from("organizational_units")
-        .select("id,company_id,name")
+        .select("id,company_id,name,unit_type")
         .in("company_id", companyIds)
         .eq("is_active", true)
         .order("name"),
@@ -76,6 +81,7 @@ export async function loadCreationOptions(
         id: unit.id,
         companyId: unit.company_id,
         name: unit.name,
+        unitType: unit.unit_type as "DEPARTMENT" | "SHARED_SERVICE",
       })),
     restaurants: (allRestaurants ?? [])
       .filter((restaurant) => restaurantAllowed.has(restaurant.id))

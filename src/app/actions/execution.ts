@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+
+import { errorOf, finish } from "@/app/actions/finish";
 
 import { createExecutionService } from "@/modules/execution/application/factory";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
@@ -21,59 +22,80 @@ function values(formData: FormData, name: string) {
 
 export async function createDecisionAction(formData: FormData) {
   const service = await createExecutionService();
-  const id = await service.createDecision({
-    companyId: String(formData.get("companyId")),
-    title: String(formData.get("title")),
-    description: optional(formData, "description"),
-    decisionDate: String(formData.get("decisionDate")),
-    decidedByProfileId: null,
-    visibility: String(formData.get("visibility")),
-    unitIds: values(formData, "unitIds"),
-    restaurantIds: values(formData, "restaurantIds"),
-  });
+  let id = "";
+  let failure: Error | null = null;
+  try {
+    id = await service.createDecision({
+      companyId: String(formData.get("companyId")),
+      title: String(formData.get("title")),
+      description: optional(formData, "description"),
+      decisionDate: String(formData.get("decisionDate")),
+      decidedByProfileId: null,
+      visibility: String(formData.get("visibility")),
+      unitIds: values(formData, "unitIds"),
+      restaurantIds: values(formData, "restaurantIds"),
+    });
+  } catch (error) {
+    failure = errorOf(error);
+  }
+  if (failure !== null) finish("/decisions/new", failure);
   redirect(`/decisions/${id}`);
 }
 
 export async function createTaskAction(formData: FormData) {
   const service = await createExecutionService();
-  const id = await service.createTask({
-    companyId: String(formData.get("companyId")),
-    title: String(formData.get("title")),
-    description: optional(formData, "description") as never,
-    priority: String(formData.get("priority")),
-    ownerProfileId: null,
-    responsibleProfileId: null,
-    startDate: optional(formData, "startDate"),
-    dueDate: optional(formData, "dueDate"),
-    pdcaId: optional(formData, "pdcaId"),
-    originatingDecisionId: null,
-    visibility: String(formData.get("visibility")),
-    unitIds: values(formData, "unitIds"),
-    restaurantIds: values(formData, "restaurantIds"),
-  });
+  let id = "";
+  let failure: Error | null = null;
+  try {
+    id = await service.createTask({
+      companyId: String(formData.get("companyId")),
+      title: String(formData.get("title")),
+      description: optional(formData, "description") as never,
+      priority: String(formData.get("priority")),
+      ownerProfileId: null,
+      responsibleProfileId: null,
+      startDate: optional(formData, "startDate"),
+      dueDate: optional(formData, "dueDate"),
+      pdcaId: optional(formData, "pdcaId"),
+      originatingDecisionId: null,
+      visibility: String(formData.get("visibility")),
+      unitIds: values(formData, "unitIds"),
+      restaurantIds: values(formData, "restaurantIds"),
+    });
+  } catch (error) {
+    failure = errorOf(error);
+  }
+  if (failure !== null) finish("/tasks/new", failure);
   redirect(`/tasks/${id}`);
 }
 
 export async function createPdcaAction(formData: FormData) {
   const service = await createExecutionService();
-  const id = await service.createPdca({
-    companyId: String(formData.get("companyId")),
-    title: String(formData.get("title")),
-    problemStatement: optional(formData, "problemStatement"),
-    objective: optional(formData, "objective"),
-    rootCauseOrHypothesis: optional(formData, "rootCauseOrHypothesis"),
-    priority: String(formData.get("priority")),
-    impact: String(formData.get("impact")),
-    risk: String(formData.get("risk")),
-    ownerProfileId: null,
-    responsibleProfileId: null,
-    startDate: optional(formData, "startDate"),
-    dueDate: optional(formData, "dueDate"),
-    originatingDecisionId: null,
-    visibility: String(formData.get("visibility")),
-    unitIds: values(formData, "unitIds"),
-    restaurantIds: values(formData, "restaurantIds"),
-  });
+  let id = "";
+  let failure: Error | null = null;
+  try {
+    id = await service.createPdca({
+      companyId: String(formData.get("companyId")),
+      title: String(formData.get("title")),
+      problemStatement: optional(formData, "problemStatement"),
+      objective: optional(formData, "objective"),
+      rootCauseOrHypothesis: optional(formData, "rootCauseOrHypothesis"),
+      priority: String(formData.get("priority")),
+      impact: String(formData.get("impact")),
+      risk: String(formData.get("risk")),
+      ownerProfileId: null,
+      responsibleProfileId: null,
+      startDate: optional(formData, "startDate"),
+      dueDate: optional(formData, "dueDate"),
+      originatingDecisionId: null,
+      visibility: String(formData.get("visibility")),
+      unitIds: values(formData, "unitIds"),
+      restaurantIds: values(formData, "restaurantIds"),
+    });
+  } catch (error) {
+    failure = errorOf(error);
+  }
+  if (failure !== null) finish("/pdcas/new", failure);
   redirect(`/pdcas/${id}`);
 }
 
@@ -89,8 +111,7 @@ export async function transitionTaskAction(formData: FormData) {
     ...(reason === null ? {} : { reason }),
     ...(completionNotes === null ? {} : { completion_notes: completionNotes }),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/tasks/${id}`);
+  finish(`/tasks/${id}`, error);
 }
 
 export async function transitionPdcaAction(formData: FormData) {
@@ -105,8 +126,7 @@ export async function transitionPdcaAction(formData: FormData) {
     ...(reason === null ? {} : { reason }),
     ...(closureNotes === null ? {} : { closure_notes: closureNotes }),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/pdcas/${id}`);
+  finish(`/pdcas/${id}`, error);
 }
 
 export async function changePdcaPhaseAction(formData: FormData) {
@@ -119,8 +139,7 @@ export async function changePdcaPhaseAction(formData: FormData) {
     new_phase: String(formData.get("phase")) as never,
     ...(reason === null ? {} : { reason }),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/pdcas/${id}`);
+  finish(`/pdcas/${id}`, error);
 }
 
 export async function addCommentAction(formData: FormData) {
@@ -131,8 +150,7 @@ export async function addCommentAction(formData: FormData) {
     security_object_id: objectId,
     body: String(formData.get("body")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(returnPath);
+  finish(returnPath, error);
 }
 
 export async function assignExecutionPeopleAction(formData: FormData) {
@@ -144,8 +162,7 @@ export async function assignExecutionPeopleAction(formData: FormData) {
     owner_profile_id: String(formData.get("ownerProfileId")),
     responsible_profile_id: String(formData.get("responsibleProfileId")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(returnPath);
+  finish(returnPath, error);
 }
 
 export async function updateDecisionAction(formData: FormData) {
@@ -159,8 +176,7 @@ export async function updateDecisionAction(formData: FormData) {
     decision_date: String(formData.get("decisionDate")),
     decided_by_profile_id: optional(formData, "decidedByProfileId") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/decisions/${id}`);
+  finish(`/decisions/${id}`, error);
 }
 
 export async function updateTaskAction(formData: FormData) {
@@ -176,8 +192,7 @@ export async function updateTaskAction(formData: FormData) {
     responsible_profile_id: optional(formData, "responsibleProfileId") as never,
     start_date: optional(formData, "startDate") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/tasks/${id}`);
+  finish(`/tasks/${id}`, error);
 }
 
 export async function updatePdcaAction(formData: FormData) {
@@ -205,8 +220,7 @@ export async function updatePdcaAction(formData: FormData) {
     responsible_profile_id: optional(formData, "responsibleProfileId") as never,
     start_date: optional(formData, "startDate") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/pdcas/${id}`);
+  finish(`/pdcas/${id}`, error);
 }
 
 export async function changeDueDateAction(formData: FormData) {
@@ -230,8 +244,7 @@ export async function changeDueDateAction(formData: FormData) {
           new_due_date: newDueDate,
           reason,
         });
-  if (result.error !== null) throw new Error(result.error.message);
-  revalidatePath(`/${kind === "Task" ? "tasks" : "pdcas"}/${id}`);
+  finish(`/${kind === "Task" ? "tasks" : "pdcas"}/${id}`, result.error);
 }
 
 export async function replaceScopeAction(formData: FormData) {
@@ -244,8 +257,7 @@ export async function replaceScopeAction(formData: FormData) {
     restaurant_ids: values(formData, "restaurantIds"),
     reason: String(formData.get("reason")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(returnPath);
+  finish(returnPath, error);
 }
 
 export async function addObjectMemberAction(formData: FormData) {
@@ -256,8 +268,7 @@ export async function addObjectMemberAction(formData: FormData) {
     profile_id: String(formData.get("profileId")),
     membership_role: String(formData.get("membershipRole")) as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(returnPath);
+  finish(returnPath, error);
 }
 
 export async function removeObjectMemberAction(formData: FormData) {
@@ -267,6 +278,5 @@ export async function removeObjectMemberAction(formData: FormData) {
     membership_id: String(formData.get("membershipId")),
     reason: optional(formData, "reason") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(returnPath);
+  finish(returnPath, error);
 }

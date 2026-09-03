@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+import { finish } from "@/app/actions/finish";
 
 import {
   createMeetingSeriesSchema,
@@ -27,7 +28,7 @@ function iso(formData: FormData, name: string) {
 }
 
 export async function createMeetingSeriesAction(formData: FormData) {
-  const command = createMeetingSeriesSchema.parse({
+  const parsed = createMeetingSeriesSchema.safeParse({
     companyId: String(formData.get("companyId")),
     title: String(formData.get("title")),
     description: optional(formData, "description"),
@@ -38,6 +39,9 @@ export async function createMeetingSeriesAction(formData: FormData) {
     unitIds: values(formData, "unitIds"),
     restaurantIds: values(formData, "restaurantIds"),
   });
+  if (!parsed.success)
+    finish("/meeting-series/new", new Error(parsed.error.issues[0]?.message));
+  const command = parsed.data;
   const client = await createSupabaseServerClient();
   const { data, error } = await client.rpc("create_meeting_series", {
     company_id: command.companyId,
@@ -50,12 +54,12 @@ export async function createMeetingSeriesAction(formData: FormData) {
     unit_ids: command.unitIds,
     restaurant_ids: command.restaurantIds,
   });
-  if (error !== null) throw new Error(error.message);
+  if (error !== null) finish("/meeting-series/new", error);
   redirect(`/meeting-series/${data}`);
 }
 
 export async function createMeetingSessionAction(formData: FormData) {
-  const command = createMeetingSessionSchema.parse({
+  const parsed = createMeetingSessionSchema.safeParse({
     companyId: String(formData.get("companyId")),
     title: String(formData.get("title")),
     meetingSeriesId: optional(formData, "meetingSeriesId"),
@@ -66,6 +70,9 @@ export async function createMeetingSessionAction(formData: FormData) {
     unitIds: values(formData, "unitIds"),
     restaurantIds: values(formData, "restaurantIds"),
   });
+  if (!parsed.success)
+    finish("/meetings/new", new Error(parsed.error.issues[0]?.message));
+  const command = parsed.data;
   const client = await createSupabaseServerClient();
   const { data, error } = await client.rpc("create_meeting_session", {
     company_id: command.companyId,
@@ -78,7 +85,7 @@ export async function createMeetingSessionAction(formData: FormData) {
     unit_ids: command.unitIds,
     restaurant_ids: command.restaurantIds,
   });
-  if (error !== null) throw new Error(error.message);
+  if (error !== null) finish("/meetings/new", error);
   redirect(`/meetings/${data}`);
 }
 
@@ -98,8 +105,7 @@ export async function updateMeetingSeriesAction(formData: FormData) {
     recurrence_rule: optional(formData, "recurrenceRule") as never,
     recurrence_metadata: {},
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meeting-series/${id}`);
+  finish(`/meeting-series/${id}`, error);
 }
 
 export async function deactivateMeetingSeriesAction(formData: FormData) {
@@ -110,8 +116,7 @@ export async function deactivateMeetingSeriesAction(formData: FormData) {
     expected_version: Number(formData.get("version")),
     reason: String(formData.get("reason")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meeting-series/${id}`);
+  finish(`/meeting-series/${id}`, error);
 }
 
 export async function updateMeetingSessionAction(formData: FormData) {
@@ -124,8 +129,7 @@ export async function updateMeetingSessionAction(formData: FormData) {
     scheduled_start_at: iso(formData, "scheduledStartAt"),
     scheduled_end_at: iso(formData, "scheduledEndAt"),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
+  finish(`/meetings/${id}`, error);
 }
 
 export async function transitionMeetingAction(formData: FormData) {
@@ -137,10 +141,10 @@ export async function transitionMeetingAction(formData: FormData) {
     new_status: String(formData.get("status")),
     reason: optional(formData, "reason") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
-  revalidatePath(`/meetings/${id}/run`);
-  revalidatePath(`/meetings/${id}/review`);
+  finish(optional(formData, "returnPath") ?? `/meetings/${id}`, error, [
+    `/meetings/${id}/run`,
+    `/meetings/${id}/review`,
+  ]);
 }
 
 export async function reopenMeetingAction(formData: FormData) {
@@ -151,8 +155,7 @@ export async function reopenMeetingAction(formData: FormData) {
     expected_version: Number(formData.get("version")),
     reason: String(formData.get("reason")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
+  finish(`/meetings/${id}`, error);
 }
 
 export async function addMeetingParticipantAction(formData: FormData) {
@@ -163,9 +166,7 @@ export async function addMeetingParticipantAction(formData: FormData) {
     profile_id: String(formData.get("profileId")),
     participant_role: "PARTICIPANT",
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
-  revalidatePath(`/meetings/${id}/run`);
+  finish(`/meetings/${id}`, error, [`/meetings/${id}/run`]);
 }
 
 export async function removeMeetingParticipantAction(formData: FormData) {
@@ -175,8 +176,7 @@ export async function removeMeetingParticipantAction(formData: FormData) {
     participant_id: String(formData.get("participantId")),
     reason: optional(formData, "reason") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
+  finish(`/meetings/${id}`, error);
 }
 
 export async function changeMeetingChairAction(formData: FormData) {
@@ -187,9 +187,7 @@ export async function changeMeetingChairAction(formData: FormData) {
     expected_version: Number(formData.get("version")),
     new_chair_profile_id: String(formData.get("profileId")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
-  revalidatePath(`/meetings/${id}/run`);
+  finish(`/meetings/${id}`, error, [`/meetings/${id}/run`]);
 }
 
 export async function addMeetingAgendaItemAction(formData: FormData) {
@@ -209,9 +207,10 @@ export async function addMeetingAgendaItemAction(formData: FormData) {
       "carriedForwardFromId",
     ) as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}`);
-  revalidatePath(`/meetings/${id}/run`);
+  finish(optional(formData, "returnPath") ?? `/meetings/${id}/run`, error, [
+    `/meetings/${id}`,
+    `/meetings/${id}/review`,
+  ]);
 }
 
 export async function setMeetingAgendaStatusAction(formData: FormData) {
@@ -223,8 +222,11 @@ export async function setMeetingAgendaStatusAction(formData: FormData) {
     new_status: String(formData.get("status")),
     reason: optional(formData, "reason") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${meetingId}/run`);
+  finish(
+    optional(formData, "returnPath") ?? `/meetings/${meetingId}/run`,
+    error,
+    [`/meetings/${meetingId}`, `/meetings/${meetingId}/review`],
+  );
 }
 
 export async function reorderMeetingAgendaItemAction(formData: FormData) {
@@ -235,9 +237,7 @@ export async function reorderMeetingAgendaItemAction(formData: FormData) {
     expected_version: Number(formData.get("version")),
     new_position: Number(formData.get("position")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${meetingId}`);
-  revalidatePath(`/meetings/${meetingId}/run`);
+  finish(`/meetings/${meetingId}`, error, [`/meetings/${meetingId}/run`]);
 }
 
 export async function addMeetingNoteAction(formData: FormData) {
@@ -248,8 +248,10 @@ export async function addMeetingNoteAction(formData: FormData) {
     meeting_agenda_item_id: optional(formData, "agendaItemId") as never,
     content: String(formData.get("content")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}/run`);
+  finish(optional(formData, "returnPath") ?? `/meetings/${id}/run`, error, [
+    `/meetings/${id}`,
+    `/meetings/${id}/review`,
+  ]);
 }
 
 export async function updateMeetingNoteAction(formData: FormData) {
@@ -260,8 +262,11 @@ export async function updateMeetingNoteAction(formData: FormData) {
     expected_version: Number(formData.get("version")),
     content: String(formData.get("content")),
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${meetingId}/run`);
+  finish(
+    optional(formData, "returnPath") ?? `/meetings/${meetingId}/run`,
+    error,
+    [`/meetings/${meetingId}`, `/meetings/${meetingId}/review`],
+  );
 }
 
 export async function linkMeetingObjectAction(formData: FormData) {
@@ -274,8 +279,10 @@ export async function linkMeetingObjectAction(formData: FormData) {
     meeting_agenda_item_id: optional(formData, "agendaItemId") as never,
     outcome_notes: optional(formData, "outcomeNotes") as never,
   });
-  if (error !== null) throw new Error(error.message);
-  revalidatePath(`/meetings/${id}/run`);
+  finish(optional(formData, "returnPath") ?? `/meetings/${id}/run`, error, [
+    `/meetings/${id}`,
+    `/meetings/${id}/review`,
+  ]);
 }
 
 export async function createMeetingObjectAction(formData: FormData) {
@@ -320,7 +327,9 @@ export async function createMeetingObjectAction(formData: FormData) {
             ),
             due_date: String(formData.get("dueDate")),
           });
-  if (result.error !== null) throw new Error(result.error.message);
-  revalidatePath(`/meetings/${meetingId}/run`);
-  revalidatePath(`/meetings/${meetingId}/review`);
+  finish(
+    optional(formData, "returnPath") ?? `/meetings/${meetingId}/run`,
+    result.error,
+    [`/meetings/${meetingId}`, `/meetings/${meetingId}/review`],
+  );
 }

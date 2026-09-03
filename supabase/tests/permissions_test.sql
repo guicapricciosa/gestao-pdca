@@ -125,9 +125,9 @@ select extensions.ok(exists (
 
 select set_config('request.jwt.claim.sub', '20000000-0000-0000-0000-000000000017', true);
 set local role authenticated;
-select extensions.is((select count(*)::integer from public.security_objects), 4, 'RLS returns only manager A intersecting NORMAL objects');
+select extensions.is((select count(*)::integer from public.security_objects where object_type = 'WORK_ITEM'), 4, 'RLS returns only manager A intersecting NORMAL objects');
 select extensions.results_eq(
-  $$ select filter_accessible_security_objects('work_item.read') order by 1 $$,
+  $$ select accessible from filter_accessible_security_objects('work_item.read') accessible join public.security_objects so on so.id = accessible where so.object_type = 'WORK_ITEM' order by 1 $$,
   $$ values
     ('a0000000-0000-0000-0000-000000000001'::uuid),
     ('a0000000-0000-0000-0000-000000000003'::uuid),

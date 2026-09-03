@@ -57,6 +57,11 @@ export default async function PdcasPage({
     result = { items: [], page: 1, pageSize: 25, total: 0 };
     options = { companies: [], units: [], restaurants: [], people: [] };
   }
+  const people = new Map(
+    options.people.map((person) => [person.id, person.name]),
+  );
+  const nameOf = (id: string | null) =>
+    id === null ? null : (people.get(id) ?? "—");
   return (
     <>
       <header className="mb-10 flex items-end justify-between gap-6">
@@ -76,10 +81,20 @@ export default async function PdcasPage({
           Novo PDCA
         </Link>
       </header>
-      <ListFilters options={options} />
-      <ExecutionList items={result.items} basePath="/pdcas" />
+      <ListFilters basePath="/pdcas" values={search} options={options} />
+      <ExecutionList
+        items={result.items.map((item) => ({
+          ...item,
+          owner: nameOf(item.ownerProfileId),
+          responsible: nameOf(item.responsibleProfileId),
+        }))}
+        basePath="/pdcas"
+        createHref="/pdcas/new"
+        createLabel="Novo PDCA"
+      />
       <Pagination
         basePath="/pdcas"
+        values={search}
         page={result.page}
         pageSize={result.pageSize}
         total={result.total}

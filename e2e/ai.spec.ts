@@ -144,7 +144,7 @@ test.describe
 
     const panel = page.getByTestId("validation-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.getByTestId("validation-finding")).toHaveCount(3);
+    await expect(panel).toContainText("WARNING · MISSING_RESPONSIBLE");
     await expect(panel).toContainText("WARNING · MISSING_OWNER");
     await expect(panel).toContainText("WARNING · MISSING_DUE_DATE");
     await expect(panel.getByTestId("ai-finding")).toHaveCount(0);

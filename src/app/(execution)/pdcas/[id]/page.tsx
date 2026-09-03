@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
-import { loadExecutionDetailContext } from "@/modules/execution/application/detail-context";
+import {
+  loadExecutionDetailContext,
+  resolveProfileNames,
+} from "@/modules/execution/application/detail-context";
 import { loadCreationOptions } from "@/modules/execution/application/creation-options";
 import { ExecutionDetail } from "@/ui/patterns/execution-detail";
 import { ExecutionActions } from "@/ui/patterns/execution-actions";
@@ -74,6 +77,10 @@ export default async function PdcaDetailPage({
     listProposals(client, pdca.security_object_id),
     listRuns(client, pdca.security_object_id, 1),
   ]);
+  const names = await resolveProfileNames(client, [
+    pdca.owner_profile_id,
+    pdca.responsible_profile_id,
+  ]);
   return (
     <>
       <ExecutionDetail
@@ -86,8 +93,16 @@ export default async function PdcaDetailPage({
         priority={pdca.priority}
         impact={pdca.impact}
         risk={pdca.risk}
-        owner={pdca.owner_profile_id}
-        responsible={pdca.responsible_profile_id}
+        owner={
+          pdca.owner_profile_id === null
+            ? null
+            : (names.get(pdca.owner_profile_id) ?? "Sem acesso ao perfil")
+        }
+        responsible={
+          pdca.responsible_profile_id === null
+            ? null
+            : (names.get(pdca.responsible_profile_id) ?? "Sem acesso ao perfil")
+        }
         dueDate={pdca.due_date}
         {...context}
         comments={comments ?? []}
@@ -107,7 +122,10 @@ export default async function PdcaDetailPage({
         id={pdca.id}
         securityObjectId={pdca.security_object_id}
         version={pdca.version}
+        status={pdca.status}
         people={people ?? []}
+        ownerProfileId={pdca.owner_profile_id}
+        responsibleProfileId={pdca.responsible_profile_id}
         currentDueDate={pdca.due_date}
         securityVersion={context.securityVersion}
         scopeOptions={scopeOptions}

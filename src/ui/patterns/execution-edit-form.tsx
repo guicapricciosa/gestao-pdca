@@ -3,8 +3,9 @@ import {
   updatePdcaAction,
   updateTaskAction,
 } from "@/app/actions/execution";
+import { SubmitButton } from "@/ui/components/submit-button";
 
-const input = "rounded-lg border bg-white px-3 py-2 text-sm";
+const input = "mt-1.5 w-full rounded-lg border bg-white px-3 py-2 text-sm";
 const dimensions = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 
 interface CommonProps {
@@ -58,43 +59,91 @@ function HiddenIdentity({ props }: { readonly props: CommonProps }) {
   );
 }
 
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  readonly label: string;
+  readonly hint?: string;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <label className="block text-sm font-medium">
+      {label}
+      {hint && (
+        <span className="text-muted-foreground ml-2 text-xs font-normal">
+          {hint}
+        </span>
+      )}
+      {children}
+    </label>
+  );
+}
+
+function Levels({
+  name,
+  label,
+  value,
+}: {
+  readonly name: string;
+  readonly label: string;
+  readonly value: string;
+}) {
+  return (
+    <Field label={label}>
+      <select className={input} name={name} defaultValue={value}>
+        {dimensions.map((level) => (
+          <option key={level}>{level}</option>
+        ))}
+      </select>
+    </Field>
+  );
+}
+
 export function ExecutionEditForm(props: Props) {
   if (props.kind === "Decision") {
     return (
       <form
         action={updateDecisionAction}
-        className="grid gap-3 rounded-2xl border bg-white p-5"
+        className="grid gap-4 rounded-2xl border bg-white p-5"
       >
         <h2 className="font-semibold">Editar Decision</h2>
         <HiddenIdentity props={props} />
-        <input
-          className={input}
-          name="title"
-          defaultValue={props.title}
-          required
-          maxLength={240}
-        />
-        <textarea
-          className={input}
-          name="description"
-          defaultValue={props.description ?? ""}
-          maxLength={20000}
-        />
-        <input
-          className={input}
-          name="decisionDate"
-          type="date"
-          defaultValue={props.decisionDate}
-          required
-        />
+        <Field label="Título">
+          <input
+            className={input}
+            name="title"
+            defaultValue={props.title}
+            required
+            maxLength={240}
+          />
+        </Field>
+        <Field label="Descrição">
+          <textarea
+            className={`${input} min-h-24`}
+            name="description"
+            defaultValue={props.description ?? ""}
+            maxLength={20000}
+          />
+        </Field>
+        <Field label="Data da decisão">
+          <input
+            className={input}
+            name="decisionDate"
+            type="date"
+            defaultValue={props.decisionDate}
+            required
+          />
+        </Field>
         <input
           type="hidden"
           name="decidedByProfileId"
           value={props.decidedByProfileId ?? ""}
         />
-        <button className="w-fit rounded-full bg-black px-4 py-2 text-sm text-white">
-          Guardar alterações
-        </button>
+        <div>
+          <SubmitButton>Guardar alterações</SubmitButton>
+        </div>
       </form>
     );
   }
@@ -103,34 +152,38 @@ export function ExecutionEditForm(props: Props) {
     return (
       <form
         action={updateTaskAction}
-        className="grid gap-3 rounded-2xl border bg-white p-5"
+        className="grid gap-4 rounded-2xl border bg-white p-5"
       >
         <h2 className="font-semibold">Editar Task</h2>
         <HiddenIdentity props={props} />
-        <input
-          className={input}
-          name="title"
-          defaultValue={props.title}
-          required
-          maxLength={240}
-        />
-        <textarea
-          className={input}
-          name="description"
-          defaultValue={props.description ?? ""}
-          maxLength={20000}
-        />
-        <select className={input} name="priority" defaultValue={props.priority}>
-          {dimensions.map((value) => (
-            <option key={value}>{value}</option>
-          ))}
-        </select>
-        <input
-          className={input}
-          name="startDate"
-          type="date"
-          defaultValue={props.startDate ?? ""}
-        />
+        <Field label="Título">
+          <input
+            className={input}
+            name="title"
+            defaultValue={props.title}
+            required
+            maxLength={240}
+          />
+        </Field>
+        <Field label="Descrição">
+          <textarea
+            className={`${input} min-h-24`}
+            name="description"
+            defaultValue={props.description ?? ""}
+            maxLength={20000}
+          />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Levels name="priority" label="Prioridade" value={props.priority} />
+          <Field label="Início">
+            <input
+              className={input}
+              name="startDate"
+              type="date"
+              defaultValue={props.startDate ?? ""}
+            />
+          </Field>
+        </div>
         <input
           type="hidden"
           name="ownerProfileId"
@@ -142,12 +195,12 @@ export function ExecutionEditForm(props: Props) {
           value={props.responsibleProfileId ?? ""}
         />
         <p className="text-muted-foreground text-xs">
-          Prazo, scope e atribuições são alterados nas operações próprias, com
-          validação e histórico.
+          Prazo, âmbito e atribuições alteram-se nos painéis próprios, com
+          motivo e histórico.
         </p>
-        <button className="w-fit rounded-full bg-black px-4 py-2 text-sm text-white">
-          Guardar alterações
-        </button>
+        <div>
+          <SubmitButton>Guardar alterações</SubmitButton>
+        </div>
       </form>
     );
   }
@@ -155,94 +208,108 @@ export function ExecutionEditForm(props: Props) {
   return (
     <form
       action={updatePdcaAction}
-      className="grid gap-3 rounded-2xl border bg-white p-5 lg:col-span-2"
+      className="grid gap-4 rounded-2xl border bg-white p-5 lg:col-span-2"
     >
       <h2 className="font-semibold">Editar PDCA</h2>
       <HiddenIdentity props={props} />
-      <input
-        className={input}
-        name="title"
-        defaultValue={props.title}
-        required
-        maxLength={240}
-      />
-      <textarea
-        className={input}
-        name="problemStatement"
-        defaultValue={props.problemStatement ?? ""}
-        placeholder="PLAN · Problema"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="objective"
-        defaultValue={props.objective ?? ""}
-        placeholder="PLAN · Objetivo"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="rootCauseOrHypothesis"
-        defaultValue={props.rootCauseOrHypothesis ?? ""}
-        placeholder="PLAN · Causa raiz ou hipótese"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="expectedResult"
-        defaultValue={props.expectedResult ?? ""}
-        placeholder="PLAN · Resultado esperado"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="actualResult"
-        defaultValue={props.actualResult ?? ""}
-        placeholder="CHECK · Resultado real"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="checkNotes"
-        defaultValue={props.checkNotes ?? ""}
-        placeholder="CHECK · Notas"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="correctiveAction"
-        defaultValue={props.correctiveAction ?? ""}
-        placeholder="ACT · Ação corretiva"
-        maxLength={20000}
-      />
-      <textarea
-        className={input}
-        name="outcomeNotes"
-        defaultValue={props.outcomeNotes ?? ""}
-        placeholder="ACT · Standardização / resultado"
-        maxLength={20000}
-      />
-      <div className="grid gap-3 sm:grid-cols-3">
-        {(["priority", "impact", "risk"] as const).map((name) => (
-          <label
-            className="grid gap-1 text-xs font-medium uppercase"
-            key={name}
-          >
-            {name}
-            <select className={input} name={name} defaultValue={props[name]}>
-              {dimensions.map((value) => (
-                <option key={value}>{value}</option>
-              ))}
-            </select>
-          </label>
-        ))}
+      <Field label="Título">
+        <input
+          className={input}
+          name="title"
+          defaultValue={props.title}
+          required
+          maxLength={240}
+        />
+      </Field>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4">
+          <p className="text-xs font-semibold tracking-[0.12em] uppercase">
+            Plan
+          </p>
+          <Field label="Problema">
+            <textarea
+              className={input}
+              name="problemStatement"
+              defaultValue={props.problemStatement ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+          <Field label="Objetivo">
+            <textarea
+              className={input}
+              name="objective"
+              defaultValue={props.objective ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+          <Field label="Causa raiz ou hipótese">
+            <textarea
+              className={input}
+              name="rootCauseOrHypothesis"
+              defaultValue={props.rootCauseOrHypothesis ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+          <Field label="Resultado esperado">
+            <textarea
+              className={input}
+              name="expectedResult"
+              defaultValue={props.expectedResult ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+        </div>
+        <div className="grid gap-4">
+          <p className="text-xs font-semibold tracking-[0.12em] uppercase">
+            Check · Act
+          </p>
+          <Field label="Resultado real">
+            <textarea
+              className={input}
+              name="actualResult"
+              defaultValue={props.actualResult ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+          <Field label="Notas de verificação">
+            <textarea
+              className={input}
+              name="checkNotes"
+              defaultValue={props.checkNotes ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+          <Field label="Ação corretiva">
+            <textarea
+              className={input}
+              name="correctiveAction"
+              defaultValue={props.correctiveAction ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+          <Field label="Standardização e resultado">
+            <textarea
+              className={input}
+              name="outcomeNotes"
+              defaultValue={props.outcomeNotes ?? ""}
+              maxLength={20000}
+            />
+          </Field>
+        </div>
       </div>
-      <input
-        className={input}
-        name="startDate"
-        type="date"
-        defaultValue={props.startDate ?? ""}
-      />
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Levels name="priority" label="Prioridade" value={props.priority} />
+        <Levels name="impact" label="Impacto" value={props.impact} />
+        <Levels name="risk" label="Risco" value={props.risk} />
+        <Field label="Início">
+          <input
+            className={input}
+            name="startDate"
+            type="date"
+            defaultValue={props.startDate ?? ""}
+          />
+        </Field>
+      </div>
       <input
         type="hidden"
         name="ownerProfileId"
@@ -254,12 +321,12 @@ export function ExecutionEditForm(props: Props) {
         value={props.responsibleProfileId ?? ""}
       />
       <p className="text-muted-foreground text-xs">
-        Prazo, scope, fase e atribuições mantêm operações próprias para
+        Prazo, âmbito, fase e atribuições alteram-se nos painéis próprios para
         preservar autorização e histórico.
       </p>
-      <button className="w-fit rounded-full bg-black px-4 py-2 text-sm text-white">
-        Guardar alterações
-      </button>
+      <div>
+        <SubmitButton>Guardar alterações</SubmitButton>
+      </div>
     </form>
   );
 }

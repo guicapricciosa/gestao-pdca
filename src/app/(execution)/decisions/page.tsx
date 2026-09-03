@@ -63,14 +63,25 @@ export default async function DecisionsPage({
         </Link>
       </header>
       <ListFilters
+        basePath="/decisions"
+        values={search}
         showPriority={false}
         showPeople={false}
         statuses={["DRAFT", "ACTIVE", "ARCHIVED"]}
         options={options}
       />
-      <ExecutionList items={result.items} basePath="/decisions" />
+      <ExecutionList
+        items={result.items.map((item) => ({
+          ...item,
+          secondary: `Decidido em ${new Date(`${item.decisionDate}T00:00:00`).toLocaleDateString("pt-PT")}`,
+        }))}
+        basePath="/decisions"
+        createHref="/decisions/new"
+        createLabel="Nova decisão"
+      />
       <Pagination
         basePath="/decisions"
+        values={search}
         page={result.page}
         pageSize={result.pageSize}
         total={result.total}

@@ -60,3 +60,17 @@ export async function loadExecutionDetailContext(
       .map((row) => ({ id: row.id, name: row.profile.display_name })),
   };
 }
+
+/** Display names for a handful of profile ids, through the viewer's RLS client. */
+export async function resolveProfileNames(
+  client: SupabaseClient<Database>,
+  ids: readonly (string | null)[],
+): Promise<Map<string, string>> {
+  const wanted = [...new Set(ids.filter((id): id is string => id !== null))];
+  if (wanted.length === 0) return new Map();
+  const { data } = await client
+    .from("profiles")
+    .select("id,display_name")
+    .in("id", wanted);
+  return new Map((data ?? []).map((row) => [row.id, row.display_name]));
+}

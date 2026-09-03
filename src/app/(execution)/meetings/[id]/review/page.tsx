@@ -14,6 +14,14 @@ export default async function ReviewMeetingPage({
   const { id } = await params;
   const detail = await loadMeetingDetail(id);
   if (detail === null) notFound();
+  const { data: profiles } = await detail.client
+    .from("profiles")
+    .select("id,display_name");
+  const nameOf = (profileId: string | null) =>
+    profileId === null
+      ? "—"
+      : (profiles?.find((profile) => profile.id === profileId)?.display_name ??
+        "Sem acesso ao perfil");
   const created = detail.links.filter(
     (link) => link.relation_type === "CREATED",
   );
@@ -91,10 +99,10 @@ export default async function ReviewMeetingPage({
                     </Link>
                   </td>
                   <td className="p-4">
-                    {accountable ? (record.owner_profile_id ?? "—") : "—"}
+                    {accountable ? nameOf(record.owner_profile_id) : "—"}
                   </td>
                   <td className="p-4">
-                    {accountable ? (record.responsible_profile_id ?? "—") : "—"}
+                    {accountable ? nameOf(record.responsible_profile_id) : "—"}
                   </td>
                   <td className="p-4">
                     {accountable ? (record.due_date ?? "—") : "—"}
@@ -123,6 +131,11 @@ export default async function ReviewMeetingPage({
           <input type="hidden" name="meetingSessionId" value={id} />
           <input type="hidden" name="version" value={detail.session.version} />
           <input type="hidden" name="status" value="PUBLISHED" />
+          <input
+            type="hidden"
+            name="returnPath"
+            value={`/meetings/${id}/review`}
+          />
           <button className="rounded-full bg-black px-5 py-2.5 text-sm text-white">
             Publish Meeting
           </button>

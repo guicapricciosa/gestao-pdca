@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
-import { loadExecutionDetailContext } from "@/modules/execution/application/detail-context";
+import {
+  loadExecutionDetailContext,
+  resolveProfileNames,
+} from "@/modules/execution/application/detail-context";
 import { loadCreationOptions } from "@/modules/execution/application/creation-options";
 import { ExecutionDetail } from "@/ui/patterns/execution-detail";
 import { ExecutionActions } from "@/ui/patterns/execution-actions";
@@ -71,6 +74,10 @@ export default async function TaskDetailPage({
     listProposals(client, task.security_object_id),
     listRuns(client, task.security_object_id, 1),
   ]);
+  const names = await resolveProfileNames(client, [
+    task.owner_profile_id,
+    task.responsible_profile_id,
+  ]);
   return (
     <>
       <ExecutionDetail
@@ -80,8 +87,16 @@ export default async function TaskDetailPage({
         version={task.version}
         description={task.description}
         priority={task.priority}
-        owner={task.owner_profile_id}
-        responsible={task.responsible_profile_id}
+        owner={
+          task.owner_profile_id === null
+            ? null
+            : (names.get(task.owner_profile_id) ?? "Sem acesso ao perfil")
+        }
+        responsible={
+          task.responsible_profile_id === null
+            ? null
+            : (names.get(task.responsible_profile_id) ?? "Sem acesso ao perfil")
+        }
         dueDate={task.due_date}
         {...context}
         comments={comments ?? []}
@@ -94,7 +109,10 @@ export default async function TaskDetailPage({
         id={task.id}
         securityObjectId={task.security_object_id}
         version={task.version}
+        status={task.status}
         people={people ?? []}
+        ownerProfileId={task.owner_profile_id}
+        responsibleProfileId={task.responsible_profile_id}
         currentDueDate={task.due_date}
         securityVersion={context.securityVersion}
         scopeOptions={scopeOptions}

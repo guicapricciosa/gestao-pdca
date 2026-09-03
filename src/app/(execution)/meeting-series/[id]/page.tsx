@@ -8,6 +8,7 @@ import {
 import { replaceScopeAction } from "@/app/actions/execution";
 import { loadCreationOptions } from "@/modules/execution/application/creation-options";
 import { loadExecutionDetailContext } from "@/modules/execution/application/detail-context";
+import { ScopeFields } from "@/ui/patterns/scope-fields";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 
 const field = "rounded-lg border bg-white px-3 py-2 text-sm";
@@ -140,36 +141,12 @@ export default async function MeetingSeriesDetailPage({
           name="returnPath"
           value={`/meeting-series/${id}`}
         />
-        <fieldset>
-          <legend className="text-xs uppercase">Unidades</legend>
-          {scopeOptions.units.map((unit) => (
-            <label className="mt-1 flex gap-2 text-sm" key={unit.id}>
-              <input
-                type="checkbox"
-                name="unitIds"
-                value={unit.id}
-                defaultChecked={context.unitScopeIds.includes(unit.id)}
-              />
-              {unit.name}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset>
-          <legend className="text-xs uppercase">Restaurantes</legend>
-          {scopeOptions.restaurants.map((restaurant) => (
-            <label className="mt-1 flex gap-2 text-sm" key={restaurant.id}>
-              <input
-                type="checkbox"
-                name="restaurantIds"
-                value={restaurant.id}
-                defaultChecked={context.restaurantScopeIds.includes(
-                  restaurant.id,
-                )}
-              />
-              {restaurant.name}
-            </label>
-          ))}
-        </fieldset>
+        <ScopeFields
+          options={scopeOptions}
+          unitIds={context.unitScopeIds}
+          restaurantIds={context.restaurantScopeIds}
+          dense
+        />
         <input
           className={field}
           name="reason"

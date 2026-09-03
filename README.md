@@ -19,11 +19,30 @@ Projects, Executive Analytics, Management Assistant, Executive Brief and externa
 
 ## Local setup
 
-1. Copy `.env.example` to `.env.local` and use values printed by `supabase status`.
-2. Start a Docker-compatible runtime.
-3. Run `supabase start`.
-4. Run `supabase db reset` to apply migrations and development seed data.
-5. Run `npm install` and `npm run dev`.
+```bash
+npm install
+supabase start
+supabase db reset
+npm run dev
+```
+
+1. `supabase start` needs a Docker-compatible runtime; it prints the local keys.
+2. Copy `.env.example` to `.env.local` and paste the values from `supabase status`
+   (`API URL`, `anon key`, `service_role key`). The app reads them on `npm run dev`.
+3. `supabase db reset` applies migrations and the development seed, including the
+   demo organization, users and execution data.
+4. Open http://127.0.0.1:3000 and sign in with a development user.
+
+| What                  | URL                    |
+| --------------------- | ---------------------- |
+| Application           | http://127.0.0.1:3000  |
+| Supabase Studio       | http://127.0.0.1:54323 |
+| Mailpit (local email) | http://127.0.0.1:54324 |
+
+Development users, the permission walkthrough and the recommended demo flow are in
+[docs/demo-guide.md](docs/demo-guide.md). Screenshots of every screen are in
+`docs/screenshots/` and can be regenerated with `node scripts/screenshots.mjs`
+while `npm run dev` is running.
 
 AI is disabled unless `AI_PROVIDER` is set: use `fake` for a deterministic local
 provider (it recognises lines such as `Tarefa: … | responsável: … | prazo: AAAA-MM-DD`

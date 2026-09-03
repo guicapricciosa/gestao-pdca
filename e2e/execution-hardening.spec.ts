@@ -168,6 +168,7 @@ test.describe.serial("authenticated Execution Core hardening", () => {
 
     const pdcaUrl = page.url();
     await page.getByRole("link", { name: "Adicionar Task ao PDCA" }).click();
+    await page.waitForURL(/\/tasks\/new/);
     await page.getByLabel("Título").fill("E2E PDCA child task");
     await page.getByText("Operations and Logistics", { exact: true }).click();
     await page.getByText("Restaurant A", { exact: true }).click();

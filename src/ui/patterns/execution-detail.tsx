@@ -1,5 +1,32 @@
 import Link from "next/link";
 
+import { DueDate, StatusBadge } from "@/ui/components/status-badge";
+
+const activityLabel: Record<string, string> = {
+  created: "Criado",
+  "status.changed": "Estado alterado",
+  "due_date.changed": "Prazo alterado",
+  "people.assigned": "Owner/Responsible atribuídos",
+  "scope.changed": "Âmbito alterado",
+  "comment.created": "Comentário",
+  "attachment.created": "Anexo adicionado",
+  "member.added": "Membro adicionado",
+  "member.removed": "Membro removido",
+  reopened: "Reaberto",
+  completed: "Concluído",
+  "phase.changed": "Fase alterada",
+  "blocker.added": "Bloqueio registado",
+  "blocker.resolved": "Bloqueio resolvido",
+  updated: "Editado",
+};
+
+function describeActivity(action: string | null) {
+  if (action === null) return "";
+  const suffix = action.split(".").slice(1).join(".");
+  const label = activityLabel[suffix] ?? activityLabel[action] ?? null;
+  return label ?? action;
+}
+
 interface DetailProps {
   readonly kind: "Decision" | "Task" | "PDCA";
   readonly title: string;
@@ -53,9 +80,7 @@ export function ExecutionDetail(props: DetailProps) {
           <h1 className="text-4xl font-semibold tracking-[-0.04em]">
             {props.title}
           </h1>
-          <span className="rounded-full border px-3 py-1 text-xs">
-            {props.status}
-          </span>
+          <StatusBadge value={props.status} />
           {props.phase && (
             <span className="rounded-full bg-black px-3 py-1 text-xs text-white">
               {props.phase}
@@ -90,19 +115,19 @@ export function ExecutionDetail(props: DetailProps) {
         <dl className="space-y-4 rounded-2xl border bg-white p-6 text-sm">
           {props.priority && (
             <div>
-              <dt className="text-muted-foreground">Priority</dt>
+              <dt className="text-muted-foreground">Prioridade</dt>
               <dd className="mt-1 font-medium">{props.priority}</dd>
             </div>
           )}
           {props.impact && (
             <div>
-              <dt className="text-muted-foreground">Impact</dt>
+              <dt className="text-muted-foreground">Impacto</dt>
               <dd className="mt-1 font-medium">{props.impact}</dd>
             </div>
           )}
           {props.risk && (
             <div>
-              <dt className="text-muted-foreground">Risk</dt>
+              <dt className="text-muted-foreground">Risco</dt>
               <dd className="mt-1 font-medium">{props.risk}</dd>
             </div>
           )}
@@ -120,10 +145,12 @@ export function ExecutionDetail(props: DetailProps) {
           </div>
           <div>
             <dt className="text-muted-foreground">Prazo</dt>
-            <dd className="mt-1 font-medium">{props.dueDate ?? "Sem prazo"}</dd>
+            <dd className="mt-1 font-medium">
+              <DueDate value={props.dueDate} status={props.status} />
+            </dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Scope organizacional</dt>
+            <dt className="text-muted-foreground">Departamentos e serviços</dt>
             <dd className="mt-1 font-medium">
               {props.unitScopes.join(", ") || "Sem unidade"}
             </dd>
@@ -258,8 +285,11 @@ export function ExecutionDetail(props: DetailProps) {
                 key={event.id ?? index}
               >
                 <span>
-                  {event.action}
+                  {describeActivity(event.action)}
                   {event.reason ? ` — ${event.reason}` : ""}
+                  <span className="text-muted-foreground ml-2 text-xs">
+                    {event.action}
+                  </span>
                 </span>
                 <time className="text-muted-foreground whitespace-nowrap">
                   {event.occurred_at
