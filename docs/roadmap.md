@@ -549,3 +549,9 @@ Still excluded and blocked pending approval: Executive Analytics, global Managem
 - Task rule relaxed to Responsável only; PDCA to Owner + Responsável + problema + objectivo; due dates are warnings.
 - RESTRICTED creator rule integrated in the central authorization function.
 - Pending: user manual screenshots refresh on every UI change; Analytics and further AI work explicitly out of scope.
+
+## 2026-09-03 — Realtime Meetings + PWA (Gates A and B)
+
+- Private meeting channels with content-free signals, presence, reconnect convergence, per-person access signals, direct links with safe `?next=`.
+- Installable PWA with shell-only caching, offline page, quiet update and install guidance per platform; branding from environment.
+- Next: Notification Center on the transactional outbox (Gate C), Web Push (Gate D), polish and manual (Gate E).

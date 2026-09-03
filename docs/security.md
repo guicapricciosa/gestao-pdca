@@ -235,3 +235,19 @@ Threats considered and controls (details in `docs/realtime.md`):
   definer but send no data.
 - **Presence** — carries display names only and requires the same join rule to
   write.
+
+## PWA (2026-09-03)
+
+- **Cache leakage** — the service worker precaches only the offline page, the
+  manifest and icons, and caches `/_next/static/*` (hashed, non-personal). No
+  navigation, RSC, Server Action, Supabase or attachment response is ever
+  stored. Verified by `e2e/pwa.spec.ts`, which lists Cache Storage after
+  browsing protected pages and after logout.
+- **Stale protected responses** — navigations are network-only; offline shows
+  a neutral page, never a cached copy.
+- **Scope** — the worker is served from `/sw.js` with scope `/`; it only
+  handles same-origin GET requests.
+- **Shared devices / logout** — nothing protected is available offline after
+  logout; the session cookie is cleared by Supabase sign-out as before.
+- **Updates** — a new worker only takes over after the person accepts
+  "Actualizar" (or on the next start); old caches are deleted on activation.

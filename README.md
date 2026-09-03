@@ -97,3 +97,9 @@ database that already holds e2e or manual data reports spurious failures.
 ## Database changes
 
 All schema changes belong in versioned files under `supabase/migrations/`. `supabase/seed.sql` contains configurable development/demo rows; names and assignments there have no special behavior in application or SQL authorization logic.
+
+## Installable app, live meetings and notifications
+
+- Live Meeting Mode and presence: `docs/realtime.md`.
+- Installable PWA, caching and offline policy, branding variables: `docs/pwa.md`
+  (`node scripts/icons.mjs` regenerates the icons from the configured name).
