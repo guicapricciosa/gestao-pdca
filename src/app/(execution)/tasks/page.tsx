@@ -8,6 +8,7 @@ import { loadListOptions } from "@/modules/execution/application/creation-option
 import { ExecutionList } from "@/ui/patterns/execution-list";
 import { ListFilters } from "@/ui/patterns/list-filters";
 import { Pagination } from "@/ui/patterns/pagination";
+import { taskStatusLabel, statusOrder } from "@/ui/labels";
 export const dynamic = "force-dynamic";
 export default async function TasksPage({
   searchParams,
@@ -66,31 +67,37 @@ export default async function TasksPage({
     <>
       <header className="mb-10 flex items-end justify-between gap-6">
         <div>
-          <p className="text-accent text-sm font-medium">Execution Core</p>
+          <p className="text-accent text-sm font-medium">Execução</p>
           <h1 className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
-            Tasks
+            Tarefas
           </h1>
           <p className="text-muted-foreground mt-3">
-            Ações concretas, deadlines e responsabilidade explícita.
+            Acções concretas, com responsável e prazo.
           </p>
         </div>
         <Link
           className="rounded-full bg-black px-5 py-2.5 text-sm text-white"
           href="/tasks/new"
         >
-          Nova task
+          Nova tarefa
         </Link>
       </header>
-      <ListFilters basePath="/tasks" values={search} options={options} />
+      <ListFilters
+        basePath="/tasks"
+        values={search}
+        options={options}
+        statuses={statusOrder.task}
+        statusLabel={taskStatusLabel}
+      />
       <ExecutionList
         items={result.items.map((item) => ({
           ...item,
-          owner: nameOf(item.ownerProfileId),
           responsible: nameOf(item.responsibleProfileId),
         }))}
+        badgeKind="task"
         basePath="/tasks"
         createHref="/tasks/new"
-        createLabel="Nova task"
+        createLabel="Nova tarefa"
       />
       <Pagination
         basePath="/tasks"

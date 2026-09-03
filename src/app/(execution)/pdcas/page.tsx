@@ -8,6 +8,7 @@ import { loadListOptions } from "@/modules/execution/application/creation-option
 import { ExecutionList } from "@/ui/patterns/execution-list";
 import { ListFilters } from "@/ui/patterns/list-filters";
 import { Pagination } from "@/ui/patterns/pagination";
+import { pdcaStatusLabel, statusOrder } from "@/ui/labels";
 export const dynamic = "force-dynamic";
 export default async function PdcasPage({
   searchParams,
@@ -66,7 +67,7 @@ export default async function PdcasPage({
     <>
       <header className="mb-10 flex items-end justify-between gap-6">
         <div>
-          <p className="text-accent text-sm font-medium">Execution Core</p>
+          <p className="text-accent text-sm font-medium">Execução</p>
           <h1 className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
             PDCAs
           </h1>
@@ -81,13 +82,19 @@ export default async function PdcasPage({
           Novo PDCA
         </Link>
       </header>
-      <ListFilters basePath="/pdcas" values={search} options={options} />
+      <ListFilters
+        basePath="/pdcas"
+        values={search}
+        options={options}
+        statuses={statusOrder.task}
+        statusLabel={pdcaStatusLabel}
+      />
       <ExecutionList
         items={result.items.map((item) => ({
           ...item,
-          owner: nameOf(item.ownerProfileId),
           responsible: nameOf(item.responsibleProfileId),
         }))}
+        badgeKind="pdca"
         basePath="/pdcas"
         createHref="/pdcas/new"
         createLabel="Novo PDCA"

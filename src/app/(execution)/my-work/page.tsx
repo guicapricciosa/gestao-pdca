@@ -3,15 +3,16 @@ import Link from "next/link";
 import { loadMyWorkValidation } from "@/modules/ai/application/services";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { DueDate, StatusBadge } from "@/ui/components/status-badge";
-import { FindingList } from "@/ui/patterns/validation-panel";
+import {
+  findingLabel,
+  formatDateTime,
+  objectTypeLabel,
+  relativeDue,
+} from "@/ui/labels";
 
 export const dynamic = "force-dynamic";
 
 const terminal = new Set(["COMPLETED", "CANCELLED", "ARCHIVED"]);
-
-function isoDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
 
 interface WorkItem {
   readonly object_type: string;
@@ -27,40 +28,59 @@ function hrefOf(item: WorkItem) {
   return `/${item.object_type === "TASK" ? "tasks" : "pdcas"}/${item.object_id}`;
 }
 
+function plural(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
 function WorkList({
   items,
   empty,
+  notes,
 }: {
   readonly items: readonly WorkItem[];
   readonly empty: string;
+  readonly notes?: ReadonlyMap<string, readonly string[]>;
 }) {
   if (items.length === 0)
     return <p className="text-muted-foreground p-5 text-sm">{empty}</p>;
   return (
     <ul>
-      {items.map((item) => (
-        <li
-          className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 text-sm last:border-0"
-          key={`${item.relationship}-${item.object_type}-${item.object_id}`}
-        >
-          <div className="min-w-0">
-            <Link
-              className="font-medium underline-offset-4 hover:underline"
-              href={hrefOf(item)}
-            >
-              {item.title}
-            </Link>
-            <p className="text-muted-foreground mt-0.5 text-xs">
-              {item.object_type} ·{" "}
-              <DueDate value={item.due_date} status={item.status} />
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <StatusBadge value={item.priority} kind="priority" />
-            <StatusBadge value={item.status} />
-          </div>
-        </li>
-      ))}
+      {items.map((item) => {
+        const extra = notes?.get(item.object_id) ?? [];
+        return (
+          <li
+            className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 text-sm last:border-0"
+            key={`${item.relationship}-${item.object_type}-${item.object_id}`}
+          >
+            <div className="min-w-0">
+              <Link
+                className="font-medium underline-offset-4 hover:underline"
+                href={hrefOf(item)}
+              >
+                {item.title}
+              </Link>
+              <p className="text-muted-foreground mt-0.5 text-xs">
+                {objectTypeLabel(item.object_type)} ·{" "}
+                <DueDate value={item.due_date} status={item.status} relative />
+                {extra.length > 0 && (
+                  <span className="text-amber-800"> · {extra.join(" · ")}</span>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {(item.priority === "HIGH" || item.priority === "CRITICAL") && (
+                <StatusBadge value={item.priority} kind="priority" />
+              )}
+              {item.status !== "OPEN" && item.status !== "IN_PROGRESS" && (
+                <StatusBadge
+                  value={item.status}
+                  kind={item.object_type === "PDCA" ? "pdca" : "task"}
+                />
+              )}
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -80,56 +100,113 @@ export default async function MyWorkPage() {
         item.relationship === "RESPONSIBLE" || item.relationship === "OWNER",
     ),
   );
+  const notes = new Map<string, string[]>();
+  for (const entry of validation)
+    notes.set(
+      entry.objectId,
+      entry.findings
+        .filter((finding) =>
+          [
+            "MISSING_DUE_DATE",
+            "MISSING_OWNER",
+            "STALE",
+            "REPEATED_POSTPONEMENT",
+          ].includes(finding.code),
+        )
+        .map((finding) => findingLabel(finding.code).toLowerCase()),
+    );
 
   const now = new Date();
-  const today = isoDate(now);
-  const weekEnd = isoDate(new Date(now.getTime() + 7 * 86_400_000));
+  const today = now.toISOString().slice(0, 10);
   const distinct = new Map<string, WorkItem>();
   for (const item of items)
     if (!distinct.has(item.object_id)) distinct.set(item.object_id, item);
   const open = [...distinct.values()].filter(
     (item) => !terminal.has(item.status),
   );
-  const assigned = items.filter((item) => item.relationship === "RESPONSIBLE");
-  const owned = items.filter((item) => item.relationship === "OWNER");
+  const mine = items.filter(
+    (item) => item.relationship === "RESPONSIBLE" && !terminal.has(item.status),
+  );
+  const mineIds = new Set(mine.map((item) => item.object_id));
+  const following = items.filter(
+    (item) =>
+      (item.relationship === "OWNER" || item.relationship === "WATCHER") &&
+      !terminal.has(item.status) &&
+      !mineIds.has(item.object_id),
+  );
   const overdue = open.filter(
     (item) => item.due_date !== null && item.due_date < today,
   );
   const blocked = open.filter((item) => item.status === "BLOCKED");
   const dueToday = open.filter((item) => item.due_date === today);
-  const dueThisWeek = open.filter(
-    (item) =>
-      item.due_date !== null &&
-      item.due_date > today &&
-      item.due_date <= weekEnd,
+  const toValidate = meetings.filter(
+    (meeting) =>
+      meeting.status === "REVIEW" && meeting.relationship === "CHAIR",
   );
-  const upcoming = meetings.filter((meeting) => meeting.status !== "REVIEW");
-  const awaitingReview = meetings.filter(
-    (meeting) => meeting.status === "REVIEW",
+  const live = meetings.filter((meeting) => meeting.status === "IN_PROGRESS");
+  const upcoming = meetings.filter(
+    (meeting) =>
+      meeting.status !== "REVIEW" && meeting.status !== "IN_PROGRESS",
   );
-
-  const tiles = [
-    { label: "Assigned to me", value: assigned.length, tone: "" },
-    { label: "Owned by me", value: owned.length, tone: "" },
-    {
-      label: "Overdue",
-      value: overdue.length,
-      tone: overdue.length > 0 ? "text-red-700" : "",
-    },
-    {
-      label: "Blocked",
-      value: blocked.length,
-      tone: blocked.length > 0 ? "text-amber-800" : "",
-    },
-    { label: "Due today", value: dueToday.length, tone: "" },
-    { label: "Due this week", value: dueThisWeek.length, tone: "" },
-    { label: "Upcoming meetings", value: upcoming.length, tone: "" },
-    {
-      label: "Awaiting my review",
-      value: awaitingReview.length,
-      tone: awaitingReview.length > 0 ? "text-amber-800" : "",
-    },
+  const attention = [
+    ...toValidate.map((meeting) => ({
+      key: `m-${meeting.meeting_session_id}`,
+      href: `/meetings/${meeting.meeting_session_id}/finish`,
+      title: meeting.title,
+      why: "reunião por terminar e distribuir",
+      tone: "text-amber-300",
+    })),
+    ...live.map((meeting) => ({
+      key: `l-${meeting.meeting_session_id}`,
+      href: `/meetings/${meeting.meeting_session_id}/run`,
+      title: meeting.title,
+      why: "reunião a decorrer agora",
+      tone: "text-white",
+    })),
+    ...overdue.map((item) => ({
+      key: `o-${item.object_id}`,
+      href: hrefOf(item),
+      title: item.title,
+      why: relativeDue(item.due_date),
+      tone: "text-red-300",
+    })),
+    ...blocked
+      .filter((item) => !overdue.includes(item))
+      .map((item) => ({
+        key: `b-${item.object_id}`,
+        href: hrefOf(item),
+        title: item.title,
+        why: "bloqueado",
+        tone: "text-amber-300",
+      })),
+    ...dueToday
+      .filter((item) => !overdue.includes(item) && !blocked.includes(item))
+      .map((item) => ({
+        key: `t-${item.object_id}`,
+        href: hrefOf(item),
+        title: item.title,
+        why: "para hoje",
+        tone: "text-white",
+      })),
   ];
+  const summary = [
+    overdue.length > 0
+      ? plural(overdue.length, "item atrasado", "itens atrasados")
+      : null,
+    blocked.length > 0
+      ? plural(blocked.length, "bloqueado", "bloqueados")
+      : null,
+    dueToday.length > 0
+      ? plural(dueToday.length, "para hoje", "para hoje")
+      : null,
+    toValidate.length > 0
+      ? plural(
+          toValidate.length,
+          "reunião por terminar",
+          "reuniões por terminar",
+        )
+      : null,
+  ].filter((part): part is string => part !== null);
 
   return (
     <>
@@ -142,116 +219,86 @@ export default async function MyWorkPage() {
           })}
         </p>
         <h1 className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
-          My Work
+          O meu trabalho
         </h1>
-        <p className="text-muted-foreground mt-3">
-          O que é teu, o que está atrasado e as reuniões que precisam de ti.
+        <p className="text-muted-foreground mt-3" data-testid="my-work-summary">
+          {summary.length > 0
+            ? `Tens ${summary.join(", ")}.`
+            : mine.length > 0
+              ? `Nada urgente. Tens ${plural(mine.length, "item em curso", "itens em curso")}.`
+              : "Nada urgente e nada atribuído a ti."}
         </p>
       </header>
 
       <section
-        aria-label="Resumo"
-        className="mb-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-[color:var(--border)] sm:grid-cols-4"
-        data-testid="my-work-summary"
+        className="mb-8 rounded-2xl bg-[#21100d] text-white"
+        data-testid="attention"
       >
-        {tiles.map((tile) => (
-          <div className="bg-white px-5 py-4" key={tile.label}>
-            <p className="text-muted-foreground text-[11px] font-medium tracking-[0.12em] uppercase">
-              {tile.label}
-            </p>
-            <p
-              className={`mt-1 text-3xl font-semibold tracking-tight tabular-nums ${tile.tone}`}
-            >
-              {tile.value}
-            </p>
-          </div>
-        ))}
-      </section>
-
-      {(overdue.length > 0 ||
-        blocked.length > 0 ||
-        awaitingReview.length > 0) && (
-        <section className="mb-8 rounded-2xl bg-[#21100d] text-white">
-          <div className="border-b border-white/10 p-5">
-            <h2 className="text-xl font-semibold">Precisa de atenção</h2>
-            <p className="mt-1 text-sm text-white/60">
-              Atrasos, bloqueios e reuniões à espera da tua revisão.
-            </p>
-          </div>
+        <div className="border-b border-white/10 p-5">
+          <h2 className="text-xl font-semibold">Precisa da minha atenção</h2>
+        </div>
+        {attention.length === 0 ? (
+          <p className="p-5 text-sm text-white/60">Nada urgente. Bom sinal.</p>
+        ) : (
           <ul className="divide-y divide-white/10">
-            {awaitingReview.map((meeting) => (
+            {attention.map((entry) => (
               <li
                 className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
-                key={meeting.meeting_session_id}
+                key={entry.key}
               >
                 <Link
                   className="underline-offset-4 hover:underline"
-                  href={`/meetings/${meeting.meeting_session_id}/review`}
+                  href={entry.href}
                 >
-                  {meeting.title}
+                  {entry.title}
                 </Link>
-                <span className="text-xs text-white/60">
-                  Reunião à espera de revisão e publicação
-                </span>
-              </li>
-            ))}
-            {[
-              ...overdue,
-              ...blocked.filter((item) => !overdue.includes(item)),
-            ].map((item) => (
-              <li
-                className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
-                key={`attention-${item.object_id}`}
-              >
-                <Link
-                  className="underline-offset-4 hover:underline"
-                  href={hrefOf(item)}
-                >
-                  {item.title}
-                </Link>
-                <span className="text-xs text-white/60">
-                  {item.status === "BLOCKED" ? "Bloqueado" : "Atrasado"}
-                  {item.due_date
-                    ? ` · prazo ${new Date(`${item.due_date}T00:00:00`).toLocaleDateString("pt-PT")}`
-                    : ""}
-                </span>
+                <span className={`text-xs ${entry.tone}`}>{entry.why}</span>
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        )}
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border bg-white">
-          <h2 className="border-b p-5 text-lg font-semibold">Assigned to me</h2>
+        <section className="rounded-2xl border bg-white" data-testid="to-do">
+          <div className="border-b p-5">
+            <h2 className="text-lg font-semibold">Para eu fazer</h2>
+            <p className="text-muted-foreground text-xs">
+              Sou responsável por executar.
+            </p>
+          </div>
           <WorkList
-            items={assigned}
-            empty="Nada atribuído a ti como Responsible."
+            items={mine}
+            empty="Nada atribuído a ti neste momento."
+            notes={notes}
           />
         </section>
-        <section className="rounded-2xl border bg-white">
-          <h2 className="border-b p-5 text-lg font-semibold">Owned by me</h2>
+        <section
+          className="rounded-2xl border bg-white"
+          data-testid="following"
+        >
+          <div className="border-b p-5">
+            <h2 className="text-lg font-semibold">A acompanhar</h2>
+            <p className="text-muted-foreground text-xs">
+              Sou Owner ou sigo estes assuntos.
+            </p>
+          </div>
           <WorkList
-            items={owned}
-            empty="Não és Owner de nenhum item em aberto."
+            items={following}
+            empty="Não acompanhas nenhum assunto em aberto."
+            notes={notes}
           />
         </section>
-        <section className="rounded-2xl border bg-white">
+        <section
+          className="rounded-2xl border bg-white lg:col-span-2"
+          data-testid="upcoming-meetings"
+        >
           <h2 className="border-b p-5 text-lg font-semibold">
-            Due today · this week
-          </h2>
-          <WorkList
-            items={[...dueToday, ...dueThisWeek]}
-            empty="Nenhum prazo nos próximos sete dias."
-          />
-        </section>
-        <section className="rounded-2xl border bg-white">
-          <h2 className="border-b p-5 text-lg font-semibold">
-            Upcoming meetings
+            Próximas reuniões
           </h2>
           {upcoming.length === 0 ? (
             <p className="text-muted-foreground p-5 text-sm">
-              Sem reuniões agendadas em que participes.
+              Sem reuniões marcadas em que participes.
             </p>
           ) : (
             <ul>
@@ -263,72 +310,23 @@ export default async function MyWorkPage() {
                   <div>
                     <Link
                       className="font-medium underline-offset-4 hover:underline"
-                      href={`/meetings/${meeting.meeting_session_id}`}
+                      href={`/meetings/${meeting.meeting_session_id}/run`}
                     >
                       {meeting.title}
                     </Link>
                     <p className="text-muted-foreground mt-0.5 text-xs">
-                      {new Date(meeting.scheduled_start_at).toLocaleString(
-                        "pt-PT",
-                        { dateStyle: "medium", timeStyle: "short" },
-                      )}{" "}
-                      ·{" "}
+                      {formatDateTime(meeting.scheduled_start_at)} ·{" "}
                       {meeting.relationship === "CHAIR"
-                        ? "Chair"
-                        : "Participante"}
+                        ? "conduzo eu"
+                        : "participo"}
                     </p>
                   </div>
-                  <StatusBadge value={meeting.status} />
+                  <StatusBadge value={meeting.status} kind="meeting" />
                 </li>
               ))}
             </ul>
           )}
         </section>
-        {(items.some((item) => item.relationship === "COLLABORATOR") ||
-          items.some((item) => item.relationship === "WATCHER")) && (
-          <section className="rounded-2xl border bg-white lg:col-span-2">
-            <h2 className="border-b p-5 text-lg font-semibold">
-              Collaborating · Watching
-            </h2>
-            <WorkList
-              items={items.filter(
-                (item) =>
-                  item.relationship === "COLLABORATOR" ||
-                  item.relationship === "WATCHER",
-              )}
-              empty=""
-            />
-          </section>
-        )}
-        {validation.length > 0 && (
-          <section
-            className="rounded-2xl border bg-white lg:col-span-2"
-            data-testid="my-work-validation"
-          >
-            <h2 className="border-b p-5 text-lg font-semibold">
-              Execution Validator
-            </h2>
-            <p className="text-muted-foreground px-5 pt-4 text-sm">
-              Alertas determinísticos sobre o que é teu. Nada é alterado
-              automaticamente.
-            </p>
-            <div className="grid gap-4 p-5 md:grid-cols-2">
-              {validation.map((entry) => (
-                <div key={`${entry.objectType}-${entry.objectId}`}>
-                  <Link
-                    className="text-sm font-medium hover:underline"
-                    href={`/${entry.objectType === "TASK" ? "tasks" : "pdcas"}/${entry.objectId}`}
-                  >
-                    {entry.objectType} · {entry.title}
-                  </Link>
-                  <div className="mt-2">
-                    <FindingList findings={entry.findings} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </>
   );

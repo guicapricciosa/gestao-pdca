@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { databaseUuidSchema } from "@/shared/validation/database";
 
 const commentSchema = z.object({
-  securityObjectId: z.uuid(),
+  securityObjectId: databaseUuidSchema,
   body: z.string().trim().min(1).max(10_000),
 });
 
 const memberSchema = z.object({
-  securityObjectId: z.uuid(),
-  profileId: z.uuid(),
+  securityObjectId: databaseUuidSchema,
+  profileId: databaseUuidSchema,
   role: z.enum(["COLLABORATOR", "WATCHER"]),
 });
 

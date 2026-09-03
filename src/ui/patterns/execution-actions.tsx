@@ -85,7 +85,9 @@ export function ExecutionActions({
   restaurantScopeIds,
   collaborators,
   watchers,
+  advancedOnly = false,
 }: {
+  readonly advancedOnly?: boolean;
   readonly kind: "Decision" | "Task" | "PDCA";
   readonly id: string;
   readonly securityObjectId: string;
@@ -109,7 +111,7 @@ export function ExecutionActions({
   );
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      {kind !== "Decision" && (
+      {kind !== "Decision" && !advancedOnly && (
         <form
           action={kind === "Task" ? transitionTaskAction : transitionPdcaAction}
         >
@@ -143,7 +145,7 @@ export function ExecutionActions({
           </Panel>
         </form>
       )}
-      {kind !== "Decision" && (
+      {kind !== "Decision" && !advancedOnly && (
         <form action={changeDueDateAction}>
           <Panel
             title="Alterar prazo"
@@ -175,7 +177,7 @@ export function ExecutionActions({
           </Panel>
         </form>
       )}
-      {kind === "PDCA" && (
+      {kind === "PDCA" && !advancedOnly && (
         <form action={changePdcaPhaseAction}>
           <Panel
             title="Mudar fase PDCA"
@@ -204,8 +206,8 @@ export function ExecutionActions({
       {kind !== "Decision" && people.length > 0 && (
         <form action={assignExecutionPeopleAction}>
           <Panel
-            title="Owner e Responsible"
-            hint="Owner responde pelo resultado; Responsible executa. Só aparecem pessoas que já conseguem ler este registo; nunca é criado acesso automático."
+            title="Owner e Responsável"
+            hint="Owner acompanha e garante o resultado; Responsável executa. Só aparecem pessoas que já conseguem ler este registo."
           >
             <div className="grid gap-3">
               <input
@@ -220,9 +222,11 @@ export function ExecutionActions({
                   className={input}
                   name="ownerProfileId"
                   defaultValue={ownerProfileId ?? ""}
-                  required
+                  required={kind === "PDCA"}
                 >
-                  <option value="">Selecionar Owner</option>
+                  <option value="">
+                    {kind === "PDCA" ? "Seleccionar Owner" : "Sem Owner"}
+                  </option>
                   {people.map((person) => (
                     <option
                       value={person.profile_id}
@@ -233,14 +237,14 @@ export function ExecutionActions({
                   ))}
                 </select>
               </Field>
-              <Field label="Responsible">
+              <Field label="Responsável">
                 <select
                   className={input}
                   name="responsibleProfileId"
                   defaultValue={responsibleProfileId ?? ""}
                   required
                 >
-                  <option value="">Selecionar Responsible</option>
+                  <option value="">Seleccionar responsável</option>
                   {people.map((person) => (
                     <option
                       value={person.profile_id}
@@ -262,8 +266,8 @@ export function ExecutionActions({
       )}
       <form action={replaceScopeAction} className="lg:col-span-2">
         <Panel
-          title="Alterar scope"
-          hint="Quem cobre estes departamentos, serviços e restaurantes passa a ver o registo. Precisas de cobrir o âmbito completo."
+          title="Onde se aplica"
+          hint="Quem cobre estes restaurantes e áreas passa a ver o registo. Precisas de cobrir o âmbito completo."
         >
           <div className="grid gap-4">
             <input
@@ -287,14 +291,14 @@ export function ExecutionActions({
               <input className={input} name="reason" minLength={3} required />
             </Field>
             <div>
-              <SubmitButton variant="secondary">Guardar scope</SubmitButton>
+              <SubmitButton variant="secondary">Guardar âmbito</SubmitButton>
             </div>
           </div>
         </Panel>
       </form>
       <Panel
-        title="Collaborators e Watchers"
-        hint="Colaboradores contribuem; watchers acompanham. Nenhum dos dois cria acesso: se alguém não aparece, ajusta o âmbito."
+        title="Colaboradores e seguidores"
+        hint="Colaboradores contribuem; seguidores acompanham. Nenhum dos dois cria acesso: se alguém não aparece, ajusta o âmbito."
         className="lg:col-span-2"
       >
         <form action={addObjectMemberAction} className="flex flex-wrap gap-2">
@@ -322,8 +326,8 @@ export function ExecutionActions({
             className="rounded-lg border bg-white px-3 py-2 text-sm"
             name="membershipRole"
           >
-            <option value="COLLABORATOR">Collaborator</option>
-            <option value="WATCHER">Watcher</option>
+            <option value="COLLABORATOR">Colaborador</option>
+            <option value="WATCHER">Seguidor</option>
           </select>
           <SubmitButton variant="secondary" pendingLabel="A adicionar…">
             Adicionar
@@ -343,8 +347,8 @@ export function ExecutionActions({
                     {member.name}
                     <span className="text-muted-foreground ml-2 text-xs">
                       {collaborators.includes(member)
-                        ? "Collaborator"
-                        : "Watcher"}
+                        ? "Colaborador"
+                        : "Seguidor"}
                     </span>
                   </span>
                   <button className="text-muted-foreground hover:text-foreground text-xs">
@@ -356,62 +360,66 @@ export function ExecutionActions({
           </ul>
         )}
       </Panel>
-      <form
-        action="/api/attachments"
-        method="post"
-        encType="multipart/form-data"
-      >
-        <Panel
-          title="Adicionar attachment"
-          hint="PDF, PNG, JPEG ou texto. Fica privado e só quem lê o registo o pode descarregar."
+      {!advancedOnly && (
+        <form
+          action="/api/attachments"
+          method="post"
+          encType="multipart/form-data"
         >
-          <div className="grid gap-3">
-            <input
-              type="hidden"
-              name="securityObjectId"
-              value={securityObjectId}
-            />
-            <input type="hidden" name="returnPath" value={path} />
-            <input
-              aria-label="Ficheiro"
-              className={input}
-              type="file"
-              name="file"
-              required
-            />
-            <div>
-              <button className="rounded-full border bg-white px-4 py-2 text-sm">
-                Enviar ficheiro
-              </button>
+          <Panel
+            title="Adicionar attachment"
+            hint="PDF, PNG, JPEG ou texto. Fica privado e só quem lê o registo o pode descarregar."
+          >
+            <div className="grid gap-3">
+              <input
+                type="hidden"
+                name="securityObjectId"
+                value={securityObjectId}
+              />
+              <input type="hidden" name="returnPath" value={path} />
+              <input
+                aria-label="Ficheiro"
+                className={input}
+                type="file"
+                name="file"
+                required
+              />
+              <div>
+                <button className="rounded-full border bg-white px-4 py-2 text-sm">
+                  Enviar ficheiro
+                </button>
+              </div>
             </div>
-          </div>
-        </Panel>
-      </form>
-      <form action={addCommentAction}>
-        <Panel title="Adicionar comentário">
-          <div className="grid gap-3">
-            <input
-              type="hidden"
-              name="securityObjectId"
-              value={securityObjectId}
-            />
-            <input type="hidden" name="returnPath" value={path} />
-            <textarea
-              aria-label="Comentário"
-              className={`${input} min-h-24`}
-              name="body"
-              required
-              maxLength={10000}
-              placeholder="Ponto de situação, decisão tomada, pedido a alguém…"
-            />
-            <div>
-              <SubmitButton variant="secondary" pendingLabel="A publicar…">
-                Comentar
-              </SubmitButton>
+          </Panel>
+        </form>
+      )}
+      {!advancedOnly && (
+        <form action={addCommentAction}>
+          <Panel title="Adicionar comentário">
+            <div className="grid gap-3">
+              <input
+                type="hidden"
+                name="securityObjectId"
+                value={securityObjectId}
+              />
+              <input type="hidden" name="returnPath" value={path} />
+              <textarea
+                aria-label="Comentário"
+                className={`${input} min-h-24`}
+                name="body"
+                required
+                maxLength={10000}
+                placeholder="Ponto de situação, decisão tomada, pedido a alguém…"
+              />
+              <div>
+                <SubmitButton variant="secondary" pendingLabel="A publicar…">
+                  Comentar
+                </SubmitButton>
+              </div>
             </div>
-          </div>
-        </Panel>
-      </form>
+          </Panel>
+        </form>
+      )}
     </div>
   );
 }

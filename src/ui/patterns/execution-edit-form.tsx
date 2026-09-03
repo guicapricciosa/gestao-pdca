@@ -108,7 +108,7 @@ export function ExecutionEditForm(props: Props) {
         action={updateDecisionAction}
         className="grid gap-4 rounded-2xl border bg-white p-5"
       >
-        <h2 className="font-semibold">Editar Decision</h2>
+        <h2 className="font-semibold">Editar decisão</h2>
         <HiddenIdentity props={props} />
         <Field label="Título">
           <input
@@ -154,7 +154,7 @@ export function ExecutionEditForm(props: Props) {
         action={updateTaskAction}
         className="grid gap-4 rounded-2xl border bg-white p-5"
       >
-        <h2 className="font-semibold">Editar Task</h2>
+        <h2 className="font-semibold">Editar tarefa</h2>
         <HiddenIdentity props={props} />
         <Field label="Título">
           <input
@@ -195,8 +195,8 @@ export function ExecutionEditForm(props: Props) {
           value={props.responsibleProfileId ?? ""}
         />
         <p className="text-muted-foreground text-xs">
-          Prazo, âmbito e atribuições alteram-se nos painéis próprios, com
-          motivo e histórico.
+          Prazo, âmbito e pessoas alteram-se nas acções próprias, com motivo e
+          histórico.
         </p>
         <div>
           <SubmitButton>Guardar alterações</SubmitButton>

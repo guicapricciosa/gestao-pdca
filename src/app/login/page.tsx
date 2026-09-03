@@ -9,13 +9,14 @@ export default async function LoginPage({
   return (
     <main className="grid min-h-screen place-items-center p-6">
       <section className="w-full max-w-md rounded-3xl border bg-white p-8 shadow-sm">
-        <p className="text-accent text-sm font-medium">Execution Platform</p>
+        <p className="text-accent text-sm font-medium">
+          Grupo Capricciosa · Execution
+        </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.04em]">
           Entrar
         </h1>
         <p className="text-muted-foreground mt-3 text-sm">
-          A sessão é validada pelo Supabase e todas as páginas operacionais
-          voltam a aplicar autorização no servidor.
+          Entra com o teu email da empresa. Só vês o que está no teu âmbito.
         </p>
         {error && (
           <p
@@ -39,7 +40,7 @@ export default async function LoginPage({
             />
           </label>
           <label className="text-sm font-medium">
-            Password
+            Palavra-passe
             <input
               className="mt-2 w-full rounded-lg border px-3 py-2"
               name="password"

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { databaseUuidSchema } from "@/shared/validation/database";
 
 import { scopeSchema } from "@/modules/execution/domain/validation";
 
@@ -9,7 +10,7 @@ export const createDecisionSchema = scopeSchema.extend({
   title: z.string().trim().min(2).max(240),
   description: z.string().trim().max(20_000).nullable().default(null),
   decisionDate: z.iso.date(),
-  decidedByProfileId: z.uuid().nullable().default(null),
+  decidedByProfileId: databaseUuidSchema.nullable().default(null),
 });
 
 export type CreateDecision = z.infer<typeof createDecisionSchema>;

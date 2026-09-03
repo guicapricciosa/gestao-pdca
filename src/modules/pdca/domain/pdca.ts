@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { databaseUuidSchema } from "@/shared/validation/database";
 
 import { priorityLevels } from "@/modules/execution/domain/types";
 import { scopeSchema } from "@/modules/execution/domain/validation";
@@ -11,11 +12,11 @@ export const createPdcaSchema = scopeSchema.extend({
   priority: z.enum(priorityLevels).default("MEDIUM"),
   impact: z.enum(priorityLevels).default("MEDIUM"),
   risk: z.enum(priorityLevels).default("MEDIUM"),
-  ownerProfileId: z.uuid().nullable().default(null),
-  responsibleProfileId: z.uuid().nullable().default(null),
+  ownerProfileId: databaseUuidSchema.nullable().default(null),
+  responsibleProfileId: databaseUuidSchema.nullable().default(null),
   startDate: z.iso.date().nullable().default(null),
   dueDate: z.iso.date().nullable().default(null),
-  originatingDecisionId: z.uuid().nullable().default(null),
+  originatingDecisionId: databaseUuidSchema.nullable().default(null),
 });
 
 export type CreatePdca = z.infer<typeof createPdcaSchema>;

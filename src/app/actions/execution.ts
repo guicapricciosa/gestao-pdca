@@ -27,9 +27,11 @@ export async function createDecisionAction(formData: FormData) {
   try {
     id = await service.createDecision({
       companyId: String(formData.get("companyId")),
-      title: String(formData.get("title")),
+      title: String(formData.get("title")).trim().slice(0, 240),
       description: optional(formData, "description"),
-      decisionDate: String(formData.get("decisionDate")),
+      decisionDate:
+        optional(formData, "decisionDate") ??
+        new Date().toISOString().slice(0, 10),
       decidedByProfileId: null,
       visibility: String(formData.get("visibility")),
       unitIds: values(formData, "unitIds"),
@@ -51,9 +53,9 @@ export async function createTaskAction(formData: FormData) {
       companyId: String(formData.get("companyId")),
       title: String(formData.get("title")),
       description: optional(formData, "description") as never,
-      priority: String(formData.get("priority")),
-      ownerProfileId: null,
-      responsibleProfileId: null,
+      priority: optional(formData, "priority") ?? "MEDIUM",
+      ownerProfileId: optional(formData, "ownerProfileId"),
+      responsibleProfileId: optional(formData, "responsibleProfileId"),
       startDate: optional(formData, "startDate"),
       dueDate: optional(formData, "dueDate"),
       pdcaId: optional(formData, "pdcaId"),
@@ -74,17 +76,24 @@ export async function createPdcaAction(formData: FormData) {
   let id = "";
   let failure: Error | null = null;
   try {
+    const problem =
+      optional(formData, "problemStatement") ??
+      optional(formData, "description") ??
+      "";
     id = await service.createPdca({
       companyId: String(formData.get("companyId")),
-      title: String(formData.get("title")),
-      problemStatement: optional(formData, "problemStatement"),
+      title:
+        optional(formData, "title") ??
+        (problem.split(/[.\n]/)[0]?.trim().slice(0, 240) ||
+          problem.slice(0, 240)),
+      problemStatement: problem || null,
       objective: optional(formData, "objective"),
       rootCauseOrHypothesis: optional(formData, "rootCauseOrHypothesis"),
-      priority: String(formData.get("priority")),
-      impact: String(formData.get("impact")),
-      risk: String(formData.get("risk")),
-      ownerProfileId: null,
-      responsibleProfileId: null,
+      priority: optional(formData, "priority") ?? "MEDIUM",
+      impact: optional(formData, "impact") ?? "MEDIUM",
+      risk: optional(formData, "risk") ?? "MEDIUM",
+      ownerProfileId: optional(formData, "ownerProfileId"),
+      responsibleProfileId: optional(formData, "responsibleProfileId"),
       startDate: optional(formData, "startDate"),
       dueDate: optional(formData, "dueDate"),
       originatingDecisionId: null,
@@ -159,8 +168,8 @@ export async function assignExecutionPeopleAction(formData: FormData) {
   const { error } = await client.rpc("assign_execution_people", {
     security_object_id: String(formData.get("securityObjectId")),
     expected_version: Number(formData.get("version")),
-    owner_profile_id: String(formData.get("ownerProfileId")),
-    responsible_profile_id: String(formData.get("responsibleProfileId")),
+    owner_profile_id: optional(formData, "ownerProfileId") as never,
+    responsible_profile_id: optional(formData, "responsibleProfileId") as never,
   });
   finish(returnPath, error);
 }
@@ -279,4 +288,99 @@ export async function removeObjectMemberAction(formData: FormData) {
     reason: optional(formData, "reason") as never,
   });
   finish(returnPath, error);
+}
+
+/** Marcar concluída: transição para COMPLETED com notas de conclusão. */
+export async function completeAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const kind = String(formData.get("kind"));
+  const id = String(formData.get("id"));
+  const path = `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`;
+  const notes = optional(formData, "completionNotes") ?? "Concluído";
+  const result =
+    kind === "Task"
+      ? await client.rpc("transition_task", {
+          task_id: id,
+          expected_version: Number(formData.get("version")),
+          new_status: "COMPLETED",
+          completion_notes: notes,
+        })
+      : await client.rpc("transition_pdca", {
+          pdca_id: id,
+          expected_version: Number(formData.get("version")),
+          new_status: "COMPLETED",
+          closure_notes: notes,
+        });
+  finish(path, result.error, ["/my-work"]);
+}
+
+/** Bloquear: regista o bloqueio e muda o estado numa só acção. */
+export async function blockAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const kind = String(formData.get("kind"));
+  const id = String(formData.get("id"));
+  const path = `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`;
+  const reason = String(formData.get("reason"));
+  const blocker =
+    kind === "Task"
+      ? await client.rpc("add_task_blocker", { task_id: id, reason })
+      : await client.rpc("add_pdca_blocker", { pdca_id: id, reason });
+  if (blocker.error !== null) finish(path, blocker.error);
+  const current =
+    kind === "Task"
+      ? await client.from("tasks").select("version").eq("id", id).single()
+      : await client.from("pdcas").select("version").eq("id", id).single();
+  const version = Number(current.data?.version ?? formData.get("version"));
+  const result =
+    kind === "Task"
+      ? await client.rpc("transition_task", {
+          task_id: id,
+          expected_version: version,
+          new_status: "BLOCKED",
+        })
+      : await client.rpc("transition_pdca", {
+          pdca_id: id,
+          expected_version: version,
+          new_status: "BLOCKED",
+        });
+  finish(path, result.error, ["/my-work"]);
+}
+
+/** Desbloquear: resolve o bloqueio activo e retoma. */
+export async function unblockAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const kind = String(formData.get("kind"));
+  const id = String(formData.get("id"));
+  const path = `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`;
+  const blockerId = String(formData.get("blockerId"));
+  const notes = optional(formData, "resolutionNotes") as never;
+  const resolved =
+    kind === "Task"
+      ? await client.rpc("resolve_task_blocker", {
+          blocker_id: blockerId,
+          resolution_notes: notes,
+        })
+      : await client.rpc("resolve_pdca_blocker", {
+          blocker_id: blockerId,
+          resolution_notes: notes,
+        });
+  if (resolved.error !== null) finish(path, resolved.error);
+  const current =
+    kind === "Task"
+      ? await client.from("tasks").select("version").eq("id", id).single()
+      : await client.from("pdcas").select("version").eq("id", id).single();
+  const version = Number(current.data?.version ?? formData.get("version"));
+  const result =
+    kind === "Task"
+      ? await client.rpc("transition_task", {
+          task_id: id,
+          expected_version: version,
+          new_status: "IN_PROGRESS",
+        })
+      : await client.rpc("transition_pdca", {
+          pdca_id: id,
+          expected_version: version,
+          new_status: "IN_PROGRESS",
+        });
+  finish(path, result.error, ["/my-work"]);
 }

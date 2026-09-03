@@ -1,6 +1,11 @@
 import Link from "next/link";
 
-import { DueDate, StatusBadge } from "@/ui/components/status-badge";
+import {
+  DueDate,
+  StatusBadge,
+  type BadgeKind,
+} from "@/ui/components/status-badge";
+import { formatDate } from "@/ui/labels";
 
 export interface ExecutionListItem {
   readonly id: string;
@@ -9,7 +14,6 @@ export interface ExecutionListItem {
   readonly priority?: string;
   readonly phase?: string;
   readonly dueDate?: string | null;
-  readonly owner?: string | null;
   readonly responsible?: string | null;
   readonly secondary?: string | null;
   readonly updatedAt: string;
@@ -18,13 +22,15 @@ export interface ExecutionListItem {
 export function ExecutionList({
   items,
   basePath,
-  emptyTitle = "Nada para mostrar",
-  emptyHint = "Não há registos acessíveis com estes filtros. Limpa os filtros ou cria um novo.",
+  badgeKind,
+  emptyTitle = "Nada para mostrar aqui",
+  emptyHint = "Não há registos no teu âmbito com estes filtros.",
   createHref,
   createLabel,
 }: {
   readonly items: readonly ExecutionListItem[];
   readonly basePath: string;
+  readonly badgeKind: BadgeKind;
   readonly emptyTitle?: string;
   readonly emptyHint?: string;
   readonly createHref?: string;
@@ -47,24 +53,25 @@ export function ExecutionList({
         )}
       </div>
     );
-  const showPeople = items.some(
-    (item) => item.owner !== undefined || item.responsible !== undefined,
-  );
+  const showPeople = items.some((item) => item.responsible !== undefined);
   const showDue = items.some((item) => item.dueDate !== undefined);
+  const showPhase = items.some((item) => item.phase !== undefined);
   return (
     <div className="overflow-x-auto rounded-2xl border bg-white">
-      <table className="w-full min-w-[720px] text-left text-sm">
+      <table className="w-full min-w-[640px] text-left text-sm">
         <thead className="text-muted-foreground border-b text-[11px] tracking-[0.12em] uppercase">
           <tr>
-            <th className="px-5 py-3 font-medium">Título</th>
-            {showPeople && (
-              <th className="px-3 py-3 font-medium">Owner · Responsible</th>
-            )}
-            <th className="px-3 py-3 font-medium">
-              {items[0]?.phase !== undefined
-                ? "Fase · Prioridade"
-                : "Prioridade"}
+            <th className="px-5 py-3 font-medium">
+              {badgeKind === "decision"
+                ? "Decisão"
+                : badgeKind === "pdca"
+                  ? "PDCA"
+                  : "Tarefa"}
             </th>
+            {showPeople && (
+              <th className="px-3 py-3 font-medium">Responsável</th>
+            )}
+            {showPhase && <th className="px-3 py-3 font-medium">Fase</th>}
             {showDue && <th className="px-3 py-3 font-medium">Prazo</th>}
             <th className="px-5 py-3 text-right font-medium">Estado</th>
           </tr>
@@ -76,43 +83,54 @@ export function ExecutionList({
               key={item.id}
             >
               <td className="px-5 py-3.5">
-                <Link
-                  className="font-medium underline-offset-4 hover:underline"
-                  href={`${basePath}/${item.id}`}
-                >
-                  {item.title}
-                </Link>
+                <div className="flex items-center gap-2">
+                  {(item.priority === "HIGH" ||
+                    item.priority === "CRITICAL") && (
+                    <span
+                      aria-label={
+                        item.priority === "CRITICAL" ? "Crítica" : "Alta"
+                      }
+                      className={`size-2 shrink-0 rounded-full ${item.priority === "CRITICAL" ? "bg-red-600" : "bg-amber-500"}`}
+                      title={
+                        item.priority === "CRITICAL"
+                          ? "Prioridade crítica"
+                          : "Prioridade alta"
+                      }
+                    />
+                  )}
+                  <Link
+                    className="font-medium underline-offset-4 hover:underline"
+                    href={`${basePath}/${item.id}`}
+                  >
+                    {item.title}
+                  </Link>
+                </div>
                 <p className="text-muted-foreground mt-0.5 text-xs">
                   {item.secondary ??
-                    `Actualizado ${new Date(item.updatedAt).toLocaleDateString("pt-PT")}`}
+                    `Actualizado ${formatDate(item.updatedAt.slice(0, 10))}`}
                 </p>
               </td>
               {showPeople && (
-                <td className="text-muted-foreground px-3 py-3.5 text-xs">
-                  <span className="text-foreground">
-                    {item.owner ?? "Sem Owner"}
-                  </span>
-                  <br />
-                  {item.responsible ?? "Sem Responsible"}
+                <td className="px-3 py-3.5 text-xs">
+                  {item.responsible ?? (
+                    <span className="text-red-700">sem responsável</span>
+                  )}
                 </td>
               )}
-              <td className="px-3 py-3.5">
-                <div className="flex flex-wrap items-center gap-1.5">
+              {showPhase && (
+                <td className="px-3 py-3.5">
                   {item.phase && (
-                    <StatusBadge value={item.phase} kind="plain" />
+                    <StatusBadge value={item.phase} kind="phase" />
                   )}
-                  {item.priority && (
-                    <StatusBadge value={item.priority} kind="priority" />
-                  )}
-                </div>
-              </td>
+                </td>
+              )}
               {showDue && (
                 <td className="px-3 py-3.5 text-xs">
                   <DueDate value={item.dueDate} status={item.status} />
                 </td>
               )}
               <td className="px-5 py-3.5 text-right">
-                <StatusBadge value={item.status} />
+                <StatusBadge value={item.status} kind={badgeKind} />
               </td>
             </tr>
           ))}

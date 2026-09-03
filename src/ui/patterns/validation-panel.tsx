@@ -4,6 +4,7 @@ import {
 } from "@/app/actions/ai";
 import type { ProposalView } from "@/modules/ai/application/services";
 import type { Finding } from "@/modules/ai/domain/types";
+import { findingLabel } from "@/ui/labels";
 
 const severityStyle: Record<Finding["severity"], string> = {
   CRITICAL: "bg-red-50 text-red-900 border-red-200",
@@ -38,8 +39,16 @@ export function FindingList({
           key={`${finding.code}-${index}`}
           data-testid="validation-finding"
         >
-          <span className="mr-2 text-xs font-semibold tracking-wide uppercase">
-            {finding.severity} · {finding.code}
+          <span
+            className="mr-2 text-xs font-semibold tracking-wide uppercase"
+            data-code={finding.code}
+          >
+            {finding.severity === "CRITICAL"
+              ? "Atenção"
+              : finding.severity === "WARNING"
+                ? "Aviso"
+                : "Nota"}{" "}
+            · {findingLabel(finding.code)}
           </span>
           {finding.message}
           {finding.evidence.length > 0 && (
@@ -70,9 +79,9 @@ export function ValidationPanel({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Execution Validator</h2>
+          <h2 className="text-lg font-semibold">Alertas</h2>
           <p className="text-muted-foreground text-sm">
-            Regras determinísticas sobre este registo; a análise AI é opcional e
+            O que falta ou está a atrasar. A análise do assistente é opcional e
             só acrescenta recomendações.
           </p>
         </div>
@@ -84,11 +93,11 @@ export function ValidationPanel({
             disabled={!aiEnabled}
             title={
               aiEnabled
-                ? "Pedir uma análise qualitativa ao modelo"
-                : "AI desativada neste ambiente (AI_PROVIDER=disabled)"
+                ? "Pedir uma leitura qualitativa ao assistente"
+                : "Assistente desactivado neste ambiente"
             }
           >
-            Pedir análise AI
+            Pedir análise ao assistente
           </button>
         </form>
       </div>
@@ -97,14 +106,14 @@ export function ValidationPanel({
           role="alert"
           className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800"
         >
-          A análise AI falhou: {aiError}. O registo e as regras determinísticas
+          O assistente não respondeu: {aiError}. O registo e os alertas
           continuam disponíveis.
         </p>
       )}
       <div className="mt-4">
         {findings.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            Sem alertas determinísticos.
+            Sem alertas. Está tudo o que é preciso.
           </p>
         ) : (
           <FindingList findings={findings} />
@@ -112,9 +121,7 @@ export function ValidationPanel({
       </div>
       {aiFindings.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-sm font-semibold">
-            Recomendações AI (pendentes)
-          </h3>
+          <h3 className="text-sm font-semibold">Recomendações do assistente</h3>
           <ul className="mt-2 grid gap-2">
             {aiFindings.map((proposal) =>
               proposal.payload.type === "FINDING" ? (
@@ -124,7 +131,7 @@ export function ValidationPanel({
                   data-testid="ai-finding"
                 >
                   <span className="mr-2 text-xs font-semibold tracking-wide uppercase">
-                    AI · {proposal.payload.severity} · {proposal.payload.code}
+                    Assistente · {findingLabel(proposal.payload.code)}
                   </span>
                   {proposal.payload.message}
                   <span className="mt-1 block text-xs opacity-80">
@@ -164,7 +171,7 @@ export function ValidationPanel({
       )}
       {lastRun && (
         <p className="text-muted-foreground mt-4 text-xs">
-          Última análise AI: {lastRun.status}
+          Última análise do assistente: {lastRun.status}
           {lastRun.error_category ? ` (${lastRun.error_category})` : ""} ·{" "}
           {new Date(lastRun.started_at).toLocaleString("pt-PT")}
         </p>

@@ -5,6 +5,7 @@ import { loadListOptions } from "@/modules/execution/application/creation-option
 import { ExecutionList } from "@/ui/patterns/execution-list";
 import { ListFilters } from "@/ui/patterns/list-filters";
 import { Pagination } from "@/ui/patterns/pagination";
+import { decisionStatusLabel, formatDate } from "@/ui/labels";
 
 export const dynamic = "force-dynamic";
 
@@ -47,12 +48,12 @@ export default async function DecisionsPage({
     <>
       <header className="mb-10 flex items-end justify-between gap-6">
         <div>
-          <p className="text-accent text-sm font-medium">Execution Core</p>
+          <p className="text-accent text-sm font-medium">Execução</p>
           <h1 className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
-            Decisions
+            Decisões
           </h1>
           <p className="text-muted-foreground mt-3">
-            Decisões duráveis, com contexto e ações relacionadas opcionais.
+            O que ficou decidido, onde se aplica e o que gerou.
           </p>
         </div>
         <Link
@@ -68,13 +69,15 @@ export default async function DecisionsPage({
         showPriority={false}
         showPeople={false}
         statuses={["DRAFT", "ACTIVE", "ARCHIVED"]}
+        statusLabel={decisionStatusLabel}
         options={options}
       />
       <ExecutionList
         items={result.items.map((item) => ({
           ...item,
-          secondary: `Decidido em ${new Date(`${item.decisionDate}T00:00:00`).toLocaleDateString("pt-PT")}`,
+          secondary: `Decidida a ${formatDate(item.decisionDate)}`,
         }))}
+        badgeKind="decision"
         basePath="/decisions"
         createHref="/decisions/new"
         createLabel="Nova decisão"
