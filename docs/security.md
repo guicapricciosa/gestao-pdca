@@ -185,7 +185,7 @@ Before a protected feature ships:
 - action and scope rules documented;
 - server and RLS paths tested;
 - list/detail/create/update/delete/export/search/analytics/AI cases covered as applicable;
-- RESTRICTED/PRIVATE behavior covered;
+- RESTRICTED/PRIVATE behavior covered, including the RESTRICTED creator rule (creator keeps access without a silent grant; access ends with the assignment);
 - audit event defined and verified;
 - error and logging content reviewed;
 - attachment/integration paths reviewed;

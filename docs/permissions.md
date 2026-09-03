@@ -93,12 +93,13 @@ Create/update/delete/publish actions additionally require the corresponding func
 
 ### RESTRICTED
 
-Read access is limited to:
+Access is limited to:
 
 - users with a valid explicit grant for the requested action; or
-- holders of an explicit `restricted_access.admin`-style permission whose policy covers the object's company and sensitivity category.
+- users whose current organizational assignment covers the object, holds the functional permission for the action **and** holds `security.restricted.read`; or
+- **the creator of the object** (decision of 2026-09-03), through a current organizational assignment that covers the object and holds the functional permission for the action. The creator is exempt only from `security.restricted.read`; nothing is written (no explicit grant, no membership), so when the creator's assignment ends, expires or stops covering the object, this access ends with it.
 
-Normal scope intersection, meeting participation, collaborator/watcher status, ownership or responsibility is insufficient. The creator is not implicitly retained forever unless creation creates an explicit grant by policy.
+Normal scope intersection, meeting participation, collaborator/watcher status, ownership or responsibility is insufficient. The creator condition lives inside `private.can_access_security_object` (migration `202609030012_restricted_creator_access.sql`), so lists, My Work, meeting links, attachments and AI sources all inherit it through RLS and `filter_accessible_security_objects` without any per-feature logic. Tests: `supabase/tests/restricted_creator_test.sql`.
 
 ### PRIVATE
 
@@ -242,7 +243,8 @@ function can(user, action, object): Decision
     return DENY
 
   if object.visibility == RESTRICTED:
-    return allow only if hasRestrictedAdminPath(scope, action, object)
+    return allow only if some current path covers the object, holds the action
+           and (user is object.createdBy or path holds security.restricted.read)
 
   for path in scope.paths:
     if action not in path.permissionKeys: continue
@@ -285,25 +287,27 @@ Never fetch IDs broadly and filter them in application memory for normal list, s
 
 Assume each actor has the functional `read` permission described by their profile; special modes have no grants unless stated.
 
-| Actor                 | Object                                | Visibility | Extra condition                       | Decision | Reason                                   |
-| --------------------- | ------------------------------------- | ---------- | ------------------------------------- | -------- | ---------------------------------------- |
-| Global executive      | Marketing / Restaurant A              | NORMAL     | company covered                       | ALLOW    | global configured path                   |
-| Global executive      | HR sensitive item                     | RESTRICTED | no grant/admin sensitivity permission | DENY     | global scope does not bypass restriction |
-| Support & IT director | IT / Restaurant B                     | NORMAL     | all restaurants covered               | ALLOW    | vertical department scope                |
-| Support & IT director | Marketing / Restaurant B              | NORMAL     | no Marketing path                     | DENY     | domain mismatch                          |
-| DOL subdirector       | Operations / subordinate Restaurant A | NORMAL     | inherited restaurant                  | ALLOW    | horizontal operational scope             |
-| DOL subdirector       | Operations / Restaurant Z             | NORMAL     | outside branch                        | DENY     | restaurant mismatch                      |
-| Restaurant A manager  | Maintenance / Restaurant A            | NORMAL     | domain authorized                     | ALLOW    | assigned restaurant and domain           |
-| Restaurant A manager  | Maintenance / Restaurant B            | NORMAL     | none                                  | DENY     | wrong restaurant                         |
-| HACCP service user    | HACCP / covered Restaurant B          | NORMAL     | service covers B                      | ALLOW    | service scope path                       |
-| HACCP service user    | Maintenance / Restaurant B            | NORMAL     | none                                  | DENY     | wrong service domain                     |
-| Collaborator          | Item outside normal scope             | NORMAL     | collaborator only                     | DENY     | relationship is not access               |
-| Collaborator          | Same item                             | NORMAL     | explicit read/update grant            | ALLOW    | bounded grant                            |
-| Watcher               | Private item                          | PRIVATE    | watcher only                          | DENY     | watcher cannot bypass visibility         |
-| Meeting participant   | Derived PDCA outside scope            | NORMAL     | participant only                      | DENY     | meeting access does not transfer         |
-| Responsible           | Restricted item                       | RESTRICTED | assignment only                       | DENY     | responsibility and access are separate   |
-| Responsible           | Restricted item                       | RESTRICTED | explicit read/update grant            | ALLOW    | grant covers action                      |
-| Creator               | Private item                          | PRIVATE    | active creator grant                  | ALLOW    | lifecycle grant                          |
+| Actor                 | Object                                | Visibility | Extra condition                        | Decision | Reason                                   |
+| --------------------- | ------------------------------------- | ---------- | -------------------------------------- | -------- | ---------------------------------------- |
+| Global executive      | Marketing / Restaurant A              | NORMAL     | company covered                        | ALLOW    | global configured path                   |
+| Global executive      | HR sensitive item                     | RESTRICTED | no grant/admin sensitivity permission  | DENY     | global scope does not bypass restriction |
+| Support & IT director | IT / Restaurant B                     | NORMAL     | all restaurants covered                | ALLOW    | vertical department scope                |
+| Support & IT director | Marketing / Restaurant B              | NORMAL     | no Marketing path                      | DENY     | domain mismatch                          |
+| DOL subdirector       | Operations / subordinate Restaurant A | NORMAL     | inherited restaurant                   | ALLOW    | horizontal operational scope             |
+| DOL subdirector       | Operations / Restaurant Z             | NORMAL     | outside branch                         | DENY     | restaurant mismatch                      |
+| Restaurant A manager  | Maintenance / Restaurant A            | NORMAL     | domain authorized                      | ALLOW    | assigned restaurant and domain           |
+| Restaurant A manager  | Maintenance / Restaurant B            | NORMAL     | none                                   | DENY     | wrong restaurant                         |
+| HACCP service user    | HACCP / covered Restaurant B          | NORMAL     | service covers B                       | ALLOW    | service scope path                       |
+| HACCP service user    | Maintenance / Restaurant B            | NORMAL     | none                                   | DENY     | wrong service domain                     |
+| Collaborator          | Item outside normal scope             | NORMAL     | collaborator only                      | DENY     | relationship is not access               |
+| Collaborator          | Same item                             | NORMAL     | explicit read/update grant             | ALLOW    | bounded grant                            |
+| Watcher               | Private item                          | PRIVATE    | watcher only                           | DENY     | watcher cannot bypass visibility         |
+| Meeting participant   | Derived PDCA outside scope            | NORMAL     | participant only                       | DENY     | meeting access does not transfer         |
+| Responsible           | Restricted item                       | RESTRICTED | assignment only                        | DENY     | responsibility and access are separate   |
+| Creator               | Restricted item they created          | RESTRICTED | current covering path + action         | ALLOW    | creator keeps access; no grant written   |
+| Creator               | Restricted item they created          | RESTRICTED | assignment expired or no longer covers | DENY     | creator access is not a standing grant   |
+| Responsible           | Restricted item                       | RESTRICTED | explicit read/update grant             | ALLOW    | grant covers action                      |
+| Creator               | Private item                          | PRIVATE    | active creator grant                   | ALLOW    | lifecycle grant                          |
 
 ## 10. Creation and scope mutation
 

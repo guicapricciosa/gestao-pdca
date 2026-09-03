@@ -347,7 +347,7 @@ Objects should support at least these visibility policies:
 Uses normal organizational scope rules.
 
 ## RESTRICTED
-Access is restricted to explicitly authorized participants/users and appropriately privileged administrators.
+Access is restricted to explicitly authorized participants/users and appropriately privileged administrators (holders of `security.restricted.read` within a covering scope). **The creator of a RESTRICTED object keeps access to the object they created** (decision of 2026-09-03): they still need a current assignment covering the object and the functional permission for the action, but not `security.restricted.read`. No explicit grant is written for this; the condition is part of the central deterministic authorization rule, so it applies uniformly to detail pages, lists, My Work, meetings, linked objects and AI sources, and it disappears when the creator's assignment ends.
 
 ## PRIVATE
 Access only to creator and explicitly authorized users, subject to explicitly defined administrative/security rules.

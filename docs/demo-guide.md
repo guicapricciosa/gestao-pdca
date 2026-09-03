@@ -111,7 +111,7 @@ nada de Marketing ou Happy People, mesmo em restaurantes que cobre.
 
 **Sara Barradas (sara.barradas@example.test)**
 Criou a Decision restrita "Rever política de gorjetas" mas **não a vê**: no
-modelo implementado, RESTRICTED exige a permissão `security.restricted.read`
+modelo implementado, RESTRICTED exige a permissão `security.restricted.read` (excepto para quem criou o objecto, que mantém acesso enquanto a sua atribuição cobrir o objecto — sem grant silencioso)
 ou um acesso explícito, e a role de director de departamento não a tem. Só o
 CEO e o André Março a vêem. É um ponto a decidir (ver "problemas conhecidos").
 
