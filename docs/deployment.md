@@ -101,5 +101,53 @@ branch) and keeps Domínios.pt to a single CNAME. Strategy A depends on Passenge
 details that cannot be verified from here and adds operational risk (cold starts,
 memory limits during `next build`, manual HSTS, cron as the only scheduler).
 
-Before the first deploy, still to do in the repository (small, no external
-change): add `vercel.json` with the cron and, optionally, an `/api/health` route.
+`vercel.json` (cron every minute on `/api/jobs/process`) and `/api/health` are in
+the repository.
+
+## 5. First-deploy checklist (exact order; DNS last)
+
+Nothing below has been executed yet. No real users are created by these steps.
+
+**Supabase Cloud**
+
+1. Create the project in an **EU region** (e.g. `eu-west-1`/Frankfurt), strong database password kept in a password manager.
+2. `supabase link --project-ref <ref>` from the repository root (asks for the database password).
+3. `supabase migration list` — every file in `supabase/migrations` must show as pending remotely and none as unknown.
+4. `supabase db push` — applies migrations only. **Never** run `supabase db reset --linked` (it destroys the remote database).
+5. **Do not** apply `supabase/seed.sql` remotely: it creates demo users with a known password.
+6. Database → Extensions: enable `pg_cron` (the migration schedules the jobs when the extension exists; if it was enabled after `db push`, run the three `cron.schedule(...)` statements from migration `202609030015_notifications.sql` once in the SQL editor).
+7. Storage: confirm bucket `execution-attachments` exists and is private.
+8. Authentication → URL configuration: Site URL `https://pdca.gcpai.pt`; Redirect URLs `https://pdca.gcpai.pt/**`. Keep e-mail confirmations on; sign-ups off unless needed.
+9. Copy Project URL, anon (publishable) key and service_role key for the next section — service_role only into Vercel's sensitive env.
+
+**Secrets**
+
+10. Generate a **new production VAPID pair**: `node -e "console.log(require('web-push').generateVAPIDKeys())"`. Never reuse the local pair.
+11. Generate `CRON_SECRET`: `openssl rand -base64 32`.
+
+**Vercel**
+
+12. Import the GitHub repository `guicapricciosa/gestao-pdca` (framework Next.js, Node 22.x, Pro plan for the per-minute cron).
+13. Environment variables (Production, and Preview if wanted):
+    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (sensitive),
+    `NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY`, `WEB_PUSH_PRIVATE_KEY` (sensitive), `WEB_PUSH_SUBJECT=mailto:<it mailbox>`, `PUSH_PROVIDER=webpush`,
+    `CRON_SECRET` (sensitive), `AI_PROVIDER=disabled`,
+    `ATTACHMENT_MAX_BYTES=10485760`, `ATTACHMENT_MAX_PER_OBJECT=25`, `ATTACHMENT_ALLOWED_MIME_TYPES=application/pdf,image/png,image/jpeg,text/plain`,
+    `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_APP_SHORT_NAME` (branding, optional).
+14. Deploy and confirm the build log ends with a successful `next build` and the cron `/api/jobs/process` appears under Settings → Cron Jobs.
+
+**Validation on the temporary `*.vercel.app` URL** (before touching the domain)
+
+15. `GET /api/health` → 200 with `{"status":"ok"}` (503 means Supabase is unreachable from Vercel: check URL/key).
+16. Create **one** administrator profile through the organization commands (not the seed) and log in; `/my-work` renders, logout works, `/tasks` unauthenticated redirects to `/login?next=`.
+17. PWA: Chrome shows the install icon; install; `manifest.webmanifest` and `sw.js` 200; go offline and confirm the "Sem ligação à Internet" page.
+18. Notification Center: create a task for the admin, activate it from another account or wait a minute; the bell shows the entry after the cron ran (Vercel → Cron Jobs → logs show 200).
+19. Push: Definições → Push → "Receber neste dispositivo"; trigger an eligible event; the device receives the push; `notification_deliveries` shows `sent`.
+20. `curl -i https://<app>.vercel.app/api/jobs/process` → 401 without the secret.
+
+**Domain — only after 15–20 pass**
+
+21. Vercel → Settings → Domains → add `pdca.gcpai.pt`.
+22. Domínios.pt → zone `gcpai.pt` → add `CNAME pdca → cname.vercel-dns.com` (TTL 3600). Wait for the certificate.
+23. Update Supabase Site URL / Redirect URLs if they were set to the `vercel.app` URL, and re-check 15–20 on `https://pdca.gcpai.pt`.
+24. Re-run the push test on the final domain (subscriptions are per origin; devices must subscribe again).

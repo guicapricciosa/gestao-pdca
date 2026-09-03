@@ -39,3 +39,16 @@ test("a deep link survives login and unsafe targets are ignored", async ({
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL("**/my-work");
 });
+
+test("the health probe answers without authentication and without secrets", async ({
+  request,
+}) => {
+  const response = await request.get("/api/health");
+  expect(response.status()).toBe(200);
+  const body = await response.json();
+  expect(body).toMatchObject({
+    status: "ok",
+    checks: { app: "ok", supabase: "ok" },
+  });
+  expect(JSON.stringify(body)).not.toMatch(/key|54321|supabase\.co/i);
+});
