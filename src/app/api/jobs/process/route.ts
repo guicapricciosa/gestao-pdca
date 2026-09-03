@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  deliverPendingPush,
+  selectPushProvider,
+} from "@/modules/notifications/application/push";
 import { createSupabaseAdminClient } from "@/platform/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -22,8 +26,10 @@ async function run(request: NextRequest) {
     admin.rpc("generate_deadline_notifications"),
   ]);
   const summary = Array.isArray(outbox.data) ? outbox.data[0] : null;
+  const push = await deliverPendingPush(admin, selectPushProvider(), 200);
   return NextResponse.json({
     outbox: summary ?? null,
+    push,
     reminders: reminders.data ?? 0,
     deadlines: deadlines.data ?? 0,
     errors: [outbox.error, reminders.error, deadlines.error]

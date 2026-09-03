@@ -1,6 +1,7 @@
 import { getBranding } from "@/platform/pwa/branding";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { InstallApp } from "@/ui/components/install-app";
+import { PushSettings } from "@/ui/components/push-settings";
 import { NotificationPreferences } from "@/ui/patterns/notification-preferences";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,11 @@ export default async function SettingsPage() {
             deadline_days: 1,
             push_enabled: true,
           }
+        }
+        push={
+          <PushSettings
+            publicKey={process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY ?? ""}
+          />
         }
       />
       <InstallApp appName={branding.name} />

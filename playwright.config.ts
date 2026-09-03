@@ -31,6 +31,13 @@ export default defineConfig({
     ...devices["Desktop Chrome"],
   },
   webServer: {
+    env: {
+      ...process.env,
+      AI_PROVIDER: "fake",
+      PUSH_PROVIDER: "fake",
+      PUSH_LOG_FILE: `${process.cwd()}/test-results/push-log.jsonl`,
+      CRON_SECRET: "e2e-secret",
+    },
     command:
       'sh -c \'until curl -sf -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/permissions?select=id&limit=1" >/dev/null; do sleep 1; done; npm run dev -- --hostname 127.0.0.1 --port 3100\'',
     url: "http://127.0.0.1:3100/login",

@@ -87,3 +87,51 @@ self.addEventListener("fetch", (event) => {
   }
   // Anything else goes straight to the network and is never stored.
 });
+
+/* Web Push: the payload is what the server decided to show (generic for
+ * reserved subjects). Tapping opens the deep link inside the app, which then
+ * authenticates and authorizes as usual. */
+self.addEventListener("push", (event) => {
+  let data = {
+    title: "Actualização",
+    body: "",
+    href: "/notificacoes",
+    tag: undefined,
+  };
+  try {
+    data = { ...data, ...event.data.json() };
+  } catch {
+    /* keep the neutral default */
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      tag: data.tag,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { href: data.href },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const href =
+    (event.notification.data && event.notification.data.href) ||
+    "/notificacoes";
+  const target = new URL(href, self.location.origin).href;
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((windows) => {
+        const open = windows.find((client) =>
+          client.url.startsWith(self.location.origin),
+        );
+        if (open)
+          return open
+            .navigate(target)
+            .then((client) => client && client.focus());
+        return self.clients.openWindow(target);
+      }),
+  );
+});
