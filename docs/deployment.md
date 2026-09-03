@@ -151,3 +151,19 @@ Nothing below has been executed yet. No real users are created by these steps.
 22. Domínios.pt → zone `gcpai.pt` → add `CNAME pdca → cname.vercel-dns.com` (TTL 3600). Wait for the certificate.
 23. Update Supabase Site URL / Redirect URLs if they were set to the `vercel.app` URL, and re-check 15–20 on `https://pdca.gcpai.pt`.
 24. Re-run the push test on the final domain (subscriptions are per origin; devices must subscribe again).
+
+## 6. Reference data and first people (executed 2026-09-04)
+
+- `supabase/migrations/202609040001_foundation_permissions.sql` moves the nine
+  foundation permissions out of the demo seed (they are referenced by code).
+- `supabase/bootstrap/production.sql` (idempotent, run with
+  `supabase db query --linked --file …`) creates the real organization
+  structure: Grupo Capricciosa and the holding, 11 departments/shared services,
+  the 9 roles with their permissions and the 15 restaurants (list of 2025-10).
+  No people, no demo objects.
+- `supabase/bootstrap/first-admin.sql` turns an Auth user created from the
+  dashboard into a profile with a company-wide Global Executive assignment.
+- Known gap (technical debt): the app has no screen for Auth invitations or
+  password recovery, so people are created in the dashboard ("Create new user",
+  auto-confirm) and their profile/assignment is added with SQL until an
+  onboarding flow exists.
