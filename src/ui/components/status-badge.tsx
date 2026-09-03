@@ -1,3 +1,15 @@
+import {
+  agendaStatusLabel,
+  decisionStatusLabel,
+  formatDate,
+  meetingStatusLabel,
+  pdcaStatusLabel,
+  phaseLabel,
+  priorityLabel,
+  relativeDue,
+  taskStatusLabel,
+} from "@/ui/labels";
+
 const tones = {
   neutral: "border-neutral-300 bg-white text-neutral-700",
   muted: "border-neutral-200 bg-neutral-100 text-neutral-600",
@@ -40,26 +52,60 @@ const priorityTone: Record<string, Tone> = {
   CRITICAL: "danger",
 };
 
+export type BadgeKind =
+  | "task"
+  | "pdca"
+  | "meeting"
+  | "decision"
+  | "agenda"
+  | "priority"
+  | "phase"
+  | "plain";
+
+function textFor(kind: BadgeKind, value: string) {
+  switch (kind) {
+    case "task":
+      return taskStatusLabel(value);
+    case "pdca":
+      return pdcaStatusLabel(value);
+    case "meeting":
+      return meetingStatusLabel(value);
+    case "decision":
+      return decisionStatusLabel(value);
+    case "agenda":
+      return agendaStatusLabel(value);
+    case "priority":
+      return priorityLabel(value);
+    case "phase":
+      return phaseLabel(value);
+    default:
+      return value;
+  }
+}
+
 export function StatusBadge({
   value,
-  kind = "status",
+  kind = "task",
   className = "",
 }: {
   readonly value: string;
-  readonly kind?: "status" | "priority" | "plain";
+  readonly kind?: BadgeKind;
   readonly className?: string;
 }) {
   const tone =
     kind === "priority"
       ? (priorityTone[value] ?? "neutral")
-      : kind === "status"
-        ? (statusTone[value] ?? "neutral")
-        : "neutral";
+      : kind === "phase"
+        ? "dark"
+        : kind === "plain"
+          ? "neutral"
+          : (statusTone[value] ?? "neutral");
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase ${tones[tone]} ${className}`}
+      data-code={value}
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.06em] whitespace-nowrap uppercase ${tones[tone]} ${className}`}
     >
-      {value}
+      {textFor(kind, value)}
     </span>
   );
 }
@@ -68,10 +114,12 @@ export function DueDate({
   value,
   status,
   className = "",
+  relative = false,
 }: {
   readonly value: string | null | undefined;
   readonly status?: string;
   readonly className?: string;
+  readonly relative?: boolean;
 }) {
   if (!value)
     return (
@@ -83,16 +131,14 @@ export function DueDate({
   );
   const overdue = !terminal && value < today;
   const dueToday = !terminal && value === today;
-  const label = new Date(`${value}T00:00:00`).toLocaleDateString("pt-PT");
   return (
     <span
       className={`tabular-nums ${overdue ? "font-semibold text-red-700" : dueToday ? "font-semibold text-amber-800" : ""} ${className}`}
-      title={
-        overdue ? "Prazo ultrapassado" : dueToday ? "Vence hoje" : undefined
-      }
+      title={formatDate(value)}
     >
-      {label}
-      {overdue ? " · atrasado" : dueToday ? " · hoje" : ""}
+      {relative
+        ? relativeDue(value)
+        : `${formatDate(value)}${overdue ? " · atrasado" : dueToday ? " · hoje" : ""}`}
     </span>
   );
 }

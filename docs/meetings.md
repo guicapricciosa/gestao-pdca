@@ -102,6 +102,16 @@ The meeting can be published only when configured validation rules pass. It may 
 
 Closing records actual end time, unresolved agenda dispositions and carry-forward links. Future notification delivery will consume the transactional outbox after commit; external notifications are not implemented in this phase.
 
+### "Terminar e distribuir" (simplified flow, 2026-09-03)
+
+People never operate the lifecycle by hand. The Meeting Mode screen offers **Abrir reunião** (DRAFT → SCHEDULED → IN_PROGRESS as needed) and **Terminar reunião**, which opens a summary page (`/meetings/{id}/finish`) with three blocks:
+
+- **Precisa de correcção antes de distribuir** (blocking): action without Responsável, PDCA without Owner/problema/objectivo, assignee without access to the object, or the viewer not being the Chair. The button stays disabled while any exists; each item links to the record with `?from=<meeting>` so the person fixes it and returns.
+- **Temas sem conclusão**: every PENDING agenda item requires an explicit choice, _Levar para a próxima reunião_ (default, POSTPONED and carried forward only if a later SCHEDULED session of the series already exists) or _Dar como discutido_ (DISCUSSED). Nothing is carried forward silently.
+- **Recomendado** (warnings): missing due date, KPI, root cause, default priority. They never block.
+
+Submitting calls `public.finish_meeting(meeting_session_id, expected_version, agenda_outcomes)`: one transaction that applies the agenda outcomes, creates the carry-forward rows, then runs the internal transitions REVIEW → PUBLISHED → CLOSED through `transition_meeting_session` (so every intermediate transition row and audit event still exists) and writes a `meeting.finished` audit event. Any validation failure rolls the whole operation back; a stale `expected_version` is rejected. The `/review` route redirects to `/finish`.
+
 ## 7. After the meeting
 
 - Published decisions, PDCAs and tasks enter their own workflows and dashboards.

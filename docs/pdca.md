@@ -59,7 +59,7 @@ Phase generally progresses `PLAN -> DO -> CHECK -> ACT`, but authorized users ma
 The application must allow incomplete early drafts while increasing validation at transitions:
 
 - **Draft:** title and author/context are sufficient.
-- **Open/Planned:** problem statement, objective, Owner, Responsible, scope, visibility and initial due date required.
+- **Open/Planned:** problem statement, objective, Owner, Responsible, scope and visibility required (since 2026-09-03 the due date is a warning, not a blocker; migration `202609030011`).
 - **Do/In Progress:** actionable plan or at least one task/manual action, responsible and start evidence required by policy.
 - **Check/Under Review:** expected result and KPI/evaluation method must be defined; actual observations begin.
 - **Act/Completion:** actual result, conclusion and required evidence/standardization or corrective action are supplied.

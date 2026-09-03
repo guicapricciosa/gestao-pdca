@@ -11,7 +11,7 @@ Implemented in migrations `202609030005` and `202609030006`:
 - Collaborator/Watcher memberships in the transversal `object_memberships` table; membership insertion verifies pre-existing access and never creates a grant;
 - transactional SQL commands enforce permission, lifecycle, completion, blockers, full-scope changes and optimistic concurrency; direct authenticated writes are revoked.
 
-The MVP default is that a production Task entering OPEN/PLANNED requires Owner, Responsible and due date. Drafts may remain incomplete. Owner approval and recurring templates remain future work.
+Since the simplification of 2026-09-03 a Task entering OPEN/PLANNED requires only a Responsible (migration `202609030011_meeting_finish_and_accountability.sql`). Owner and due date are optional: they are surfaced as warnings by the Execution Validator, on the record and when a meeting is finished, never as blockers. The Owner is never filled in automatically (no "Owner = creator" rule); it is only suggested when an organizational rule is deterministic and unambiguous. Drafts may remain incomplete. Owner approval and recurring templates remain future work.
 
 ## 1. Domain intent
 
@@ -34,7 +34,7 @@ Status labels are configurable but map to stable semantic categories. Every tran
 Minimum transition rules:
 
 - Draft may be incomplete and stays outside normal execution dashboards.
-- Open/Planned requires title, scope, visibility, Responsible and due date unless an approved task type permits no deadline.
+- Open/Planned requires title, scope, visibility and Responsible. Due date and Owner are recommended and produce warnings when missing.
 - In Progress sets `first_action_at` if not already set.
 - Blocked requires an active blocker.
 - Completed requires completion notes/evidence according to task policy.

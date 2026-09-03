@@ -540,3 +540,12 @@ The next gate remains explicitly blocked pending human approval. No AI, Executiv
 - unit, pgTAP and end-to-end coverage for authorization, staleness, idempotent confirmation and provider failure.
 
 Still excluded and blocked pending approval: Executive Analytics, global Management Chat, automatic Executive Brief, Teams, WhatsApp, email, Calendar, semantic search and autonomous actions.
+
+## 2026-09-03 — Simplification delivered
+
+- Full PT-PT labels layer (`src/ui/labels.ts`), codes never shown.
+- Navigation: O meu trabalho / Reuniões / PDCAs / Tarefas / Decisões.
+- Meeting Mode as one screen with Abrir reunião, notes with autosave, quick creation of Tarefa/PDCA/Decisão in side sheets and _Terminar e distribuir_ as a single transaction (`finish_meeting`).
+- Task rule relaxed to Responsável only; PDCA to Owner + Responsável + problema + objectivo; due dates are warnings.
+- RESTRICTED creator rule integrated in the central authorization function.
+- Pending: user manual screenshots refresh on every UI change; Analytics and further AI work explicitly out of scope.

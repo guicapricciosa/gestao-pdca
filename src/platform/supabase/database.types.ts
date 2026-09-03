@@ -4565,6 +4565,39 @@ export type Database = {
         Args: { requested_permission: string };
         Returns: string[];
       };
+      finish_meeting: {
+        Args: {
+          agenda_outcomes?: Json;
+          expected_version: number;
+          meeting_session_id: string;
+        };
+        Returns: {
+          actual_end_at: string | null;
+          actual_start_at: string | null;
+          chair_profile_id: string;
+          closed_at: string | null;
+          company_id: string;
+          created_at: string;
+          created_by_profile_id: string;
+          id: string;
+          meeting_series_id: string | null;
+          published_at: string | null;
+          reopened_at: string | null;
+          scheduled_end_at: string;
+          scheduled_start_at: string;
+          security_object_id: string;
+          status: string;
+          title: string;
+          updated_at: string;
+          version: number;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "meeting_sessions";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       get_accessible_scope: {
         Args: never;
         Returns: {
