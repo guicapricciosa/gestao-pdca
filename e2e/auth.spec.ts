@@ -9,9 +9,13 @@ test("authentication, persisted session, logout and protected redirect", async (
   await expect(page).toHaveURL(/\/login$/);
 
   await login(page);
-  await expect(page.getByRole("heading", { name: "My Work" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "O meu trabalho" }),
+  ).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("heading", { name: "My Work" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "O meu trabalho" }),
+  ).toBeVisible();
 
   await logout(page);
   await page.goto("/pdcas");

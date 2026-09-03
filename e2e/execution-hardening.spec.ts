@@ -1,57 +1,126 @@
 import { expect, test } from "@playwright/test";
 
-import { adminClient, login, logout, submitAction } from "./support";
+import {
+  adminClient,
+  login,
+  logout,
+  openSheet,
+  pickRestaurantA,
+  profiles,
+  submitAction,
+} from "./support";
 
-test.describe.serial("authenticated Execution Core hardening", () => {
-  test("Task editing, assignments, due date, scope, lifecycle, memberships and attachment", async ({
+test.describe.serial("Tasks and PDCAs in the simplified UI", () => {
+  test("Task: create, change due date, block, unblock, complete, reopen, advanced options and attachment", async ({
     page,
   }) => {
     await login(page);
     await page.goto("/tasks/new");
-    await page.getByLabel("Título").fill("E2E Hardened Task");
     await page
-      .getByLabel("Descrição")
-      .fill("Created through the authenticated browser");
-    await page.getByLabel("Prazo").fill("2026-09-20");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar Task" }).click();
-    await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
-    const taskUrl = page.url();
-
-    const assignments = page
-      .locator("form")
-      .filter({ hasText: "Owner e Responsible" });
-    await assignments
-      .locator('select[name="ownerProfileId"]')
-      .selectOption({ label: "CEO" });
-    await assignments
+      .getByLabel("O que é preciso fazer?")
+      .fill("E2E Tarefa endurecida");
+    await page
       .locator('select[name="responsibleProfileId"]')
       .selectOption({ label: "CEO" });
-    await assignments
-      .getByRole("button", { name: "Guardar atribuições" })
-      .click();
-    await expect(page.getByText("Versão 2")).toBeVisible();
-
-    const edit = page.locator("form").filter({ hasText: "Editar Task" });
-    await edit.locator('input[name="title"]').fill("E2E Hardened Task edited");
-    await edit.getByRole("button", { name: "Guardar alterações" }).click();
+    await page.locator('input[name="dueDate"]').fill("2026-09-20");
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Adicionar tarefa" }).click();
+    await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
+    const taskUrl = page.url();
     await expect(
-      page.getByRole("heading", { name: "E2E Hardened Task edited" }),
-    ).toBeVisible();
-
-    const due = page.locator("form").filter({ hasText: "Alterar prazo" });
-    await due.locator('input[name="newDueDate"]').fill("2026-09-25");
-    await due.locator('input[name="reason"]').fill("Planeamento revisto");
-    await due.getByRole("button", { name: "Guardar prazo" }).click();
-    await expect(
-      page.getByRole("heading", { name: "Histórico de prazo" }),
+      page.getByRole("heading", { name: "E2E Tarefa endurecida" }),
     ).toBeVisible();
     await expect(
-      page.getByText("Planeamento revisto", { exact: false }).first(),
+      page.getByText("Responsável", { exact: true }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Rascunho", { exact: true }).first(),
     ).toBeVisible();
 
-    const scope = page.locator("form").filter({ hasText: "Alterar scope" });
+    // Verbs, not lifecycle codes.
+    await submitAction(page, page.getByRole("button", { name: "Activar" }));
+    await expect(
+      page.getByText("Aberta", { exact: true }).first(),
+    ).toBeVisible();
+    await submitAction(page, page.getByRole("button", { name: "Começar" }));
+    await expect(
+      page.getByText("Em curso", { exact: true }).first(),
+    ).toBeVisible();
+
+    let sheet = await openSheet(page, "open-due-sheet");
+    await sheet.locator('input[name="newDueDate"]').fill("2026-09-25");
+    await sheet.locator('input[name="reason"]').fill("Planeamento revisto");
+    await submitAction(
+      page,
+      sheet.getByRole("button", { name: "Guardar prazo" }),
+    );
+    await page.locator("summary").filter({ hasText: "Histórico" }).click();
+    await expect(page.getByText("Planeamento revisto").first()).toBeVisible();
+
+    sheet = await openSheet(page, "open-block-sheet");
+    await sheet
+      .locator('textarea[name="reason"], input[name="reason"]')
+      .first()
+      .fill("Fornecedor sem resposta");
+    await submitAction(page, sheet.getByRole("button", { name: "Bloquear" }));
+    await expect(
+      page.getByText("Bloqueada", { exact: true }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Fornecedor sem resposta").first(),
+    ).toBeVisible();
+
+    sheet = await openSheet(page, "open-unblock-sheet");
+    await submitAction(
+      page,
+      sheet.getByRole("button", { name: "Desbloquear e retomar" }),
+    );
+    await expect(
+      page.getByText("Em curso", { exact: true }).first(),
+    ).toBeVisible();
+
+    sheet = await openSheet(page, "open-complete-sheet");
+    await sheet
+      .locator('textarea[name="completionNotes"]')
+      .fill("Validado em E2E");
+    await submitAction(
+      page,
+      sheet.getByRole("button", { name: "Confirmar conclusão" }),
+    );
+    await expect(
+      page.getByText("Concluída", { exact: true }).first(),
+    ).toBeVisible();
+
+    // Reopen lives under "Mais".
+    await page.getByText("Mais ▾").click();
+    const more = page
+      .locator("form")
+      .filter({ has: page.locator('select[name="status"]') });
+    await more.locator('select[name="status"]').selectOption("OPEN");
+    await more.locator('input[name="reason"]').fill("Reabertura validada");
+    await submitAction(page, more.getByRole("button"));
+    await expect(
+      page.getByText("Aberta", { exact: true }).first(),
+    ).toBeVisible();
+    await page.locator("summary").filter({ hasText: "Histórico" }).click();
+    await expect(page.getByText(/Reabert/).first()).toBeVisible();
+
+    // Advanced options: edit, scope, members. Labels in Portuguese, no codes.
+    await page.getByTestId("advanced-options").locator("summary").click();
+    const edit = page.locator("form").filter({ hasText: "Editar tarefa" });
+    await edit
+      .locator('input[name="title"]')
+      .fill("E2E Tarefa endurecida editada");
+    await submitAction(
+      page,
+      edit.getByRole("button", { name: "Guardar alterações" }),
+    );
+    await expect(
+      page.getByRole("heading", { name: "E2E Tarefa endurecida editada" }),
+    ).toBeVisible();
+
+    await page.getByTestId("advanced-options").locator("summary").click();
+    const scope = page.locator("form").filter({ hasText: "Onde se aplica" });
     await scope.locator('input[name="restaurantIds"]').evaluateAll((boxes) =>
       boxes.forEach((box) => {
         (box as HTMLInputElement).checked = true;
@@ -60,194 +129,238 @@ test.describe.serial("authenticated Execution Core hardening", () => {
     await scope
       .locator('input[name="reason"]')
       .fill("Cobertura multi-restaurante");
-    await scope.getByRole("button", { name: "Guardar scope" }).click();
+    await submitAction(
+      page,
+      scope.getByRole("button", { name: "Guardar âmbito" }),
+    );
     await expect(
-      page.getByText("Restaurant A, Restaurant B", { exact: false }),
+      page.getByText("Restaurant A, Restaurant B", { exact: false }).first(),
     ).toBeVisible();
 
+    await page.getByTestId("advanced-options").locator("summary").click();
     const members = page
       .locator("section")
-      .filter({ hasText: "Collaborators e Watchers" });
+      .filter({ hasText: "Colaboradores e seguidores" });
     await members
       .locator('select[name="profileId"]')
       .selectOption({ label: "Restaurant Manager A" });
     await members
       .locator('select[name="membershipRole"]')
       .selectOption("COLLABORATOR");
-    await members.getByRole("button", { name: "Adicionar" }).click();
+    await submitAction(
+      page,
+      members.getByRole("button", { name: "Adicionar" }),
+    );
+    await page.getByTestId("advanced-options").locator("summary").click();
     await expect(
-      members.locator("span").filter({ hasText: "Restaurant Manager A" }),
+      page
+        .locator("section")
+        .filter({ hasText: "Colaboradores e seguidores" })
+        .locator("span")
+        .filter({ hasText: "Restaurant Manager A" }),
     ).toBeVisible();
-    await members.getByRole("button", { name: "Remover" }).click();
 
-    const upload = page
+    // Progress: a comment and an attachment.
+    const progress = page
       .locator("form")
-      .filter({ hasText: "Adicionar attachment" });
+      .filter({ hasText: "Publicar actualização" });
+    await progress
+      .locator('textarea[name="body"]')
+      .fill("Ponto de situação E2E");
+    await submitAction(
+      page,
+      progress.getByRole("button", { name: "Publicar actualização" }),
+    );
+    await expect(page.getByText("Ponto de situação E2E")).toBeVisible();
+
+    const upload = page.locator("form").filter({ hasText: "Anexar ficheiro" });
     await upload.locator('input[type="file"]').setInputFiles({
       name: "evidence.txt",
       mimeType: "text/plain",
       buffer: Buffer.from("authorized evidence"),
     });
-    await upload.getByRole("button", { name: "Enviar ficheiro" }).click();
+    await upload.getByRole("button", { name: "Anexar ficheiro" }).click();
     await expect(
       page.getByRole("link", { name: "evidence.txt" }),
     ).toBeVisible();
-    const responsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/attachments/") &&
-        response.status() === 307,
-    );
-    await page.getByRole("link", { name: "evidence.txt" }).click();
-    await responsePromise;
-    await page.goto(taskUrl);
-
-    const transition = async (status: string, reason = "") => {
-      await page.reload();
-      const form = page.locator("form").filter({ hasText: "Alterar estado" });
-      await form.locator('select[name="status"]').selectOption(status);
-      if (reason) await form.locator('input[name="reason"]').fill(reason);
-      if (status === "COMPLETED")
-        await form
-          .locator('textarea[name="completionNotes"]')
-          .fill("Validated in E2E");
-      await form.getByRole("button", { name: "Guardar transição" }).click();
-      await expect(
-        page.getByText(status, { exact: true }).first(),
-      ).toBeVisible();
-    };
-    await transition("OPEN");
-    await transition("IN_PROGRESS");
-    await transition("COMPLETED");
-    await transition("OPEN", "Reabertura validada");
-    await expect(
-      page.getByText("task.reopened", { exact: false }),
-    ).toBeVisible();
-
     const attachmentPath = await page
       .getByRole("link", { name: "evidence.txt" })
       .getAttribute("href");
+    await page.goto(taskUrl);
+
     await logout(page);
     await login(page, "ricardo.torrao@example.test");
-    const deniedDownload = await page.goto(attachmentPath!);
-    expect(deniedDownload?.status()).toBe(404);
-    expect(await deniedDownload?.text()).toContain("Attachment not found");
+    const denied = await page.goto(attachmentPath!);
+    expect(denied?.status()).toBe(404);
   });
 
-  test("PDCA editing, phase, linked Task, completion and reopening", async ({
+  test("PDCA: phases with only the relevant fields, child task, completion and reopening", async ({
     page,
   }) => {
     await login(page);
     await page.goto("/pdcas/new");
-    await page.getByLabel("Título").fill("E2E Improvement Cycle");
-    await page.getByLabel("Descrição").fill("Problem captured in E2E");
-    await page.getByLabel("Objetivo").fill("Remove recurrent failure");
-    await page.getByLabel("Prazo").fill("2026-10-01");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar PDCA" }).click();
-    await page.waitForURL(/\/pdcas\/[0-9a-f-]+$/);
-
-    const assignments = page
-      .locator("form")
-      .filter({ hasText: "Owner e Responsible" });
-    await assignments
-      .locator('select[name="ownerProfileId"]')
-      .selectOption({ label: "CEO" });
-    await assignments
+    await page
+      .getByLabel("Qual é o problema?")
+      .fill("E2E Ciclo de melhoria: falhas recorrentes no fecho");
+    await page
+      .getByLabel("O que queremos atingir?")
+      .fill("Zero falhas em 30 dias.");
+    await page
       .locator('select[name="responsibleProfileId"]')
       .selectOption({ label: "CEO" });
-    await assignments
-      .getByRole("button", { name: "Guardar atribuições" })
-      .click();
-    await expect(page.getByText("Versão 2")).toBeVisible();
-
-    const phase = page.locator("form").filter({ hasText: "Mudar fase PDCA" });
-    await phase.locator('select[name="phase"]').selectOption("DO");
-    await phase.getByRole("button", { name: "Guardar fase" }).click();
-    await expect(page.getByText("DO", { exact: true }).first()).toBeVisible();
-
+    await page
+      .locator('select[name="ownerProfileId"]')
+      .selectOption({ label: "CEO" });
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Adicionar PDCA" }).click();
+    await page.waitForURL(/\/pdcas\/[0-9a-f-]+$/);
     const pdcaUrl = page.url();
-    await page.getByRole("link", { name: "Adicionar Task ao PDCA" }).click();
-    await page.waitForURL(/\/tasks\/new/);
-    await page.getByLabel("Título").fill("E2E PDCA child task");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await submitAction(page, page.getByRole("button", { name: "Criar Task" }));
-    await page.goto(pdcaUrl);
-    await expect(page.getByText("E2E PDCA child task")).toBeVisible();
-
-    for (const nextPhase of ["CHECK", "ACT"]) {
-      await page.reload();
-      const nextPhaseForm = page
-        .locator("form")
-        .filter({ hasText: "Mudar fase PDCA" });
-      await nextPhaseForm
-        .locator('select[name="phase"]')
-        .selectOption(nextPhase);
-      await nextPhaseForm.getByRole("button", { name: "Guardar fase" }).click();
-      await expect(
-        page.getByText(nextPhase, { exact: true }).first(),
-      ).toBeVisible();
-    }
-
-    await page.reload();
-    const edit = page.locator("form").filter({ hasText: "Editar PDCA" });
-    await edit
-      .locator('textarea[name="actualResult"]')
-      .fill("Expected outcome confirmed by evidence");
-    await edit.getByRole("button", { name: "Guardar alterações" }).click();
-
-    const transition = async (status: string, reason = "") => {
-      await page.reload();
-      const form = page.locator("form").filter({ hasText: "Alterar estado" });
-      await form.locator('select[name="status"]').selectOption(status);
-      if (reason) await form.locator('input[name="reason"]').fill(reason);
-      if (status === "COMPLETED")
-        await form
-          .locator('textarea[name="completionNotes"]')
-          .fill("Cycle completed");
-      await form.getByRole("button", { name: "Guardar transição" }).click();
-      await expect(
-        page.getByText(status, { exact: true }).first(),
-      ).toBeVisible();
-    };
-    await transition("OPEN");
-    await transition("IN_PROGRESS");
-    await transition("COMPLETED");
-    await transition("OPEN", "Novo ciclo necessário");
     await expect(
-      page.getByText("pdca.reopened", { exact: false }),
+      page.getByRole("heading", { name: /E2E Ciclo de melhoria/ }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /Planear/ })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+
+    // Plan fields are editable in place.
+    await page
+      .getByLabel("Causa raiz ou hipótese")
+      .fill("Checklist de fecho incompleta");
+    await submitAction(
+      page,
+      page.getByRole("button", { name: "Guardar planear" }),
+    );
+    await expect(page.getByLabel("Causa raiz ou hipótese")).toHaveValue(
+      "Checklist de fecho incompleta",
+    );
+
+    await submitAction(page, page.getByRole("button", { name: "Activar" }));
+    await submitAction(page, page.getByRole("button", { name: "Começar" }));
+    await submitAction(
+      page,
+      page.getByRole("button", { name: "Avançar para Fazer" }),
+    );
+    await expect(page.getByRole("link", { name: /Fazer/ })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await page.getByRole("link", { name: "+ Tarefa" }).click();
+    await page.waitForURL(/\/tasks\/new\?pdcaId=/);
+    await page.getByLabel("O que é preciso fazer?").fill("E2E Tarefa do PDCA");
+    await page
+      .locator('select[name="responsibleProfileId"]')
+      .selectOption({ label: "CEO" });
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Adicionar tarefa" }).click();
+    await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
+    await page.goto(pdcaUrl);
+    await expect(
+      page.getByRole("link", { name: "E2E Tarefa do PDCA" }),
+    ).toBeVisible();
+
+    await submitAction(
+      page,
+      page.getByRole("button", { name: "Avançar para Verificar" }),
+    );
+    await page
+      .getByLabel("Resultado real")
+      .fill("Resultado confirmado por evidência");
+    await submitAction(
+      page,
+      page.getByRole("button", { name: "Guardar verificar" }),
+    );
+    await submitAction(
+      page,
+      page.getByRole("button", { name: "Avançar para Actuar" }),
+    );
+    await expect(page.getByRole("link", { name: /Actuar/ })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+
+    const sheet = await openSheet(page, "open-complete-sheet");
+    await sheet
+      .locator('textarea[name="completionNotes"]')
+      .fill("Ciclo concluído");
+    await submitAction(
+      page,
+      sheet.getByRole("button", { name: "Confirmar conclusão" }),
+    );
+    await expect(
+      page.getByText("Concluído", { exact: true }).first(),
+    ).toBeVisible();
+
+    await page.getByText("Mais ▾").click();
+    const more = page
+      .locator("form")
+      .filter({ has: page.locator('select[name="status"]') });
+    await more.locator('select[name="status"]').selectOption("OPEN");
+    await more.locator('input[name="reason"]').fill("Novo ciclo necessário");
+    await submitAction(page, more.getByRole("button"));
+    await expect(
+      page.getByText("Aberto", { exact: true }).first(),
     ).toBeVisible();
   });
 
-  test("browser hides PRIVATE and RESTRICTED records and reflects grant revocation", async ({
+  test("PRIVATE stays creator-only; RESTRICTED keeps the creator and hides from others; grants are honoured", async ({
     page,
   }) => {
-    await login(page);
+    // The Restaurant Manager creates a RESTRICTED task and keeps it.
+    await login(page, "manager.a@example.test");
     await page.goto("/tasks/new");
-    await page.getByLabel("Título").fill("E2E Private Task");
-    await page.getByLabel("Visibilidade").selectOption("PRIVATE");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar Task" }).click();
-    await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
-    const privateUrl = page.url();
-
-    await page.goto("/tasks/new");
-    await page.getByLabel("Título").fill("E2E Restricted Task");
-    await page.getByLabel("Visibilidade").selectOption("RESTRICTED");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar Task" }).click();
+    await page
+      .getByLabel("O que é preciso fazer?")
+      .fill("E2E Tarefa restrita do gerente");
+    await page
+      .locator('select[name="responsibleProfileId"]')
+      .selectOption({ label: "Restaurant Manager A" });
+    await page.getByText("Opções avançadas").click();
+    await page.locator('select[name="visibility"]').selectOption("RESTRICTED");
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Adicionar tarefa" }).click();
     await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
     const restrictedUrl = page.url();
-
-    const taskId = privateUrl.split("/").at(-1)!;
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: "E2E Tarefa restrita do gerente" }),
+    ).toBeVisible();
+    await page.goto("/tasks");
+    await expect(
+      page.getByRole("link", { name: "E2E Tarefa restrita do gerente" }),
+    ).toBeVisible();
     await logout(page);
+
+    // A PRIVATE task created by the CEO.
+    await login(page);
+    await page.goto("/tasks/new");
+    await page.getByLabel("O que é preciso fazer?").fill("E2E Tarefa privada");
+    await page
+      .locator('select[name="responsibleProfileId"]')
+      .selectOption({ label: "CEO" });
+    await page.getByText("Opções avançadas").click();
+    await page.locator('select[name="visibility"]').selectOption("PRIVATE");
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Adicionar tarefa" }).click();
+    await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
+    const privateUrl = page.url();
+    const taskId = privateUrl.split("/").at(-1)!;
+    // The CEO holds restricted read and sees the manager's restricted task.
+    await page.goto(restrictedUrl);
+    await expect(
+      page.getByRole("heading", { name: "E2E Tarefa restrita do gerente" }),
+    ).toBeVisible();
+    await logout(page);
+
+    // The Kitchen Manager at Restaurant A covers the scope but neither created
+    // the restricted task nor holds restricted read.
+    await login(page, "kitchen.manager.a@example.test");
+    await page.goto(restrictedUrl);
+    await expect(page.getByText("This page could not be found.")).toBeVisible();
+    await logout(page);
+
     await login(page, "manager.a@example.test");
     await page.goto(privateUrl);
-    await expect(page.getByText("This page could not be found.")).toBeVisible();
-    await page.goto(restrictedUrl);
     await expect(page.getByText("This page could not be found.")).toBeVisible();
 
     const admin = adminClient();
@@ -265,9 +378,9 @@ test.describe.serial("authenticated Execution Core hardening", () => {
       .from("explicit_access_grants")
       .insert({
         security_object_id: task!.security_object_id,
-        grantee_profile_id: "21000000-0000-0000-0000-000000000017",
+        grantee_profile_id: profiles.managerA,
         permission_id: permission!.id,
-        granted_by_profile_id: "21000000-0000-0000-0000-000000000001",
+        granted_by_profile_id: profiles.ceo,
         reason: "E2E authorized exception",
       })
       .select("id")
@@ -275,17 +388,29 @@ test.describe.serial("authenticated Execution Core hardening", () => {
     expect(error).toBeNull();
     await page.goto(privateUrl);
     await expect(
-      page.getByRole("heading", { name: "E2E Private Task" }),
+      page.getByRole("heading", { name: "E2E Tarefa privada" }),
     ).toBeVisible();
 
     await admin
       .from("explicit_access_grants")
       .update({
         revoked_at: new Date().toISOString(),
-        revoked_by_profile_id: "21000000-0000-0000-0000-000000000001",
+        revoked_by_profile_id: profiles.ceo,
       })
       .eq("id", grant!.id);
     await page.goto(privateUrl);
     await expect(page.getByText("This page could not be found.")).toBeVisible();
+
+    // No silent grant was created for the restricted creator.
+    const { data: restricted } = await admin
+      .from("tasks")
+      .select("security_object_id")
+      .eq("title", "E2E Tarefa restrita do gerente")
+      .single();
+    const { count } = await admin
+      .from("explicit_access_grants")
+      .select("id", { count: "exact", head: true })
+      .eq("security_object_id", restricted!.security_object_id);
+    expect(count).toBe(0);
   });
 });

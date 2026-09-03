@@ -4,11 +4,16 @@ import type { Locator, Page } from "@playwright/test";
 import type { Database } from "@/platform/supabase/database.types";
 
 export const password = "DevelopmentOnly123!";
+export const restaurantA = "40000000-0000-0000-0000-000000000001";
+export const profiles = {
+  ceo: "21000000-0000-0000-0000-000000000001",
+  managerA: "21000000-0000-0000-0000-000000000017",
+} as const;
 
 export async function login(page: Page, email = "ceo@example.test") {
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Palavra-passe").fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL("**/my-work");
 }
@@ -28,6 +33,11 @@ export function adminClient() {
   });
 }
 
+/** Picks "only Restaurant A" in the scope picker inside `scope`. */
+export async function pickRestaurantA(scope: Locator | Page) {
+  await scope.getByTestId("scope-picker").selectOption(`one:${restaurantA}`);
+}
+
 /**
  * Clicks a Server Action submit button and resolves only after the action
  * response has arrived. Server Actions commit their RPC before responding, so
@@ -42,14 +52,21 @@ export async function submitAction(page: Page, button: Locator) {
         response.request().headers()["next-action"] !== undefined &&
         response.status() < 400,
     ),
+    // Every Server Action here ends in a redirect, which the router applies
+    // as a client navigation slightly after the response. Waiting for it
+    // keeps the test from touching a page that is about to re-render.
+    page.waitForEvent("framenavigated", {
+      predicate: (frame) => frame === page.mainFrame(),
+    }),
     button.click(),
   ]);
+  await page.waitForLoadState("networkidle");
 }
 
-export async function submitForm(page: Page, label: string) {
-  const form = page.locator("form").filter({ hasText: label });
-  await Promise.all([
-    page.waitForLoadState("networkidle"),
-    form.getByRole("button", { name: label }).click(),
-  ]);
+/** Opens a side sheet by its trigger test id and returns the dialog. */
+export async function openSheet(page: Page, testId: string) {
+  await page.getByTestId(testId).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.waitFor();
+  return dialog;
 }

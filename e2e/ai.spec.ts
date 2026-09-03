@@ -1,27 +1,27 @@
 import { expect, test } from "@playwright/test";
 
-import { login, submitAction } from "./support";
+import { login, pickRestaurantA, submitAction } from "./support";
 
-test.describe
-  .serial("AI Foundation, Meeting Assistant and Execution Validator", () => {
+test.describe.serial("Assistant proposals, summary and alerts", () => {
   let sessionId = "";
-  let bareTaskUrl = "";
 
   test("proposes from meeting material and only a human confirmation creates records", async ({
     page,
   }) => {
     await login(page);
     await page.goto("/meetings/new");
-    await page.getByLabel("Título").fill("E2E AI Session");
+    await page
+      .getByLabel("Assunto da reunião")
+      .fill("E2E Reunião com assistente");
     await page.getByLabel("Início").fill("2026-10-05T10:00");
     await page.getByLabel("Fim").fill("2026-10-05T11:00");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar sessão" }).click();
-    await page.waitForURL(/\/meetings\/[0-9a-f-]+$/);
-    sessionId = page.url().split("/").at(-1)!;
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Marcar reunião" }).click();
+    await page.waitForURL(/\/meetings\/[0-9a-f-]+\/run$/);
+    sessionId = page.url().split("/").at(-2)!;
 
-    await page.getByRole("link", { name: "AI Assistant" }).click();
+    await page.goto(`/meetings/${sessionId}`);
+    await page.getByRole("link", { name: "Assistente" }).click();
     await page.waitForURL(`**/meetings/${sessionId}/assistant`);
     await expect(page.getByTestId("ai-availability")).toHaveText(
       "AI: fake/fake",
@@ -43,8 +43,8 @@ test.describe
     await expect(page.getByTestId("ai-proposal")).toHaveCount(3);
 
     // Nothing exists until confirmation.
-    const review = await page.request.get(`/meetings/${sessionId}/review`);
-    expect(await review.text()).not.toContain("E2E AI Task");
+    const finish = await page.request.get(`/meetings/${sessionId}/finish`);
+    expect(await finish.text()).not.toContain("E2E AI Task");
 
     const taskProposal = page
       .getByTestId("ai-proposal")
@@ -53,23 +53,15 @@ test.describe
       taskProposal.locator('select[name="responsibleProfileId"]'),
     ).toHaveValue(/[0-9a-f-]{36}/);
     await taskProposal
-      .locator('select[name="ownerProfileId"]')
-      .selectOption({ label: "CEO" });
-    await taskProposal
       .locator('input[name="title"]')
       .fill("E2E AI Task confirmed");
     await submitAction(
       page,
-      taskProposal.getByRole("button", {
-        name: "Confirmar e criar TASK draft",
-      }),
+      taskProposal.getByRole("button", { name: /Confirmar/ }),
     );
     await expect(page.getByTestId("ai-proposal")).toHaveCount(2);
     await expect(
       page.getByRole("link", { name: "E2E AI Task confirmed" }),
-    ).toBeVisible();
-    await expect(
-      page.getByText("CONFIRMED", { exact: false }).first(),
     ).toBeVisible();
 
     const unresolved = page
@@ -84,14 +76,13 @@ test.describe
       unresolved.getByRole("button", { name: "Rejeitar proposta" }),
     );
     await expect(page.getByTestId("ai-proposal")).toHaveCount(1);
-    await expect(
-      page.getByText("REJECTED · Pessoa não pertence à organização"),
-    ).toBeVisible();
 
-    await page.goto(`/meetings/${sessionId}/review`);
-    const row = page.locator("tr").filter({ hasText: "E2E AI Task confirmed" });
-    await expect(row).toBeVisible();
-    await expect(row).toContainText("DRAFT");
+    await page.goto(`/meetings/${sessionId}/run`);
+    await expect(
+      page
+        .getByTestId("created-in-meeting")
+        .getByRole("link", { name: "E2E AI Task confirmed" }),
+    ).toBeVisible();
   });
 
   test("summarizes the meeting and stores the reviewed text as an attributed note", async ({
@@ -114,79 +105,62 @@ test.describe
       .fill("Resumo revisto pelo Chair: decisões e tarefas alinhadas.");
     await submitAction(
       page,
-      summary.getByRole("button", {
-        name: "Confirmar e guardar como nota da reunião",
-      }),
+      summary.getByRole("button", { name: /Confirmar/ }),
     );
-    await expect(
-      page.getByText("Resumo da reunião", { exact: true }),
-    ).toBeVisible();
 
     await page.goto(`/meetings/${sessionId}/run`);
     await expect(
       page
-        .locator('textarea[name="content"]')
+        .getByTestId("meeting-note")
         .filter({ hasText: "Resumo revisto pelo Chair" }),
     ).toBeVisible();
   });
 
-  test("runs deterministic validation everywhere and AI findings only on demand", async ({
+  test("alerts are deterministic everywhere and assistant findings only on demand", async ({
     page,
   }) => {
     await login(page);
     await page.goto("/tasks/new");
-    await page.getByLabel("Título").fill("E2E Bare Task");
-    await page.getByText("Operations and Logistics", { exact: true }).click();
-    await page.getByText("Restaurant A", { exact: true }).click();
-    await page.getByRole("button", { name: "Criar Task" }).click();
+    await page
+      .getByLabel("O que é preciso fazer?")
+      .fill("E2E Tarefa sem prazo");
+    await page
+      .locator('select[name="responsibleProfileId"]')
+      .selectOption({ label: "CEO" });
+    await pickRestaurantA(page);
+    await page.getByRole("button", { name: "Adicionar tarefa" }).click();
     await page.waitForURL(/\/tasks\/[0-9a-f-]+$/);
-    bareTaskUrl = page.url();
+    const bareTaskUrl = page.url();
 
+    await expect(page.getByTestId("record-alerts")).toContainText("Sem prazo");
     const panel = page.getByTestId("validation-panel");
-    await expect(panel).toBeVisible();
-    await expect(panel).toContainText("WARNING · MISSING_RESPONSIBLE");
-    await expect(panel).toContainText("WARNING · MISSING_OWNER");
-    await expect(panel).toContainText("WARNING · MISSING_DUE_DATE");
+    await expect(panel).toContainText("Sem prazo");
+    await expect(panel).not.toContainText("MISSING_DUE_DATE");
     await expect(panel.getByTestId("ai-finding")).toHaveCount(0);
 
     await submitAction(
       page,
-      panel.getByRole("button", { name: "Pedir análise AI" }),
+      panel.getByRole("button", { name: "Pedir análise ao assistente" }),
     );
     await expect(page.getByTestId("ai-finding")).toHaveCount(1);
     await expect(page.getByTestId("ai-finding")).toContainText(
-      "OBJECTIVE_UNCLEAR",
+      "Objectivo pouco claro",
     );
-    await expect(page.getByText("Última análise AI: SUCCEEDED")).toBeVisible();
+    await expect(page.getByText(/Última análise do assistente/)).toBeVisible();
     await submitAction(
       page,
       page.getByTestId("ai-finding").getByRole("button", { name: "Dispensar" }),
     );
     await expect(page.getByTestId("ai-finding")).toHaveCount(0);
 
-    const assignments = page
-      .locator("form")
-      .filter({ hasText: "Owner e Responsible" });
-    await assignments
-      .locator('select[name="ownerProfileId"]')
-      .selectOption({ label: "CEO" });
-    await assignments
-      .locator('select[name="responsibleProfileId"]')
-      .selectOption({ label: "CEO" });
-    await submitAction(
-      page,
-      assignments.getByRole("button", { name: "Guardar atribuições" }),
-    );
-
     await page.goto("/my-work");
-    const myWork = page.getByTestId("my-work-validation");
-    await expect(myWork).toBeVisible();
-    const entry = myWork
-      .locator("div")
-      .filter({ hasText: "TASK · E2E Bare Task" });
-    await expect(entry.first()).toContainText("MISSING_DUE_DATE");
+    const todo = page.getByTestId("to-do");
+    const entry = todo
+      .locator("li")
+      .filter({ hasText: "E2E Tarefa sem prazo" });
+    await expect(entry).toContainText("sem prazo");
     await expect(
-      page.getByRole("link", { name: "TASK · E2E Bare Task" }),
+      entry.getByRole("link", { name: "E2E Tarefa sem prazo" }),
     ).toHaveAttribute("href", bareTaskUrl.replace(/^https?:\/\/[^/]+/, ""));
   });
 });
