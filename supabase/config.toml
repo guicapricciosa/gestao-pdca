@@ -1,0 +1,50 @@
+project_id = "execution-management-platform"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000", "http://127.0.0.1:3100"]
+jwt_expiry = 3600
+# Local development only. Production controls sign-up independently and must
+# keep invitation/admin provisioning as the policy.
+enable_signup = true
+minimum_password_length = 10
+
+[auth.email]
+# The provider must be enabled for seeded local users to authenticate. Global
+# sign-up remains disabled by auth.enable_signup above.
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+
+[analytics]
+enabled = false
