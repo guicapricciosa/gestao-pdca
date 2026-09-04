@@ -15,3 +15,18 @@ acessos escondidos.
 
 Se deixares de cobrir um restaurante, deixas de ver os assuntos desse
 restaurante, incluindo os que criaste com visibilidade restrita.
+
+## Convidar pessoas
+
+Quem gere a organização vê em **Definições › Pessoas** quem tem acesso, com
+que papel, departamento e restaurantes, e se a pessoa já entrou.
+
+Para convidar alguém: nome, email da empresa, **papel** (o que pode fazer),
+**departamento ou serviço** (ou «Toda a empresa») e **restaurantes** (todos,
+só alguns ou nenhum). Ao enviar, a pessoa recebe um email com um link para
+definir a palavra-passe. Enquanto não entrar, aparece «Ainda não entrou» e o
+botão **Reenviar convite**; depois de entrar aparece «Visto» com a data.
+
+O papel e o âmbito escolhidos aqui são a única coisa que define o que a pessoa
+vê: não há permissões avulsas por registo (excepto os acessos explícitos
+descritos acima).

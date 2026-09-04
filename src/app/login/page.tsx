@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { loginAction } from "./actions";
 
 export default async function LoginPage({
@@ -25,7 +27,9 @@ export default async function LoginPage({
           >
             {error === "service_unavailable"
               ? "O serviço de autenticação não respondeu. Não é um problema das credenciais; tenta novamente dentro de instantes."
-              : "Não foi possível iniciar sessão. Verifica o email e a password."}
+              : error === "link_invalid"
+                ? "Esse link já não é válido. Pede um novo em «Esqueci-me da palavra-passe»."
+                : "Não foi possível iniciar sessão. Verifica o email e a palavra-passe."}
           </p>
         )}
         <form action={loginAction} className="mt-8 grid gap-4">
@@ -53,6 +57,12 @@ export default async function LoginPage({
           <button className="mt-2 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white">
             Entrar
           </button>
+          <Link
+            className="text-muted-foreground text-center text-sm underline-offset-4 hover:underline"
+            href="/recuperar-palavra-passe"
+          >
+            Esqueci-me da palavra-passe
+          </Link>
         </form>
       </section>
     </main>

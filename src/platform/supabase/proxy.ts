@@ -30,6 +30,8 @@ export async function refreshSupabaseSession(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isPublic =
     pathname === "/login" ||
+    pathname === "/recuperar-palavra-passe" ||
+    pathname.startsWith("/auth/") ||
     pathname === "/offline" ||
     pathname.startsWith("/api/") ||
     pathname === "/manifest.webmanifest" ||

@@ -71,6 +71,22 @@ const RULES: readonly (readonly [RegExp, string])[] = [
     "As recomendações não são executáveis; apenas se podem dispensar.",
   ],
   [
+    /email already invited|email_exists|already been registered/i,
+    "Já existe uma conta com esse email. Usa «Reenviar convite» ou a recuperação de palavra-passe.",
+  ],
+  [
+    /invite failed|over_email_send_rate_limit|rate limit/i,
+    "O envio do email de convite falhou (limite de envios atingido). Espera uns minutos e tenta de novo.",
+  ],
+  [
+    /at least one restaurant is required/i,
+    "Escolhe pelo menos um restaurante, ou muda o âmbito para «Todos» ou «Nenhum».",
+  ],
+  [
+    /unknown (role|organizational unit|restaurant)/i,
+    "O papel, o departamento ou o restaurante escolhido não pertence a esta empresa.",
+  ],
+  [
     /not found or access denied|access denied|permission denied|not owned/i,
     "Sem permissão para esta operação, ou o registo já não está acessível.",
   ],

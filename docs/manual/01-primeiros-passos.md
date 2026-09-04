@@ -10,6 +10,20 @@ Se aparecer «Não foi possível iniciar sessão», confirma o email e a
 palavra-passe. Se aparecer «O serviço de autenticação não respondeu», espera
 uns segundos e tenta de novo; não é um problema das tuas credenciais.
 
+## Primeiro acesso
+
+Recebes um email «You have been invited» com um link. O link abre a aplicação
+já com sessão iniciada e pede-te para definires uma palavra-passe (mínimo 10
+caracteres). A partir daí entras sempre com email e palavra-passe. Se o link
+tiver expirado, pede a quem gere a plataforma para reenviar o convite.
+
+## Esqueci-me da palavra-passe
+
+Na página de entrada carrega em **Esqueci-me da palavra-passe**, escreve o teu
+email e carrega em **Enviar link**. Se esse email tiver conta, chega um email
+com um link válido durante uma hora; abre-o e define a palavra-passe nova. A
+resposta no ecrã é sempre a mesma, exista ou não a conta.
+
 ## O que vês depois de entrar
 
 Cais em **O meu trabalho**, a página que resume o que precisa de ti hoje. A

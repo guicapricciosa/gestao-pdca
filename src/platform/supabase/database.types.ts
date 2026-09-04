@@ -111,6 +111,13 @@ export type Database = {
             foreignKeyName: "ai_proposals_reviewed_by_profile_id_fkey";
             columns: ["reviewed_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "ai_proposals_reviewed_by_profile_id_fkey";
+            columns: ["reviewed_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -226,6 +233,13 @@ export type Database = {
             foreignKeyName: "ai_runs_requested_by_profile_id_fkey";
             columns: ["requested_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "ai_runs_requested_by_profile_id_fkey";
+            columns: ["requested_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -283,6 +297,13 @@ export type Database = {
             foreignKeyName: "attachments_deleted_by_profile_id_fkey";
             columns: ["deleted_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "attachments_deleted_by_profile_id_fkey";
+            columns: ["deleted_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -292,6 +313,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "security_objects";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attachments_uploaded_by_profile_id_fkey";
+            columns: ["uploaded_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "attachments_uploaded_by_profile_id_fkey";
@@ -356,6 +384,13 @@ export type Database = {
             foreignKeyName: "audit_events_actor_profile_id_fkey";
             columns: ["actor_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "audit_events_actor_profile_id_fkey";
+            columns: ["actor_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -411,8 +446,22 @@ export type Database = {
             foreignKeyName: "comments_author_profile_id_fkey";
             columns: ["author_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "comments_author_profile_id_fkey";
+            columns: ["author_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comments_hidden_by_profile_id_fkey";
+            columns: ["hidden_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "comments_hidden_by_profile_id_fkey";
@@ -493,6 +542,13 @@ export type Database = {
             foreignKeyName: "decision_pdca_links_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "decision_pdca_links_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -567,6 +623,13 @@ export type Database = {
           task_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "decision_task_links_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "decision_task_links_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
@@ -662,8 +725,22 @@ export type Database = {
             foreignKeyName: "decisions_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "decisions_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "decisions_decided_by_profile_id_fkey";
+            columns: ["decided_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "decisions_decided_by_profile_id_fkey";
@@ -793,8 +870,22 @@ export type Database = {
             foreignKeyName: "explicit_access_grants_granted_by_profile_id_fkey";
             columns: ["granted_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "explicit_access_grants_granted_by_profile_id_fkey";
+            columns: ["granted_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "explicit_access_grants_grantee_profile_id_fkey";
+            columns: ["grantee_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "explicit_access_grants_grantee_profile_id_fkey";
@@ -809,6 +900,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "permissions";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "explicit_access_grants_revoked_by_profile_id_fkey";
+            columns: ["revoked_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "explicit_access_grants_revoked_by_profile_id_fkey";
@@ -872,6 +970,20 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "hierarchy_relationships_child_assignment_id_fkey";
+            columns: ["child_assignment_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["assignment_id"];
+          },
+          {
+            foreignKeyName: "hierarchy_relationships_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
             foreignKeyName: "hierarchy_relationships_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
@@ -884,6 +996,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "organizational_assignments";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hierarchy_relationships_parent_assignment_id_fkey";
+            columns: ["parent_assignment_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["assignment_id"];
           },
         ];
       };
@@ -945,6 +1064,13 @@ export type Database = {
             foreignKeyName: "meeting_agenda_items_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_agenda_items_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -961,6 +1087,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "meeting_sessions";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_agenda_items_presenter_profile_id_fkey";
+            columns: ["presenter_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_agenda_items_presenter_profile_id_fkey";
@@ -1041,8 +1174,22 @@ export type Database = {
             foreignKeyName: "meeting_notes_author_profile_id_fkey";
             columns: ["author_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_notes_author_profile_id_fkey";
+            columns: ["author_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_notes_hidden_by_profile_id_fkey";
+            columns: ["hidden_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_notes_hidden_by_profile_id_fkey";
@@ -1116,6 +1263,13 @@ export type Database = {
             foreignKeyName: "meeting_object_links_linked_by_profile_id_fkey";
             columns: ["linked_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_object_links_linked_by_profile_id_fkey";
+            columns: ["linked_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -1146,6 +1300,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "security_objects";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_object_links_unlinked_by_profile_id_fkey";
+            columns: ["unlinked_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_object_links_unlinked_by_profile_id_fkey";
@@ -1204,6 +1365,13 @@ export type Database = {
             foreignKeyName: "meeting_participants_added_by_profile_id_fkey";
             columns: ["added_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_participants_added_by_profile_id_fkey";
+            columns: ["added_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -1225,8 +1393,22 @@ export type Database = {
             foreignKeyName: "meeting_participants_profile_id_fkey";
             columns: ["profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_participants_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_participants_removed_by_profile_id_fkey";
+            columns: ["removed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_participants_removed_by_profile_id_fkey";
@@ -1281,6 +1463,13 @@ export type Database = {
             foreignKeyName: "meeting_publications_published_by_profile_id_fkey";
             columns: ["published_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_publications_published_by_profile_id_fkey";
+            columns: ["published_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -1322,6 +1511,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "meeting_sessions";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_reopening_events_reopened_by_profile_id_fkey";
+            columns: ["reopened_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_reopening_events_reopened_by_profile_id_fkey";
@@ -1399,8 +1595,22 @@ export type Database = {
             foreignKeyName: "meeting_series_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_series_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_series_default_chair_profile_id_fkey";
+            columns: ["default_chair_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_series_default_chair_profile_id_fkey";
@@ -1461,8 +1671,22 @@ export type Database = {
             foreignKeyName: "meeting_series_participants_added_by_profile_id_fkey";
             columns: ["added_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_series_participants_added_by_profile_id_fkey";
+            columns: ["added_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_series_participants_ended_by_profile_id_fkey";
+            columns: ["ended_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_series_participants_ended_by_profile_id_fkey";
@@ -1477,6 +1701,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "meeting_series";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_series_participants_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_series_participants_profile_id_fkey";
@@ -1516,6 +1747,13 @@ export type Database = {
           to_status?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "meeting_session_status_transitions_changed_by_profile_id_fkey";
+            columns: ["changed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "meeting_session_status_transitions_changed_by_profile_id_fkey";
             columns: ["changed_by_profile_id"];
@@ -1619,6 +1857,13 @@ export type Database = {
             foreignKeyName: "meeting_sessions_chair_profile_id_fkey";
             columns: ["chair_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_sessions_chair_profile_id_fkey";
+            columns: ["chair_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -1628,6 +1873,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "companies";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_sessions_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_sessions_created_by_profile_id_fkey";
@@ -1748,6 +2000,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "companies";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_templates_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "meeting_templates_created_by_profile_id_fkey";
@@ -1885,6 +2144,13 @@ export type Database = {
             foreignKeyName: "notification_preferences_profile_id_fkey";
             columns: ["profile_id"];
             isOneToOne: true;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "notification_preferences_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: true;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -1957,6 +2223,13 @@ export type Database = {
             foreignKeyName: "notifications_recipient_profile_id_fkey";
             columns: ["recipient_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "notifications_recipient_profile_id_fkey";
+            columns: ["recipient_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2012,6 +2285,13 @@ export type Database = {
             foreignKeyName: "object_memberships_added_by_profile_id_fkey";
             columns: ["added_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "object_memberships_added_by_profile_id_fkey";
+            columns: ["added_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2019,8 +2299,22 @@ export type Database = {
             foreignKeyName: "object_memberships_ended_by_profile_id_fkey";
             columns: ["ended_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "object_memberships_ended_by_profile_id_fkey";
+            columns: ["ended_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "object_memberships_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "object_memberships_profile_id_fkey";
@@ -2058,6 +2352,13 @@ export type Database = {
           security_object_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "object_scope_organizational_units_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "object_scope_organizational_units_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
@@ -2101,6 +2402,13 @@ export type Database = {
           security_object_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "object_scope_restaurants_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "object_scope_restaurants_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
@@ -2185,6 +2493,13 @@ export type Database = {
             foreignKeyName: "organizational_assignments_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "organizational_assignments_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2194,6 +2509,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "organizational_units";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "organizational_assignments_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "organizational_assignments_profile_id_fkey";
@@ -2357,6 +2679,13 @@ export type Database = {
             foreignKeyName: "pdca_blockers_blocked_by_profile_id_fkey";
             columns: ["blocked_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdca_blockers_blocked_by_profile_id_fkey";
+            columns: ["blocked_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2373,6 +2702,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "pdcas";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pdca_blockers_resolved_by_profile_id_fkey";
+            columns: ["resolved_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "pdca_blockers_resolved_by_profile_id_fkey";
@@ -2415,6 +2751,13 @@ export type Database = {
           pdca_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "pdca_completion_events_completed_by_profile_id_fkey";
+            columns: ["completed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "pdca_completion_events_completed_by_profile_id_fkey";
             columns: ["completed_by_profile_id"];
@@ -2483,6 +2826,13 @@ export type Database = {
             foreignKeyName: "pdca_dependencies_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdca_dependencies_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2532,6 +2882,13 @@ export type Database = {
             foreignKeyName: "pdca_dependencies_resolved_by_profile_id_fkey";
             columns: ["resolved_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdca_dependencies_resolved_by_profile_id_fkey";
+            columns: ["resolved_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2566,6 +2923,13 @@ export type Database = {
           reason?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "pdca_due_date_changes_changed_by_profile_id_fkey";
+            columns: ["changed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "pdca_due_date_changes_changed_by_profile_id_fkey";
             columns: ["changed_by_profile_id"];
@@ -2618,6 +2982,13 @@ export type Database = {
           to_phase?: Database["public"]["Enums"]["pdca_phase"];
         };
         Relationships: [
+          {
+            foreignKeyName: "pdca_phase_transitions_changed_by_profile_id_fkey";
+            columns: ["changed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "pdca_phase_transitions_changed_by_profile_id_fkey";
             columns: ["changed_by_profile_id"];
@@ -2692,6 +3063,13 @@ export type Database = {
             foreignKeyName: "pdca_reopening_events_reopened_by_profile_id_fkey";
             columns: ["reopened_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdca_reopening_events_reopened_by_profile_id_fkey";
+            columns: ["reopened_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2726,6 +3104,13 @@ export type Database = {
           to_status?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "pdca_status_transitions_changed_by_profile_id_fkey";
+            columns: ["changed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "pdca_status_transitions_changed_by_profile_id_fkey";
             columns: ["changed_by_profile_id"];
@@ -2899,8 +3284,22 @@ export type Database = {
             foreignKeyName: "pdcas_completed_by_profile_id_fkey";
             columns: ["completed_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdcas_completed_by_profile_id_fkey";
+            columns: ["completed_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pdcas_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "pdcas_created_by_profile_id_fkey";
@@ -2934,6 +3333,13 @@ export type Database = {
             foreignKeyName: "pdcas_owner_profile_id_fkey";
             columns: ["owner_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdcas_owner_profile_id_fkey";
+            columns: ["owner_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -2943,6 +3349,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "severity_definitions";
             referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "pdcas_responsible_profile_id_fkey";
+            columns: ["responsible_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "pdcas_responsible_profile_id_fkey";
@@ -3097,6 +3510,13 @@ export type Database = {
             foreignKeyName: "push_subscriptions_profile_id_fkey";
             columns: ["profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "push_subscriptions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -3144,6 +3564,13 @@ export type Database = {
             foreignKeyName: "restaurant_assignments_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "restaurant_assignments_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -3153,6 +3580,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "organizational_assignments";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "restaurant_assignments_organizational_assignment_id_fkey";
+            columns: ["organizational_assignment_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["assignment_id"];
           },
           {
             foreignKeyName: "restaurant_assignments_restaurant_id_fkey";
@@ -3236,6 +3670,13 @@ export type Database = {
           role_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "role_permissions_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "role_permissions_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
@@ -3346,6 +3787,13 @@ export type Database = {
             foreignKeyName: "security_objects_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "security_objects_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -3447,8 +3895,22 @@ export type Database = {
             foreignKeyName: "task_blockers_blocked_by_profile_id_fkey";
             columns: ["blocked_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "task_blockers_blocked_by_profile_id_fkey";
+            columns: ["blocked_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_blockers_resolved_by_profile_id_fkey";
+            columns: ["resolved_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "task_blockers_resolved_by_profile_id_fkey";
@@ -3506,6 +3968,13 @@ export type Database = {
             foreignKeyName: "task_completion_events_completed_by_profile_id_fkey";
             columns: ["completed_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "task_completion_events_completed_by_profile_id_fkey";
+            columns: ["completed_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -3545,6 +4014,13 @@ export type Database = {
           task_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "task_dependencies_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "task_dependencies_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
@@ -3615,6 +4091,13 @@ export type Database = {
             foreignKeyName: "task_due_date_changes_changed_by_profile_id_fkey";
             columns: ["changed_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "task_due_date_changes_changed_by_profile_id_fkey";
+            columns: ["changed_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -3671,6 +4154,13 @@ export type Database = {
             foreignKeyName: "task_reopening_events_reopened_by_profile_id_fkey";
             columns: ["reopened_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "task_reopening_events_reopened_by_profile_id_fkey";
+            columns: ["reopened_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -3719,6 +4209,13 @@ export type Database = {
           to_status?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "task_status_transitions_changed_by_profile_id_fkey";
+            columns: ["changed_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "task_status_transitions_changed_by_profile_id_fkey";
             columns: ["changed_by_profile_id"];
@@ -3844,8 +4341,22 @@ export type Database = {
             foreignKeyName: "tasks_completed_by_profile_id_fkey";
             columns: ["completed_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "tasks_completed_by_profile_id_fkey";
+            columns: ["completed_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "tasks_created_by_profile_id_fkey";
@@ -3867,6 +4378,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "decisions";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_owner_profile_id_fkey";
+            columns: ["owner_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "tasks_owner_profile_id_fkey";
@@ -3895,6 +4413,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "severity_definitions";
             referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "tasks_responsible_profile_id_fkey";
+            columns: ["responsible_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "tasks_responsible_profile_id_fkey";
@@ -3969,8 +4494,22 @@ export type Database = {
             foreignKeyName: "decisions_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "decisions_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "decisions_decided_by_profile_id_fkey";
+            columns: ["decided_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "decisions_decided_by_profile_id_fkey";
@@ -4037,6 +4576,13 @@ export type Database = {
             foreignKeyName: "audit_events_actor_profile_id_fkey";
             columns: ["actor_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "audit_events_actor_profile_id_fkey";
+            columns: ["actor_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -4094,6 +4640,13 @@ export type Database = {
           security_object_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "audit_events_actor_profile_id_fkey";
+            columns: ["actor_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "audit_events_actor_profile_id_fkey";
             columns: ["actor_profile_id"];
@@ -4164,6 +4717,13 @@ export type Database = {
           version?: number | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "meeting_sessions_chair_profile_id_fkey";
+            columns: ["chair_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
           {
             foreignKeyName: "meeting_sessions_chair_profile_id_fkey";
             columns: ["chair_profile_id"];
@@ -4270,6 +4830,13 @@ export type Database = {
             foreignKeyName: "pdcas_owner_profile_id_fkey";
             columns: ["owner_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "pdcas_owner_profile_id_fkey";
+            columns: ["owner_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -4279,6 +4846,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "severity_definitions";
             referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "pdcas_responsible_profile_id_fkey";
+            columns: ["responsible_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "pdcas_responsible_profile_id_fkey";
@@ -4307,6 +4881,36 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "execution_status_definitions";
             referencedColumns: ["code"];
+          },
+        ];
+      };
+      people_directory: {
+        Row: {
+          assignment_id: string | null;
+          auth_user_id: string | null;
+          company_id: string | null;
+          display_name: string | null;
+          email: string | null;
+          is_active: boolean | null;
+          last_seen_at: string | null;
+          profile_id: string | null;
+          restaurant_names: string[] | null;
+          restaurant_scope_mode:
+            Database["public"]["Enums"]["restaurant_scope_mode"] | null;
+          role_code: string | null;
+          role_name: string | null;
+          title: string | null;
+          unit_name: string | null;
+          unit_scope_mode:
+            Database["public"]["Enums"]["unit_scope_mode"] | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "organizational_assignments_company_id_fkey";
+            columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
           },
         ];
       };
@@ -4370,6 +4974,13 @@ export type Database = {
             foreignKeyName: "tasks_owner_profile_id_fkey";
             columns: ["owner_profile_id"];
             isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "tasks_owner_profile_id_fkey";
+            columns: ["owner_profile_id"];
+            isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
@@ -4379,6 +4990,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "severity_definitions";
             referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "tasks_responsible_profile_id_fkey";
+            columns: ["responsible_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
           },
           {
             foreignKeyName: "tasks_responsible_profile_id_fkey";
@@ -5031,6 +5649,21 @@ export type Database = {
         Args: { comment_id: string; reason: string };
         Returns: undefined;
       };
+      invite_person: {
+        Args: {
+          p_auth_user_id: string;
+          p_company_id: string;
+          p_display_name: string;
+          p_email: string;
+          p_organizational_unit_id: string;
+          p_restaurant_ids?: string[];
+          p_restaurant_scope_mode: Database["public"]["Enums"]["restaurant_scope_mode"];
+          p_role_id: string;
+          p_title: string;
+          p_unit_scope_mode: Database["public"]["Enums"]["unit_scope_mode"];
+        };
+        Returns: string;
+      };
       link_meeting_object: {
         Args: {
           meeting_agenda_item_id?: string;
@@ -5287,6 +5920,7 @@ export type Database = {
         };
         Returns: string;
       };
+      touch_profile_last_seen: { Args: never; Returns: undefined };
       transition_meeting_session: {
         Args: {
           expected_version: number;

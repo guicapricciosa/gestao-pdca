@@ -166,10 +166,20 @@ Nothing below has been executed yet. No real users are created by these steps.
   No people, no demo objects.
 - `supabase/bootstrap/first-admin.sql` turns an Auth user created from the
   dashboard into a profile with a company-wide Global Executive assignment.
-- Known gap (technical debt): the app has no screen for Auth invitations or
-  password recovery, so people are created in the dashboard ("Create new user",
-  auto-confirm) and their profile/assignment is added with SQL until an
-  onboarding flow exists.
+- Since 2026-09-04 people are invited from **Definições › Pessoas**
+  (`organization.manage`): the server creates the Auth user with the service
+  key (`inviteUserByEmail`), then the `invite_person` command creates the
+  profile and first assignment; if the command is refused the Auth user is
+  deleted again. Password recovery lives at `/recuperar-palavra-passe`;
+  both e-mails land on `/auth/callback`, which stores the session from the
+  link (PKCE `code` or implicit `#access_token`) and continues to
+  `/definir-palavra-passe`.
+- **E-mail sending limits.** With Supabase's built-in sender the project is
+  limited to a few auth e-mails per hour and the templates are the English
+  defaults. Before inviting a batch of people set a custom SMTP (Auth →
+  SMTP settings) and, optionally, translate the "Invite user" and "Reset
+  password" templates; `{{ .ConfirmationURL }}` must stay in the templates.
+  Redirect URLs already allow `https://pdca.gcpai.pt/**`.
 
 ## 7. Importação histórica excepcional (04/09/2026)
 

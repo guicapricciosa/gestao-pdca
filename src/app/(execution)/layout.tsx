@@ -49,12 +49,15 @@ async function loadViewer() {
     client
       .from("profiles")
       .select(
-        "id,display_name,assignments:organizational_assignments!organizational_assignments_profile_id_fkey(title,unit_scope_mode,restaurant_scope_mode,valid_to,unit:organizational_units!organizational_assignments_organizational_unit_id_fkey(name),restaurants:restaurant_assignments!restaurant_assignments_organizational_assignment_id_fkey(valid_to,restaurant:restaurants!restaurant_assignments_restaurant_id_fkey(name)))",
+        "id,display_name,last_seen_at,assignments:organizational_assignments!organizational_assignments_profile_id_fkey(title,unit_scope_mode,restaurant_scope_mode,valid_to,unit:organizational_units!organizational_assignments_organizational_unit_id_fkey(name),restaurants:restaurant_assignments!restaurant_assignments_organizational_assignment_id_fkey(valid_to,restaurant:restaurants!restaurant_assignments_restaurant_id_fkey(name)))",
       )
       .eq("auth_user_id", user.id)
       .single(),
     client.rpc("unread_notification_count"),
   ]);
+  const lastSeen = profile?.last_seen_at ? Date.parse(profile.last_seen_at) : 0;
+  if (Date.now() - lastSeen > 60 * 60 * 1000)
+    await client.rpc("touch_profile_last_seen");
   return { email: user.email, profile, unread: unread ?? 0 };
 }
 

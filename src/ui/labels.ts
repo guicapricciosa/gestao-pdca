@@ -226,6 +226,22 @@ export function roleLabel(code: string) {
   return role[code] ?? code;
 }
 
+const organizationalRole: Record<string, string> = {
+  GLOBAL_EXECUTIVE: "Direcção geral",
+  SUPPORT_DIRECTOR: "Director de departamento de suporte",
+  DOL_DIRECTOR: "Director DOL",
+  DOL_SUBDIRECTOR: "Subdirector DOL",
+  OPS_SUPERVISOR: "Supervisor de operações",
+  RESTAURANT_MANAGER: "Gerente de restaurante",
+  KITCHEN_MANAGER: "Chefe de cozinha",
+  KITCHEN_SUPERVISOR: "Supervisor de cozinha",
+  SHARED_SERVICE: "Serviço partilhado",
+};
+
+export function organizationalRoleLabel(code: string) {
+  return organizationalRole[code] ?? code;
+}
+
 export function objectTypeLabel(code: string) {
   return objectType[code] ?? code;
 }

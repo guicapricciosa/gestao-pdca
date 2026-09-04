@@ -17,6 +17,9 @@ export default async function SettingsPage() {
   const canManageTemplates = (scope ?? []).some(
     (path) => path.permission_key === "meeting.template.manage",
   );
+  const canManagePeople = (scope ?? []).some(
+    (path) => path.permission_key === "organization.manage",
+  );
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
@@ -45,6 +48,22 @@ export default async function SettingsPage() {
         }
       />
       <InstallApp appName={branding.name} />
+      {canManagePeople && (
+        <section className="rounded-2xl border bg-white p-5">
+          <h2 className="font-semibold">Pessoas</h2>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Convida quem entra na plataforma, com papel, departamento e
+            restaurantes. Reenvia convites a quem ainda não definiu
+            palavra-passe.
+          </p>
+          <Link
+            className="mt-3 inline-flex rounded-full border bg-white px-4 py-2 text-sm"
+            href="/definicoes/pessoas"
+          >
+            Gerir pessoas
+          </Link>
+        </section>
+      )}
       {canManageTemplates && (
         <section className="rounded-2xl border bg-white p-5">
           <h2 className="font-semibold">Modelos de reunião</h2>
