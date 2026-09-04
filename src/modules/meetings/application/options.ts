@@ -1,7 +1,10 @@
 import "server-only";
 
 import { loadCreationOptions } from "@/modules/execution/application/creation-options";
-import { createSupabaseServerClient } from "@/platform/supabase/server";
+import {
+  createSupabaseServerClient,
+  currentAuthUser,
+} from "@/platform/supabase/server";
 
 export async function loadMeetingCreationOptions() {
   const base = await loadCreationOptions("meeting.create");
@@ -25,9 +28,9 @@ export async function loadMeetingCreationOptions() {
       .eq("is_active", true)
       .order("sort_order")
       .order("name"),
-    client.auth.getUser(),
+    currentAuthUser(client),
   ]);
-  const authUserId = auth.data.user?.id;
+  const authUserId = auth?.id;
   const { data: currentProfile } = authUserId
     ? await client
         .from("profiles")

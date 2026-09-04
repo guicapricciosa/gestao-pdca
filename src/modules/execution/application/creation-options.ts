@@ -1,7 +1,10 @@
 import "server-only";
 
 import type { PermissionKey } from "@/modules/authorization/domain/types";
-import { createSupabaseServerClient } from "@/platform/supabase/server";
+import {
+  createSupabaseServerClient,
+  currentAuthUser,
+} from "@/platform/supabase/server";
 
 export interface CreationOptions {
   readonly companies: readonly { id: string; name: string }[];
@@ -128,12 +131,13 @@ export async function loadViewerContext(
   permissionKey: PermissionKey,
 ): Promise<ViewerContext> {
   const client = await createSupabaseServerClient();
+  const user = await currentAuthUser(client);
   const [{ data: paths }, { data: profile }] = await Promise.all([
     client.rpc("get_accessible_scope"),
     client
       .from("profiles")
       .select("id")
-      .eq("auth_user_id", (await client.auth.getUser()).data.user?.id ?? "")
+      .eq("auth_user_id", user?.id ?? "")
       .maybeSingle(),
   ]);
   const relevant = (paths ?? []).filter(

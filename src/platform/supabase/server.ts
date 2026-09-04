@@ -30,3 +30,20 @@ export async function createSupabaseServerClient() {
     },
   );
 }
+
+/**
+ * Who is signed in, from the JWT already validated by the proxy — no round
+ * trip to the Auth server. Use this on every request path; keep `getUser()`
+ * for the few places that must re-check the session against the server.
+ */
+export async function currentAuthUser(
+  client: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{ readonly id: string; readonly email: string } | null> {
+  const { data } = await client.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims || typeof claims.sub !== "string") return null;
+  return {
+    id: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : "",
+  };
+}

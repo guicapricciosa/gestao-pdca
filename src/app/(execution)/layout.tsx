@@ -9,7 +9,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { logoutAction } from "@/app/login/actions";
-import { createSupabaseServerClient } from "@/platform/supabase/server";
+import {
+  createSupabaseServerClient,
+  currentAuthUser,
+} from "@/platform/supabase/server";
 import { NavLink } from "@/ui/components/nav-link";
 import { NotificationBell } from "@/ui/components/notification-bell";
 import { Notice } from "@/ui/components/notice";
@@ -39,19 +42,20 @@ const groups = [
 
 async function loadViewer() {
   const client = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await client.auth.getUser();
+  const user = await currentAuthUser(client);
   if (user === null) return null;
-  const { data: profile } = await client
-    .from("profiles")
-    .select(
-      "id,display_name,assignments:organizational_assignments!organizational_assignments_profile_id_fkey(title,unit_scope_mode,restaurant_scope_mode,valid_to,unit:organizational_units!organizational_assignments_organizational_unit_id_fkey(name),restaurants:restaurant_assignments!restaurant_assignments_organizational_assignment_id_fkey(valid_to,restaurant:restaurants!restaurant_assignments_restaurant_id_fkey(name)))",
-    )
-    .eq("auth_user_id", user.id)
-    .single();
-  const { data: unread } = await client.rpc("unread_notification_count");
-  return { email: user.email ?? "", profile, unread: unread ?? 0 };
+  // Profile and badge in parallel: one network round trip, not two.
+  const [{ data: profile }, { data: unread }] = await Promise.all([
+    client
+      .from("profiles")
+      .select(
+        "id,display_name,assignments:organizational_assignments!organizational_assignments_profile_id_fkey(title,unit_scope_mode,restaurant_scope_mode,valid_to,unit:organizational_units!organizational_assignments_organizational_unit_id_fkey(name),restaurants:restaurant_assignments!restaurant_assignments_organizational_assignment_id_fkey(valid_to,restaurant:restaurants!restaurant_assignments_restaurant_id_fkey(name)))",
+      )
+      .eq("auth_user_id", user.id)
+      .single(),
+    client.rpc("unread_notification_count"),
+  ]);
+  return { email: user.email, profile, unread: unread ?? 0 };
 }
 
 export default async function ExecutionLayout({
