@@ -167,3 +167,47 @@ Nothing below has been executed yet. No real users are created by these steps.
   password recovery, so people are created in the dashboard ("Create new user",
   auto-confirm) and their profile/assignment is added with SQL until an
   onboarding flow exists.
+
+## 7. Importação histórica excepcional (04/09/2026)
+
+Decisão do Gui Rainho em 04/09/2026: os 152 PDCAs do ficheiro
+`PDCA_importacao_final.xlsx` (folha "Importação final": 141 de Visita Técnica,
+11 de Direção, edição 2026) entram em produção como migração histórica
+**sem Responsável nem Owner**. Esta excepção aplica-se apenas a estes registos;
+as regras normais de criação de PDCAs (responsável obrigatório nos comandos
+da aplicação, validação de acesso) mantêm-se inalteradas.
+
+Como foi feito:
+
+- `scripts/import-pdcas-2026.mjs` lê o ficheiro e gera
+  `supabase/bootstrap/import-pdcas-2026.sql` (um único bloco `DO`, idempotente
+  por ids determinísticos uuid5 de `fonte + nº original`). O ficheiro Excel e o
+  SQL gerado ficam fora do repositório (`.gitignore`) por conterem dados de
+  negócio.
+- Aplicado com `supabase db query --linked --file supabase/bootstrap/import-pdcas-2026.sql`
+  depois de ensaio numa base local.
+- Por registo: `security_objects` (PDCA, visibilidade NORMAL, criado por Gui
+  Rainho), `pdcas` (título = descrição; estado COMPLETED/IN_PROGRESS/CANCELLED
+  conforme a coluna "Estado importação"; fase ACT para concluídos e DO para os
+  restantes; datas "mmm/aa" convertidas para o dia 1 do mês; `completed_at` =
+  data fim para concluídos), âmbito organizacional (DOL para Visita Técnica,
+  EXECUTIVE para Direção) e âmbito de restaurantes conforme a coluna "Âmbito",
+  um comentário com o bloco histórico (fonte, nº original, origem da reunião,
+  responsável histórico, colaboradores, estado original, notas, correcções) e um
+  evento de auditoria `pdca.imported` com actor SYSTEM. O outbox processa estes
+  eventos sem gerar notificações.
+- Mapeamento de restaurantes decidido em 04/09/2026: Jângal → Jangal Allo;
+  Sophia LX → Sophia Pizoteca; Sophia → Sophia Natural; Irish & Co → Irish;
+  Lat.A → Lat.a; Capricciosa Cais do Sodré → Capricciosa Cais; Selllva LX
+  Factory → Selva Lx; Selllva Mouzinho → Selva MZ; "Todas as Capricciosas" →
+  as 5 Capricciosas; "Todas as Capricciosas, Selllvas e Sophias" → 5 + 3 + 2.
+- O responsável só é ligado quando existe um perfil activo com o mesmo nome e
+  com acesso de leitura ao objecto (a regra do trigger); os restantes nomes
+  ficam no comentário histórico até as pessoas existirem na aplicação.
+
+Resultado em produção: 152 PDCAs (82 concluídos, 66 em curso, 4 cancelados);
+148 sem responsável (4 ligados a Gui Rainho), 152 sem Owner, 13 sem
+restaurante (os 11 da Direção e 2 de Visita Técnica), 14 sem prazo.
+
+Pendente: atribuir Responsável/Owner à medida que as pessoas forem criadas
+(o comentário histórico indica o nome) e rever as 13 sem restaurante.

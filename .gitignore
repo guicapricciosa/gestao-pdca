@@ -15,3 +15,7 @@ supabase/.temp/
 .DS_Store
 next-env.d.ts
 .claude/
+
+# Local import inputs/outputs with business data
+PDCA_*.xlsx
+supabase/bootstrap/import-pdcas-2026.sql
