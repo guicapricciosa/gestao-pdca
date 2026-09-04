@@ -151,6 +151,9 @@ Nothing below has been executed yet. No real users are created by these steps.
 22. Domínios.pt → zone `gcpai.pt` → add `CNAME pdca → cname.vercel-dns.com` (TTL 3600). Wait for the certificate.
 23. Update Supabase Site URL / Redirect URLs if they were set to the `vercel.app` URL, and re-check 15–20 on `https://pdca.gcpai.pt`.
 24. Re-run the push test on the final domain (subscriptions are per origin; devices must subscribe again).
+25. Make the domain canonical: Vercel → Settings → Domains → Edit `pdca-gcpai.vercel.app` → "Redirect to Another Domain", **308 Permanent Redirect** → `pdca.gcpai.pt`. Confirm `curl -sI https://pdca-gcpai.vercel.app/api/health` answers 308 with `location: https://pdca.gcpai.pt/…`, and that the cron keeps delivering (a notification created after the change reaches `notification_deliveries` as `sent`).
+
+**Done on 2026-09-04.** CNAME `pdca` → `d78d62ebfb5621e3.vercel-dns-016.com` (the value Vercel showed for this project, not the generic `cname.vercel-dns.com`), TXT `_vercel` for verification; Let's Encrypt certificate issued; Supabase Site URL `https://pdca.gcpai.pt`; steps 15–25 validated on the final domain. Old subscriptions from the temporary origin are revoked automatically when the push service answers 410 ("gone").
 
 ## 6. Reference data and first people (executed 2026-09-04)
 
