@@ -28,15 +28,35 @@ export interface ScopeInput {
   readonly visibility: Visibility;
 }
 
+export const listSortKeys = [
+  "title",
+  "status",
+  "phase",
+  "priority",
+  "due_date",
+  "updated_at",
+  "responsible",
+  "owner",
+  "decision_date",
+] as const;
+export type ListSortKey = (typeof listSortKeys)[number];
+export type SortDirection = "asc" | "desc";
+
+/**
+ * Every selector accepts several values (multi-select filters). Status keeps
+ * the virtual "ACTIVE" value meaning "everything except archived".
+ */
 export interface ListFilters {
   readonly query?: string | undefined;
-  readonly status?: ExecutionStatus | "ACTIVE" | undefined;
-  readonly priority?: PriorityLevel | undefined;
-  readonly ownerId?: string | undefined;
-  readonly responsibleId?: string | undefined;
-  readonly restaurantId?: string | undefined;
-  readonly unitId?: string | undefined;
+  readonly status?: readonly (ExecutionStatus | "ACTIVE")[] | undefined;
+  readonly priority?: readonly PriorityLevel[] | undefined;
+  readonly ownerId?: readonly string[] | undefined;
+  readonly responsibleId?: readonly string[] | undefined;
+  readonly restaurantId?: readonly string[] | undefined;
+  readonly unitId?: readonly string[] | undefined;
   readonly overdue?: boolean | undefined;
+  readonly sort?: ListSortKey | undefined;
+  readonly direction?: SortDirection | undefined;
   readonly page?: number | undefined;
   readonly pageSize?: number | undefined;
 }

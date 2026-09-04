@@ -27,6 +27,9 @@ export interface TaskSummary {
   readonly priority: string;
   readonly ownerProfileId: string | null;
   readonly responsibleProfileId: string | null;
+  /** Display names as seen by the caller; null when unset or not visible. */
+  readonly ownerName?: string | null;
+  readonly responsibleName?: string | null;
   readonly dueDate: string | null;
   readonly completedAt: string | null;
   readonly version: number;

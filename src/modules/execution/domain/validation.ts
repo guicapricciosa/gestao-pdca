@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { databaseUuidSchema } from "@/shared/validation/database";
 
-import { executionStatuses, pdcaPhases, priorityLevels } from "./types";
+import {
+  executionStatuses,
+  listSortKeys,
+  pdcaPhases,
+  priorityLevels,
+} from "./types";
 
 const uuid = databaseUuidSchema;
 
@@ -13,15 +18,20 @@ export const scopeSchema = z.object({
   visibility: z.enum(["NORMAL", "RESTRICTED", "PRIVATE"]).default("NORMAL"),
 });
 
+const many = <T extends z.ZodTypeAny>(item: T) =>
+  z.array(item).max(50).min(1).optional();
+
 export const listFiltersSchema = z.object({
   query: z.string().trim().max(200).optional(),
-  status: z.enum([...executionStatuses, "ACTIVE"]).optional(),
-  priority: z.enum(priorityLevels).optional(),
-  ownerId: uuid.optional(),
-  responsibleId: uuid.optional(),
-  restaurantId: uuid.optional(),
-  unitId: uuid.optional(),
+  status: many(z.enum([...executionStatuses, "ACTIVE"])),
+  priority: many(z.enum(priorityLevels)),
+  ownerId: many(uuid),
+  responsibleId: many(uuid),
+  restaurantId: many(uuid),
+  unitId: many(uuid),
   overdue: z.boolean().optional(),
+  sort: z.enum(listSortKeys).optional(),
+  direction: z.enum(["asc", "desc"]).optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(25),
 });
