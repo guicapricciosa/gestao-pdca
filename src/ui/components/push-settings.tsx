@@ -54,7 +54,7 @@ export function PushSettings({ publicKey }: { readonly publicKey: string }) {
   };
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
+    const frame = setTimeout(() => {
       if (
         !("Notification" in window) ||
         !("PushManager" in window) ||
@@ -69,8 +69,8 @@ export function PushSettings({ publicKey }: { readonly publicKey: string }) {
         .then((registration) => registration.pushManager.getSubscription())
         .then((existing) => setSubscribed(existing !== null));
       void loadDevices();
-    });
-    return () => cancelAnimationFrame(frame);
+    }, 0);
+    return () => clearTimeout(frame);
   }, []);
 
   const enable = async () => {

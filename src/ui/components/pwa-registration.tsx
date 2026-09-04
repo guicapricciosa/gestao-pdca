@@ -15,7 +15,7 @@ export function PwaRegistration() {
     const onOnline = () => setOffline(false);
     window.addEventListener("offline", onOffline);
     window.addEventListener("online", onOnline);
-    const frame = requestAnimationFrame(() => setOffline(!navigator.onLine));
+    const frame = setTimeout(() => setOffline(!navigator.onLine), 0);
 
     const onInstallPrompt = (event: Event) => {
       event.preventDefault();
@@ -51,7 +51,7 @@ export function PwaRegistration() {
       });
     }
     return () => {
-      cancelAnimationFrame(frame);
+      clearTimeout(frame);
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("beforeinstallprompt", onInstallPrompt);

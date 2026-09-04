@@ -23,11 +23,11 @@ export function InstallApp({ appName }: { readonly appName: string }) {
   const [mode, setMode] = useState<Mode>("manual");
   useEffect(() => {
     // Detected after hydration so server and client render the same first.
-    const frame = requestAnimationFrame(() => setMode(detect()));
+    const frame = setTimeout(() => setMode(detect()), 0);
     const onReady = () => setMode(detect());
     window.addEventListener("installprompt-ready", onReady);
     return () => {
-      cancelAnimationFrame(frame);
+      clearTimeout(frame);
       window.removeEventListener("installprompt-ready", onReady);
     };
   }, []);
