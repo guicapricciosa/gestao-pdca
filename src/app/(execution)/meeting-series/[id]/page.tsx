@@ -11,7 +11,11 @@ import { loadExecutionDetailContext } from "@/modules/execution/application/deta
 import { ScopeFields } from "@/ui/patterns/scope-fields";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { StatusBadge } from "@/ui/components/status-badge";
-import { meetingTypeLabel } from "@/ui/labels";
+import {
+  nextOccurrence,
+  parseRecurrence,
+} from "@/modules/meetings/domain/recurrence";
+import { formatDateTime, meetingTypeLabel } from "@/ui/labels";
 
 const field = "rounded-lg border bg-white px-3 py-2 text-sm";
 export const dynamic = "force-dynamic";
@@ -42,6 +46,13 @@ export default async function MeetingSeriesDetailPage({
     loadExecutionDetailContext(client, series.security_object_id),
     loadCreationOptions("meeting.scope.update"),
   ]);
+  const recurrence = parseRecurrence(JSON.stringify(series.recurrence ?? {}));
+  const lastStart = (sessions ?? [])[0]?.scheduled_start_at ?? null;
+  const anchor = lastStart ? new Date(lastStart) : null;
+  const next =
+    anchor && recurrence.freq !== "NONE"
+      ? nextOccurrence(recurrence, anchor, anchor, (sessions ?? []).length)
+      : null;
   return (
     <div className="space-y-8">
       <header>
@@ -54,12 +65,22 @@ export default async function MeetingSeriesDetailPage({
           {series.recurrence_rule ?? "sem repetição definida"}
         </p>
       </header>
-      <Link
-        className="inline-flex rounded-full bg-black px-4 py-2 text-sm text-white"
-        href={`/meetings/new?seriesId=${id}`}
-      >
-        Marcar próxima reunião
-      </Link>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          className="inline-flex rounded-full bg-black px-4 py-2 text-sm text-white"
+          href={`/meetings/new?seriesId=${id}${next ? `&start=${encodeURIComponent(next.toISOString())}` : ""}`}
+        >
+          Marcar próxima reunião
+        </Link>
+        {next && (
+          <span
+            className="text-muted-foreground text-sm"
+            data-testid="next-occurrence"
+          >
+            Sugestão: {formatDateTime(next.toISOString())}
+          </span>
+        )}
+      </div>
       <section className="rounded-2xl border bg-white">
         <h2 className="border-b p-5 font-semibold">Reuniões desta série</h2>
         {(sessions ?? []).map((session) => (

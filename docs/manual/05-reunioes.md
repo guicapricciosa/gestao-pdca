@@ -6,8 +6,22 @@ Em **Reuniões › Marcar reunião**:
 
 ![Marcar reunião](../screenshots/15-new-meeting.png)
 
-Dá um assunto, escolhe início e fim, quem participa, onde se aplica e se se
-repete (semanal, quinzenal, mensal). Ao gravar entras logo na reunião.
+Começa pelo **Modelo da reunião** (Reunião de Direção, DOL, visita técnica…):
+o modelo preenche o assunto («Reunião de Direção · 14 de outubro»), a duração,
+quem participa, onde se aplica, a agenda de base e a repetição. Podes mudar
+tudo nesta reunião. Sem modelo, escreves o assunto.
+
+**Quando**: escolhe o dia e as horas (de 10 em 10 minutos); o fim acompanha o
+início até o alterares. **Quem participa** vem logo a seguir. Em **Repetir**
+tens Não, Diariamente, Semanalmente, Mensalmente ou **Personalizado…** (a cada
+N semanas, nos dias que escolheres, mensal por dia ou por «primeira
+segunda-feira», a terminar nunca, numa data ou após N vezes). A visibilidade
+fica em Opções avançadas, Normal por omissão. Ao gravar entras logo na
+reunião.
+
+Os modelos criam-se em **Definições › Modelos de reunião** (quem tem essa
+permissão): nome, duração, participantes habituais, onde se aplica, agenda
+habitual, periodicidade e visibilidade.
 
 ## A reunião
 

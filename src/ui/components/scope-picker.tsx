@@ -16,6 +16,11 @@ interface ScopePickerProps {
   readonly contextLabel: string;
   readonly name?: string;
   readonly companyWide?: boolean;
+  /** Pre-selection from a template: all restaurants or a fixed list. */
+  readonly initialSelection?:
+    | { readonly kind: "all" }
+    | { readonly kind: "ids"; readonly ids: readonly string[] }
+    | undefined;
 }
 
 const field = "w-full rounded-lg border bg-white px-3 py-2 text-sm";
@@ -31,22 +36,36 @@ export function ScopePicker({
   contextLabel,
   name = "restaurantIds",
   companyWide = false,
+  initialSelection,
 }: ScopePickerProps) {
   const id = useId();
   const context = restaurants.filter((restaurant) =>
     contextIds.includes(restaurant.id),
   );
+  const preset =
+    initialSelection?.kind === "all"
+      ? "all"
+      : initialSelection?.kind === "ids"
+        ? initialSelection.ids.length === 1
+          ? `one:${initialSelection.ids[0]}`
+          : initialSelection.ids.length === 0
+            ? "none"
+            : "custom"
+        : null;
   const initial =
-    context.length === 1
+    preset ??
+    (context.length === 1
       ? `one:${context[0]!.id}`
       : context.length > 1
         ? "context"
         : companyWide
           ? "all"
-          : "custom";
+          : "custom");
   const [choice, setChoice] = useState<string>(initial);
   const [custom, setCustom] = useState<string[]>(
-    context.map((restaurant) => restaurant.id),
+    initialSelection?.kind === "ids"
+      ? [...initialSelection.ids]
+      : context.map((restaurant) => restaurant.id),
   );
 
   const selected =

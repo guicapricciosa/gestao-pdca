@@ -589,3 +589,10 @@ target, href, sensitive, dedupe key, source outbox event, created/read) and
 `notification_preferences` (per profile). `audit_events` now feed
 `outbox_events` through a trigger. Gate D adds `push_subscriptions` and
 `notification_deliveries`. See `docs/notifications.md`.
+
+## Meeting templates and recurrence (2026-09-04)
+
+`meeting_templates` (company reference data: name, duration, participants,
+scope, agenda, recurrence, visibility; managed with `meeting.template.manage`,
+readable by meeting creators) and `meeting_series.recurrence` (structured
+rule next to the label). See `docs/meetings.md`.

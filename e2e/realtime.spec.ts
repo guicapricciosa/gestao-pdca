@@ -31,9 +31,7 @@ test.describe.serial("Realtime meeting between two participants", () => {
   test("the chair marks a meeting, adds a participant and opens it", async () => {
     await login(chair);
     await chair.goto("/meetings/new");
-    await chair
-      .getByLabel("Assunto da reunião")
-      .fill("RT · Reunião partilhada");
+    await chair.locator('input[name="title"]').fill("RT · Reunião partilhada");
     await pickRestaurantA(chair);
     await chair.getByRole("button", { name: "Marcar reunião" }).click();
     await chair.waitForURL(/\/meetings\/[0-9a-f-]+\/run$/);
@@ -346,7 +344,7 @@ test.describe
     await login(first);
     await first.goto("/meetings/new");
     await first
-      .getByLabel("Assunto da reunião")
+      .locator('input[name="title"]')
       .fill("RT · Notas em dois dispositivos");
     await pickRestaurantA(first);
     await first.getByRole("button", { name: "Marcar reunião" }).click();

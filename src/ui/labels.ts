@@ -81,15 +81,15 @@ const phase: Record<string, string> = {
 export const visibility = {
   NORMAL: {
     label: "Normal",
-    hint: "Quem cobre o restaurante ou a área vê este registo.",
+    hint: "Visível às pessoas com acesso a esta área/restaurante.",
   },
   RESTRICTED: {
     label: "Restrita",
-    hint: "Só quem for autorizado explicitamente, além de quem criou.",
+    hint: "Apenas pessoas autorizadas a consultar informação restrita nesta área.",
   },
   PRIVATE: {
     label: "Privada",
-    hint: "Só quem criou e quem receber acesso explícito.",
+    hint: "Apenas tu e as pessoas que escolheres.",
   },
 } as const;
 

@@ -70,3 +70,15 @@ export async function openSheet(page: Page, testId: string) {
   await dialog.waitFor();
   return dialog;
 }
+
+/** Sets "Quando" on the meeting form: date plus start/end in 10-minute steps. */
+export async function setMeetingWhen(
+  page: Page,
+  date: string,
+  start: string,
+  end?: string,
+) {
+  await page.getByLabel("Data").fill(date);
+  await page.getByLabel("Início").selectOption(start);
+  if (end) await page.getByLabel("Fim").selectOption(end);
+}

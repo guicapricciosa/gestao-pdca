@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { getBranding } from "@/platform/pwa/branding";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { InstallApp } from "@/ui/components/install-app";
@@ -8,8 +10,12 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const branding = getBranding();
   const client = await createSupabaseServerClient();
-  const { data: preferences } = await client.rpc(
-    "get_notification_preferences",
+  const [{ data: preferences }, { data: scope }] = await Promise.all([
+    client.rpc("get_notification_preferences"),
+    client.rpc("get_accessible_scope"),
+  ]);
+  const canManageTemplates = (scope ?? []).some(
+    (path) => path.permission_key === "meeting.template.manage",
   );
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -39,6 +45,21 @@ export default async function SettingsPage() {
         }
       />
       <InstallApp appName={branding.name} />
+      {canManageTemplates && (
+        <section className="rounded-2xl border bg-white p-5">
+          <h2 className="font-semibold">Modelos de reunião</h2>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Reunião de Direção, DOL, visita técnica… Um modelo preenche assunto,
+            duração, pessoas, âmbito, agenda e repetição ao marcar uma reunião.
+          </p>
+          <Link
+            className="mt-3 inline-flex rounded-full border bg-white px-4 py-2 text-sm"
+            href="/definicoes/modelos-de-reuniao"
+          >
+            Gerir modelos
+          </Link>
+        </section>
+      )}
     </div>
   );
 }

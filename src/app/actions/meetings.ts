@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { finish } from "@/app/actions/finish";
+import {
+  describeRecurrence,
+  parseRecurrence,
+} from "@/modules/meetings/domain/recurrence";
 import { describeCommandError } from "@/shared/errors/describe";
 
 import {
@@ -71,27 +75,30 @@ export async function createMeetingSessionAction(formData: FormData) {
   let seriesId =
     optional(formData, "meetingSeriesId") ??
     optional(formData, "existingSeriesId");
-  const repeat = optional(formData, "repeat") ?? "NONE";
-  const repeatLabel: Record<string, string> = {
-    WEEKLY: "Semanalmente",
-    BIWEEKLY: "Quinzenalmente",
-    MONTHLY: "Mensalmente",
-  };
-  if (seriesId === null && repeatLabel[repeat] !== undefined) {
+  const recurrence = parseRecurrence(formData.get("recurrence"));
+  if (seriesId === null && recurrence.freq !== "NONE") {
+    const label = describeRecurrence(recurrence);
+    const seriesTitle = title.split(" · ")[0]?.trim() || title;
     const { data, error } = await client.rpc("create_meeting_series", {
       company_id: companyId,
-      title,
+      title: seriesTitle,
       description: null as never,
       meeting_type: "OPERATIONS",
       default_chair_profile_id: chairProfileId as never,
-      recurrence_rule: repeatLabel[repeat] as never,
-      recurrence_metadata: { repeat },
+      recurrence_rule: label as never,
+      recurrence_metadata: JSON.parse(JSON.stringify({ recurrence })),
       visibility: visibility as never,
       unit_ids: unitIds,
       restaurant_ids: restaurantIds,
     });
     if (error !== null) finish("/meetings/new", error);
     seriesId = data;
+    await client.rpc("set_meeting_series_recurrence", {
+      meeting_series_id: data,
+      expected_version: 1,
+      recurrence: recurrence as never,
+      recurrence_rule: label,
+    });
   }
   const parsed = createMeetingSessionSchema.safeParse({
     companyId,
@@ -119,6 +126,15 @@ export async function createMeetingSessionAction(formData: FormData) {
     restaurant_ids: command.restaurantIds,
   });
   if (error !== null) finish("/meetings/new", error);
+  // Base agenda from the template, in order.
+  for (const line of (optional(formData, "agendaItems") ?? "").split("\n")) {
+    const itemTitle = line.trim().slice(0, 240);
+    if (itemTitle.length < 2) continue;
+    await client.rpc("add_meeting_agenda_item", {
+      meeting_session_id: data,
+      title: itemTitle,
+    });
+  }
   const skipped: string[] = [];
   for (const profileId of values(formData, "participantIds")) {
     if (profileId === chairProfileId) continue;
@@ -491,4 +507,59 @@ export async function finishMeetingAction(formData: FormData) {
   for (const route of [`/meetings/${id}`, `/meetings/${id}/run`, "/my-work"])
     revalidatePath(route);
   redirect(`/meetings/${id}?finished=1`);
+}
+
+function uuidList(formData: FormData, name: string) {
+  return values(formData, name).filter((value) =>
+    /^[0-9a-f-]{36}$/i.test(value),
+  );
+}
+
+export async function saveMeetingTemplateAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const templateId = optional(formData, "templateId");
+  const agenda = (optional(formData, "agenda") ?? "")
+    .split("\n")
+    .map((line) => line.replace(/^\s*\d+[.)]\s*/, "").trim())
+    .filter((line) => line.length >= 2)
+    .slice(0, 30);
+  const recurrence = parseRecurrence(formData.get("recurrence"));
+  const { data, error } = await client.rpc("save_meeting_template", {
+    template_id: templateId as never,
+    expected_version: Number(formData.get("version") ?? 1),
+    company_id: String(formData.get("companyId")),
+    name: String(formData.get("name")),
+    default_duration_minutes: Number(formData.get("durationMinutes") ?? 60),
+    meeting_type: optional(formData, "meetingType") ?? "OPERATIONS",
+    visibility: (optional(formData, "visibility") ?? "NORMAL") as never,
+    participant_profile_ids: uuidList(formData, "participantIds"),
+    unit_ids: uuidList(formData, "unitIds"),
+    restaurant_ids:
+      formData.get("scopeMode") === "all"
+        ? []
+        : uuidList(formData, "restaurantIds"),
+    all_restaurants: formData.get("scopeMode") === "all",
+    agenda: agenda as never,
+    recurrence: recurrence as never,
+  });
+  if (error !== null)
+    finish(
+      templateId
+        ? `/definicoes/modelos-de-reuniao/${templateId}`
+        : "/definicoes/modelos-de-reuniao/novo",
+      error,
+    );
+  revalidatePath("/definicoes/modelos-de-reuniao");
+  revalidatePath("/meetings/new");
+  redirect(`/definicoes/modelos-de-reuniao?saved=1`);
+  void data;
+}
+
+export async function deactivateMeetingTemplateAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const { error } = await client.rpc("deactivate_meeting_template", {
+    template_id: String(formData.get("templateId")),
+    expected_version: Number(formData.get("version")),
+  });
+  finish("/definicoes/modelos-de-reuniao", error, ["/meetings/new"]);
 }

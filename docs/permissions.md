@@ -386,3 +386,7 @@ The central rule also governs joining a meeting's Realtime channel
 (`private.can_join_meeting_channel`), creating a notification for a recipient
 (checked at creation time) and opening any deep link (checked by the page).
 A Realtime signal, a notification or a push never carries a capability.
+
+`meeting.template.manage` (2026-09-04): create/edit/deactivate meeting
+templates for a company; granted to Global Executive and the director roles.
+Using a template only needs `meeting.create`.

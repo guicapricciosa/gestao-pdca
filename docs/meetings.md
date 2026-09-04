@@ -206,3 +206,28 @@ who is present, "Copiar ligação" shares a navigation-only link, and notes
 signal newer versions instead of merging. Details: `docs/realtime.md`.
 Participation still creates no explicit grants; everyone sees the meeting
 within their own permissions.
+
+### Marcar reunião: modelos, horas e repetição (2026-09-04)
+
+- **Modelo da reunião** (`meeting_templates`, Definições → Modelos de reunião,
+  permissão `meeting.template.manage` para directores e executivos): nome,
+  duração habitual, participantes habituais, onde se aplica (todos os
+  restaurantes / lista / nenhum), agenda habitual, periodicidade sugerida e
+  visibilidade. Escolher um modelo preenche o formulário — assunto
+  «Nome · 14 de outubro», fim = início + duração, pessoas, âmbito, agenda de
+  base e repetição — e tudo continua editável nessa reunião.
+- **Quando**: data e horas em passos de 10 minutos; o fim segue o início
+  (+ duração) até a pessoa o alterar.
+- **Repetir**: Não / Diariamente / Semanalmente / Mensalmente /
+  Personalizado… O painel personalizado segue um calendário: a cada N, dias da
+  semana, mensal por dia ou por «primeira/última segunda-feira», termina
+  nunca / em data / após N ocorrências. A regra estruturada fica em
+  `meeting_series.recurrence` (`src/modules/meetings/domain/recurrence.ts`,
+  RRULE-like, pensada para a futura sincronização com Outlook) ao lado da
+  etiqueta legível; «Marcar próxima reunião» sugere a data seguinte.
+- **Visibilidade** vive nas opções avançadas com Normal por omissão:
+  Normal «Visível às pessoas com acesso a esta área/restaurante», Restrita
+  «Apenas pessoas autorizadas a consultar informação restrita nesta área»,
+  Privada «Apenas tu e as pessoas que escolheres».
+- Ordem do formulário: Modelo → Assunto → Quando → Quem participa → Onde se
+  aplica → Repetir → Opções avançadas.

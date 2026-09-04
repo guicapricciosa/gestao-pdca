@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-import { login, pickRestaurantA, submitAction } from "./support";
+import {
+  login,
+  pickRestaurantA,
+  submitAction,
+  setMeetingWhen,
+} from "./support";
 
 test.describe.serial("Assistant proposals, summary and alerts", () => {
   let sessionId = "";
@@ -11,10 +16,9 @@ test.describe.serial("Assistant proposals, summary and alerts", () => {
     await login(page);
     await page.goto("/meetings/new");
     await page
-      .getByLabel("Assunto da reunião")
+      .locator('input[name="title"]')
       .fill("E2E Reunião com assistente");
-    await page.getByLabel("Início").fill("2026-10-05T10:00");
-    await page.getByLabel("Fim").fill("2026-10-05T11:00");
+    await setMeetingWhen(page, "2026-10-05", "10:00", "11:00");
     await pickRestaurantA(page);
     await page.getByRole("button", { name: "Marcar reunião" }).click();
     await page.waitForURL(/\/meetings\/[0-9a-f-]+\/run$/);

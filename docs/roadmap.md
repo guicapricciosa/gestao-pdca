@@ -566,3 +566,8 @@ Still excluded and blocked pending approval: Executive Analytics, global Managem
 - Per-device push subscriptions, delivery queue with retries and cleanup, provider abstraction (webpush/fake/disabled), reserved-subject payload policy, device management in Definições.
 - Polish: "Adicionar ficheiro" picker, discreet Sem prazo / Sem Owner hints in lists, dead `execution-form.tsx` removed, bell/Definições reachable on phones, manual chapters 10–12, screenshots refreshed.
 - Awaiting: real-meeting validation before Deterministic Executive Analytics; Microsoft 365 integration documented as future work only.
+
+## 2026-09-04 — Production and meeting templates
+
+- Production: Supabase Cloud (Ireland, Pro) with migrations only, bootstrap of the real organization (15 restaurants), first admin, Vercel Pro with cron; health, login, PWA, Notification Center and deep links validated on the temporary URL; push and the domain still pending.
+- Meeting form: templates (Definições → Modelos de reunião), 10-minute times with the end following the start, participants right after the template, calendar-style custom recurrence stored structurally, visibility copy simplified and moved to advanced options.

@@ -9,9 +9,9 @@ export const dynamic = "force-dynamic";
 export default async function NewMeetingPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ seriesId?: string }>;
+  readonly searchParams: Promise<{ seriesId?: string; start?: string }>;
 }) {
-  const { seriesId } = await searchParams;
+  const { seriesId, start } = await searchParams;
   const [options, viewer] = await Promise.all([
     loadMeetingCreationOptions(),
     loadViewerContext("meeting.create"),
@@ -34,6 +34,9 @@ export default async function NewMeetingPage({
         contextRestaurantIds={viewer.restaurantIds}
         contextUnitIds={viewer.unitIds}
         companyWide={viewer.companyWide}
+        initialStart={
+          start && !Number.isNaN(new Date(start).getTime()) ? start : undefined
+        }
       />
     </section>
   );

@@ -19,7 +19,7 @@ test.describe.serial("Notification Center", () => {
   }) => {
     await login(page);
     await page.goto("/meetings/new");
-    await page.getByLabel("Assunto da reunião").fill(meetingTitle);
+    await page.locator('input[name="title"]').fill(meetingTitle);
     await pickRestaurantA(page);
     await page.getByRole("button", { name: "Marcar reunião" }).click();
     await page.waitForURL(/\/meetings\/[0-9a-f-]+\/run$/);

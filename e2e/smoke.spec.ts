@@ -28,7 +28,7 @@ test("a meeting from opening to distribution, as a person runs it", async ({
   // Marcar reunião
   await page.goto("/meetings/new");
   await page
-    .getByLabel("Assunto da reunião")
+    .locator('input[name="title"]')
     .fill("Smoke · Reunião de operações");
   await pickRestaurantA(page);
   await expect(page.getByTestId("scope-summary")).toContainText("Restaurant A");

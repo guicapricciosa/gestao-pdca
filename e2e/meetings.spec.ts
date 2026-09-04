@@ -8,6 +8,7 @@ import {
   pickRestaurantA,
   profiles,
   submitAction,
+  setMeetingWhen,
 } from "./support";
 
 test.describe
@@ -21,7 +22,7 @@ test.describe
   }) => {
     await login(page);
     await page.goto("/meetings/new");
-    await page.getByLabel("Assunto da reunião").fill("E2E Direcção semanal");
+    await page.locator('input[name="title"]').fill("E2E Direcção semanal");
     await page.locator('select[name="repeat"]').selectOption("WEEKLY");
     await pickRestaurantA(page);
     await page.getByRole("button", { name: "Marcar reunião" }).click();
@@ -100,11 +101,8 @@ test.describe
 
     // Next meeting of the same series, marked before the first one ends.
     await page.goto(`/meetings/new?seriesId=${session!.meeting_series_id}`);
-    await page
-      .getByLabel("Assunto da reunião")
-      .fill("E2E Direcção semanal · 2");
-    await page.getByLabel("Início").fill("2026-10-01T10:00");
-    await page.getByLabel("Fim").fill("2026-10-01T11:00");
+    await page.locator('input[name="title"]').fill("E2E Direcção semanal · 2");
+    await setMeetingWhen(page, "2026-10-01", "10:00", "11:00");
     await pickRestaurantA(page);
     await page.getByRole("button", { name: "Marcar reunião" }).click();
     await page.waitForURL(/\/meetings\/[0-9a-f-]+\/run$/);
