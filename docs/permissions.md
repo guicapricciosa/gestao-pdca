@@ -390,3 +390,23 @@ A Realtime signal, a notification or a push never carries a capability.
 `meeting.template.manage` (2026-09-04): create/edit/deactivate meeting
 templates for a company; granted to Global Executive and the director roles.
 Using a template only needs `meeting.create`.
+
+## Implementation note — set-based read access (2026-09-04)
+
+`private.can_access_security_object(profile, object, permission)` remains the
+single rule for commands, triggers and single checks. For reads, calling it per
+row cost about 1.2 ms per object in production (180 ms for 152 PDCAs, twice
+per list because of the exact count), growing linearly with data.
+
+Migration `202609040004_accessible_objects.sql` adds
+`private.accessible_security_objects(profile, permission default null)`: the
+set of objects the rule accepts, computed once per query (explicit grants,
+PRIVATE creator reads, assignment coverage by unit and restaurant, RESTRICTED
+gating). `permission = null` means each object's own `<type>.read`. The read
+policies on decisions, tasks, pdcas, comments, memberships, attachments,
+security_objects, meeting_series and meeting_sessions use
+`security_object_id in (select private.accessible_security_objects(…))`, which
+Postgres evaluates as one hashed sub-plan. `supabase/tests/accessible_objects_test.sql`
+asserts the set equals the per-row rule for every seeded profile × object and
+seven permissions, so the rule itself did not change. History and event tables
+keep the per-row check (they are read for one record at a time).
