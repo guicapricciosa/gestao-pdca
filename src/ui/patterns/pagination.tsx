@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { listHref, type SearchValues } from "@/ui/patterns/list-query";
+
 export function Pagination({
   basePath,
   page,
@@ -11,17 +13,11 @@ export function Pagination({
   readonly page: number;
   readonly pageSize: number;
   readonly total: number;
-  readonly values?: Readonly<Record<string, string | string[] | undefined>>;
+  readonly values?: SearchValues;
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
-  const href = (target: number) => {
-    const params = new URLSearchParams();
-    for (const [key, raw] of Object.entries(values))
-      if (typeof raw === "string" && raw !== "" && key !== "page")
-        params.set(key, raw);
-    params.set("page", String(target));
-    return `${basePath}?${params.toString()}`;
-  };
+  const href = (target: number) =>
+    listHref(basePath, values, { page: String(target), open: null });
   return (
     <nav
       aria-label="Paginação"

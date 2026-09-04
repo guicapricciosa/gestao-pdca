@@ -1,12 +1,9 @@
 import Link from "next/link";
-import type {
-  ExecutionStatus,
-  PriorityLevel,
-} from "@/modules/execution/domain/types";
 import { createExecutionService } from "@/modules/execution/application/factory";
 import { loadListOptions } from "@/modules/execution/application/creation-options";
 import { ExecutionList } from "@/ui/patterns/execution-list";
 import { ListFilters } from "@/ui/patterns/list-filters";
+import { parseListSearch } from "@/ui/patterns/list-query";
 import { Pagination } from "@/ui/patterns/pagination";
 import { taskStatusLabel, statusOrder } from "@/ui/labels";
 export const dynamic = "force-dynamic";
@@ -20,38 +17,7 @@ export default async function TasksPage({
   let options;
   try {
     [result, options] = await Promise.all([
-      (await createExecutionService()).listTasks({
-        query:
-          typeof search.query === "string" && search.query
-            ? search.query
-            : undefined,
-        status:
-          typeof search.status === "string" && search.status
-            ? (search.status as ExecutionStatus)
-            : undefined,
-        priority:
-          typeof search.priority === "string" && search.priority
-            ? (search.priority as PriorityLevel)
-            : undefined,
-        unitId:
-          typeof search.unitId === "string" && search.unitId
-            ? search.unitId
-            : undefined,
-        restaurantId:
-          typeof search.restaurantId === "string" && search.restaurantId
-            ? search.restaurantId
-            : undefined,
-        ownerId:
-          typeof search.ownerId === "string" && search.ownerId
-            ? search.ownerId
-            : undefined,
-        responsibleId:
-          typeof search.responsibleId === "string" && search.responsibleId
-            ? search.responsibleId
-            : undefined,
-        overdue: search.overdue === "true",
-        page: typeof search.page === "string" ? Number(search.page) : 1,
-      }),
+      (await createExecutionService()).listTasks(parseListSearch(search)),
       loadListOptions("task.read"),
     ]);
   } catch {
@@ -92,7 +58,8 @@ export default async function TasksPage({
       <ExecutionList
         items={result.items.map((item) => ({
           ...item,
-          responsible: nameOf(item.responsibleProfileId),
+          responsible:
+            item.responsibleName ?? nameOf(item.responsibleProfileId),
           warnings: [
             ...(!item.dueDate &&
             !["COMPLETED", "CANCELLED", "ARCHIVED"].includes(item.status)
@@ -106,6 +73,7 @@ export default async function TasksPage({
         }))}
         badgeKind="task"
         basePath="/tasks"
+        values={search}
         createHref="/tasks/new"
         createLabel="Nova tarefa"
       />

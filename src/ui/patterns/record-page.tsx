@@ -37,7 +37,11 @@ export function RecordHeader({
   return (
     <header>
       <p className="text-accent text-sm font-medium">
-        <Link className="hover:underline" href={backHref}>
+        <Link
+          className="hover:underline"
+          data-testid="back-link"
+          href={backHref}
+        >
           {backLabel}
         </Link>
         {" › "}

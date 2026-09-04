@@ -14,17 +14,21 @@ export function finish(
   alsoRevalidate: readonly string[] = [],
   options: { readonly silent?: boolean } = {},
 ): never {
-  for (const route of [path, ...alsoRevalidate]) revalidatePath(route);
+  // The return path may already carry a query string (a filtered list with
+  // an open side panel); revalidate the route and append feedback safely.
+  const route = path.split("?")[0] ?? path;
+  const join = path.includes("?") ? "&" : "?";
+  for (const target of [route, ...alsoRevalidate]) revalidatePath(target);
   if (error) {
     console.error("command failed", { path, message: error.message });
     redirect(
-      `${path}?error=${encodeURIComponent(describeCommandError(error.message))}`,
+      `${path}${join}error=${encodeURIComponent(describeCommandError(error.message))}`,
     );
   }
   // Meeting Mode and other live screens show the new state itself; a
   // `?saved=1` there would also change the URL and remount the page segment
   // (closing open side sheets). Errors always surface.
-  redirect(options.silent ? path : `${path}?saved=1`);
+  redirect(options.silent ? path : `${path}${join}saved=1`);
 }
 
 export function errorOf(error: unknown): Error {

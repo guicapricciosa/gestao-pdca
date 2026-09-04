@@ -1,12 +1,14 @@
 import Link from "next/link";
-import type {
-  ExecutionStatus,
-  PriorityLevel,
-} from "@/modules/execution/domain/types";
 import { createExecutionService } from "@/modules/execution/application/factory";
 import { loadListOptions } from "@/modules/execution/application/creation-options";
 import { ExecutionList } from "@/ui/patterns/execution-list";
 import { ListFilters } from "@/ui/patterns/list-filters";
+import {
+  listHref,
+  parseListSearch,
+  singleParam,
+} from "@/ui/patterns/list-query";
+import { PdcaPanel } from "@/ui/patterns/pdca-panel";
 import { Pagination } from "@/ui/patterns/pagination";
 import { pdcaStatusLabel, statusOrder } from "@/ui/labels";
 export const dynamic = "force-dynamic";
@@ -20,38 +22,7 @@ export default async function PdcasPage({
   let options;
   try {
     [result, options] = await Promise.all([
-      (await createExecutionService()).listPdcas({
-        query:
-          typeof search.query === "string" && search.query
-            ? search.query
-            : undefined,
-        status:
-          typeof search.status === "string" && search.status
-            ? (search.status as ExecutionStatus)
-            : undefined,
-        priority:
-          typeof search.priority === "string" && search.priority
-            ? (search.priority as PriorityLevel)
-            : undefined,
-        unitId:
-          typeof search.unitId === "string" && search.unitId
-            ? search.unitId
-            : undefined,
-        restaurantId:
-          typeof search.restaurantId === "string" && search.restaurantId
-            ? search.restaurantId
-            : undefined,
-        ownerId:
-          typeof search.ownerId === "string" && search.ownerId
-            ? search.ownerId
-            : undefined,
-        responsibleId:
-          typeof search.responsibleId === "string" && search.responsibleId
-            ? search.responsibleId
-            : undefined,
-        overdue: search.overdue === "true",
-        page: typeof search.page === "string" ? Number(search.page) : 1,
-      }),
+      (await createExecutionService()).listPdcas(parseListSearch(search)),
       loadListOptions("pdca.read"),
     ]);
   } catch {
@@ -63,6 +34,7 @@ export default async function PdcasPage({
   );
   const nameOf = (id: string | null) =>
     id === null ? null : (people.get(id) ?? "—");
+  const openId = singleParam(search, "open");
   return (
     <>
       <header className="mb-10 flex items-end justify-between gap-6">
@@ -92,7 +64,8 @@ export default async function PdcasPage({
       <ExecutionList
         items={result.items.map((item) => ({
           ...item,
-          responsible: nameOf(item.responsibleProfileId),
+          responsible:
+            item.responsibleName ?? nameOf(item.responsibleProfileId),
           warnings: [
             ...(!item.dueDate &&
             !["COMPLETED", "CANCELLED", "ARCHIVED"].includes(item.status)
@@ -106,6 +79,8 @@ export default async function PdcasPage({
         }))}
         badgeKind="pdca"
         basePath="/pdcas"
+        values={search}
+        openInPanel
         createHref="/pdcas/new"
         createLabel="Novo PDCA"
       />
@@ -116,6 +91,13 @@ export default async function PdcasPage({
         pageSize={result.pageSize}
         total={result.total}
       />
+      {openId !== "" && (
+        <PdcaPanel
+          id={openId}
+          returnPath={listHref("/pdcas", search, { open: openId })}
+          closeHref={listHref("/pdcas", search, { open: null })}
+        />
+      )}
     </>
   );
 }

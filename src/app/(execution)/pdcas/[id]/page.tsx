@@ -81,9 +81,10 @@ export default async function PdcaDetailPage({
     ai_error?: string;
     from?: string;
     fase?: string;
+    back?: string;
   }>;
 }) {
-  const [{ id }, { ai_error: aiError, from, fase }] = await Promise.all([
+  const [{ id }, { ai_error: aiError, from, fase, back }] = await Promise.all([
     params,
     searchParams,
   ]);
@@ -180,7 +181,7 @@ export default async function PdcaDetailPage({
     <div className="space-y-6">
       <RecordHeader
         kindLabel="PDCA"
-        backHref="/pdcas"
+        backHref={back?.startsWith("/pdcas") ? back : "/pdcas"}
         backLabel="PDCAs"
         from={from}
         title={pdca.title}

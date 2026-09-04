@@ -51,3 +51,14 @@ seguidores e o texto da tarefa.
 
 Filtros essenciais à vista: pesquisa, estado, restaurante, responsável e «Só
 atrasados». Em «Mais filtros» tens Owner, prioridade e área.
+
+Cada filtro aceita **várias escolhas**: abre o selector, marca o que queres
+(o botão passa a mostrar «Estado · 2») e carrega em **Filtrar**. As escolhas
+aplicadas aparecem como etiquetas por baixo dos filtros; o × de cada uma
+retira só essa escolha e «Limpar filtros» retira todas.
+
+**Ordenar**: carrega no cabeçalho de uma coluna (Tarefa, Responsável, Prazo,
+Estado). O primeiro clique ordena de forma ascendente, o segundo inverte; a
+seta ▲/▼ mostra a ordem activa. A ordem fica no endereço, por isso sobrevive
+aos filtros, à paginação e a um link partilhado. Sem ordem escolhida, a lista
+mostra primeiro o que foi actualizado há menos tempo.

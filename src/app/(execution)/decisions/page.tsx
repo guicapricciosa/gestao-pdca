@@ -4,6 +4,7 @@ import { createExecutionService } from "@/modules/execution/application/factory"
 import { loadListOptions } from "@/modules/execution/application/creation-options";
 import { ExecutionList } from "@/ui/patterns/execution-list";
 import { ListFilters } from "@/ui/patterns/list-filters";
+import { parseListSearch } from "@/ui/patterns/list-query";
 import { Pagination } from "@/ui/patterns/pagination";
 import { decisionStatusLabel, formatDate } from "@/ui/labels";
 
@@ -19,25 +20,7 @@ export default async function DecisionsPage({
   let options;
   try {
     [result, options] = await Promise.all([
-      (await createExecutionService()).listDecisions({
-        query:
-          typeof search.query === "string" && search.query
-            ? search.query
-            : undefined,
-        status:
-          typeof search.status === "string" && search.status
-            ? (search.status as "DRAFT" | "ACTIVE" | "ARCHIVED")
-            : undefined,
-        unitId:
-          typeof search.unitId === "string" && search.unitId
-            ? search.unitId
-            : undefined,
-        restaurantId:
-          typeof search.restaurantId === "string" && search.restaurantId
-            ? search.restaurantId
-            : undefined,
-        page: typeof search.page === "string" ? Number(search.page) : 1,
-      }),
+      (await createExecutionService()).listDecisions(parseListSearch(search)),
       loadListOptions("decision.read"),
     ]);
   } catch {
@@ -79,6 +62,7 @@ export default async function DecisionsPage({
         }))}
         badgeKind="decision"
         basePath="/decisions"
+        values={search}
         createHref="/decisions/new"
         createLabel="Nova decisão"
       />

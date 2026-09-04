@@ -12,6 +12,12 @@ function optional(formData: FormData, name: string) {
   return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
 }
 
+/** Where to land after the command: the caller's page, or the record. */
+function returnTo(formData: FormData, fallback: string) {
+  const path = optional(formData, "returnPath");
+  return path !== null && path.startsWith("/") ? path : fallback;
+}
+
 function values(formData: FormData, name: string) {
   return formData
     .getAll(name)
@@ -120,7 +126,7 @@ export async function transitionTaskAction(formData: FormData) {
     ...(reason === null ? {} : { reason }),
     ...(completionNotes === null ? {} : { completion_notes: completionNotes }),
   });
-  finish(`/tasks/${id}`, error);
+  finish(returnTo(formData, `/tasks/${id}`), error);
 }
 
 export async function transitionPdcaAction(formData: FormData) {
@@ -135,7 +141,7 @@ export async function transitionPdcaAction(formData: FormData) {
     ...(reason === null ? {} : { reason }),
     ...(closureNotes === null ? {} : { closure_notes: closureNotes }),
   });
-  finish(`/pdcas/${id}`, error);
+  finish(returnTo(formData, `/pdcas/${id}`), error);
 }
 
 export async function changePdcaPhaseAction(formData: FormData) {
@@ -148,7 +154,7 @@ export async function changePdcaPhaseAction(formData: FormData) {
     new_phase: String(formData.get("phase")) as never,
     ...(reason === null ? {} : { reason }),
   });
-  finish(`/pdcas/${id}`, error);
+  finish(returnTo(formData, `/pdcas/${id}`), error);
 }
 
 export async function addCommentAction(formData: FormData) {
@@ -253,7 +259,10 @@ export async function changeDueDateAction(formData: FormData) {
           new_due_date: newDueDate,
           reason,
         });
-  finish(`/${kind === "Task" ? "tasks" : "pdcas"}/${id}`, result.error);
+  finish(
+    returnTo(formData, `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`),
+    result.error,
+  );
 }
 
 export async function replaceScopeAction(formData: FormData) {
@@ -295,7 +304,10 @@ export async function completeAction(formData: FormData) {
   const client = await createSupabaseServerClient();
   const kind = String(formData.get("kind"));
   const id = String(formData.get("id"));
-  const path = `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`;
+  const path = returnTo(
+    formData,
+    `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`,
+  );
   const notes = optional(formData, "completionNotes") ?? "Concluído";
   const result =
     kind === "Task"
@@ -319,7 +331,10 @@ export async function blockAction(formData: FormData) {
   const client = await createSupabaseServerClient();
   const kind = String(formData.get("kind"));
   const id = String(formData.get("id"));
-  const path = `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`;
+  const path = returnTo(
+    formData,
+    `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`,
+  );
   const reason = String(formData.get("reason"));
   const blocker =
     kind === "Task"
@@ -351,7 +366,10 @@ export async function unblockAction(formData: FormData) {
   const client = await createSupabaseServerClient();
   const kind = String(formData.get("kind"));
   const id = String(formData.get("id"));
-  const path = `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`;
+  const path = returnTo(
+    formData,
+    `/${kind === "Task" ? "tasks" : "pdcas"}/${id}`,
+  );
   const blockerId = String(formData.get("blockerId"));
   const notes = optional(formData, "resolutionNotes") as never;
   const resolved =

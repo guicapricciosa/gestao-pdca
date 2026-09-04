@@ -42,6 +42,7 @@ export function RecordActions({
   dueDate,
   activeBlocker,
   phase,
+  returnPath,
 }: {
   readonly kind: "Task" | "PDCA";
   readonly id: string;
@@ -50,7 +51,12 @@ export function RecordActions({
   readonly dueDate: string | null;
   readonly activeBlocker: { id: string; reason: string } | null;
   readonly phase?: string;
+  /** Page to return to after a command (defaults to the record page). */
+  readonly returnPath?: string;
 }) {
+  const back = returnPath ? (
+    <input type="hidden" name="returnPath" value={returnPath} />
+  ) : null;
   const current = status as ExecutionStatus;
   const label = kind === "Task" ? taskStatusLabel : pdcaStatusLabel;
   const terminal = ["COMPLETED", "CANCELLED", "ARCHIVED"].includes(status);
@@ -90,6 +96,7 @@ export function RecordActions({
           action={kind === "Task" ? transitionTaskAction : transitionPdcaAction}
         >
           <input type="hidden" name="id" value={id} />
+          {back}
           <input type="hidden" name="version" value={version} />
           <input type="hidden" name="status" value="OPEN" />
           <SubmitButton pendingLabel="…">Activar</SubmitButton>
@@ -100,6 +107,7 @@ export function RecordActions({
           action={kind === "Task" ? transitionTaskAction : transitionPdcaAction}
         >
           <input type="hidden" name="id" value={id} />
+          {back}
           <input type="hidden" name="version" value={version} />
           <input type="hidden" name="status" value="IN_PROGRESS" />
           <SubmitButton pendingLabel="…">Começar</SubmitButton>
@@ -108,6 +116,7 @@ export function RecordActions({
       {kind === "PDCA" && nextPhase && !terminal && (
         <form action={changePdcaPhaseAction}>
           <input type="hidden" name="id" value={id} />
+          {back}
           <input type="hidden" name="version" value={version} />
           <input type="hidden" name="phase" value={nextPhase} />
           <SubmitButton pendingLabel="…">
@@ -129,6 +138,7 @@ export function RecordActions({
           <form action={completeAction} className="grid gap-4">
             <input type="hidden" name="kind" value={kind} />
             <input type="hidden" name="id" value={id} />
+            {back}
             <input type="hidden" name="version" value={version} />
             <label className="block text-sm font-medium">
               O que foi feito?
@@ -170,6 +180,7 @@ export function RecordActions({
         >
           <form action={changeDueDateAction} className="grid gap-4">
             <input type="hidden" name="id" value={id} />
+            {back}
             <input type="hidden" name="kind" value={kind} />
             <input type="hidden" name="version" value={version} />
             <label className="block text-sm font-medium">
@@ -211,6 +222,7 @@ export function RecordActions({
           <form action={blockAction} className="grid gap-4">
             <input type="hidden" name="kind" value={kind} />
             <input type="hidden" name="id" value={id} />
+            {back}
             <input type="hidden" name="version" value={version} />
             <label className="block text-sm font-medium">
               O que está a bloquear?
@@ -238,6 +250,7 @@ export function RecordActions({
           <form action={unblockAction} className="grid gap-4">
             <input type="hidden" name="kind" value={kind} />
             <input type="hidden" name="id" value={id} />
+            {back}
             <input type="hidden" name="version" value={version} />
             <input type="hidden" name="blockerId" value={activeBlocker.id} />
             <label className="block text-sm font-medium">
@@ -269,6 +282,7 @@ export function RecordActions({
               className="grid gap-3"
             >
               <input type="hidden" name="id" value={id} />
+              {back}
               <input type="hidden" name="version" value={version} />
               <label className="block text-sm font-medium">
                 Acção

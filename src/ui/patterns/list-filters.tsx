@@ -1,22 +1,27 @@
 import Link from "next/link";
 
 import type { ListOptions } from "@/modules/execution/application/creation-options";
+import {
+  MultiSelect,
+  type MultiSelectOption,
+} from "@/ui/components/multi-select";
 import { priorityLabel } from "@/ui/labels";
+import {
+  activeFilterCount,
+  listHref,
+  listParam,
+  singleParam,
+  type SearchValues,
+} from "@/ui/patterns/list-query";
 
 const field = "rounded-lg border bg-white px-3 py-2 text-sm";
 
-export type FilterValues = Readonly<
-  Record<string, string | string[] | undefined>
->;
-
-function value(values: FilterValues, name: string) {
-  const raw = values[name];
-  return typeof raw === "string" ? raw : "";
-}
+export type FilterValues = SearchValues;
 
 /**
- * Essential filters visible; the rest under "Mais filtros". Values survive
- * a submit so people always see what is applied.
+ * Essential filters visible; the rest under "Mais filtros". Every selector
+ * takes several values; the choices show as chips that can be removed one
+ * by one, so people always see what is applied.
  */
 export function ListFilters({
   basePath,
@@ -35,76 +40,110 @@ export function ListFilters({
   readonly statuses: readonly string[];
   readonly statusLabel: (code: string) => string;
 }) {
-  const active = Object.entries(values).filter(
-    ([key, raw]) => key !== "page" && typeof raw === "string" && raw !== "",
-  ).length;
+  const active = activeFilterCount(values);
   const advancedActive = ["ownerId", "priority", "unitId"].some(
-    (key) => value(values, key) !== "",
+    (key) => listParam(values, key).length > 0,
   );
-  const departments = options.units.filter(
-    (unit) => unit.unitType !== "SHARED_SERVICE",
+  const people: MultiSelectOption[] = options.people.map((person) => ({
+    value: person.id,
+    label: person.name,
+  }));
+  const units: MultiSelectOption[] = options.units.map((unit) => ({
+    value: unit.id,
+    label: unit.name,
+    group:
+      unit.unitType === "SHARED_SERVICE"
+        ? "Serviços partilhados"
+        : "Departamentos",
+  }));
+  const selectors: readonly {
+    readonly name: string;
+    readonly label: string;
+    readonly options: readonly MultiSelectOption[];
+  }[] = [
+    {
+      name: "status",
+      label: "Estado",
+      options: statuses.map((status) => ({
+        value: status,
+        label: statusLabel(status),
+      })),
+    },
+    {
+      name: "restaurantId",
+      label: "Restaurante",
+      options: options.restaurants.map((restaurant) => ({
+        value: restaurant.id,
+        label: restaurant.name,
+      })),
+    },
+    { name: "responsibleId", label: "Responsável", options: people },
+    { name: "ownerId", label: "Owner", options: people },
+    {
+      name: "priority",
+      label: "Prioridade",
+      options: ["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((priority) => ({
+        value: priority,
+        label: priorityLabel(priority),
+      })),
+    },
+    { name: "unitId", label: "Área", options: units },
+  ];
+  const chips = selectors.flatMap((selector) =>
+    listParam(values, selector.name).map((value) => ({
+      key: `${selector.name}:${value}`,
+      label: `${selector.label}: ${
+        selector.options.find((option) => option.value === value)?.label ??
+        value
+      }`,
+      href: listHref(basePath, values, {
+        [selector.name]: listParam(values, selector.name).filter(
+          (item) => item !== value,
+        ),
+      }),
+    })),
   );
-  const services = options.units.filter(
-    (unit) => unit.unitType === "SHARED_SERVICE",
-  );
+  const selector = (name: string) => {
+    const definition = selectors.find((item) => item.name === name);
+    if (!definition) return null;
+    return (
+      <MultiSelect
+        // Remount when the URL changes the selection (chips, "Limpar").
+        key={`${definition.name}:${listParam(values, definition.name).join("|")}`}
+        label={definition.label}
+        name={definition.name}
+        options={definition.options}
+        selected={listParam(values, definition.name)}
+      />
+    );
+  };
   return (
     <form aria-label="Filtros" className="mb-6 rounded-2xl border bg-white p-4">
+      {/* Sort survives filtering; it lives in the URL, not in the form fields. */}
+      {listParam(values, "sort").map((value) => (
+        <input key={value} name="sort" type="hidden" value={value} />
+      ))}
+      {listParam(values, "dir").map((value) => (
+        <input key={value} name="dir" type="hidden" value={value} />
+      ))}
       <div className="grid gap-3 md:grid-cols-4">
         <input
           aria-label="Pesquisar"
           className={`${field} md:col-span-2`}
           name="query"
           placeholder="Pesquisar por título…"
-          defaultValue={value(values, "query")}
+          defaultValue={singleParam(values, "query")}
         />
-        <select
-          aria-label="Estado"
-          className={field}
-          name="status"
-          defaultValue={value(values, "status")}
-        >
-          <option value="">Qualquer estado</option>
-          {statuses.map((status) => (
-            <option key={status} value={status}>
-              {statusLabel(status)}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Restaurante"
-          className={field}
-          name="restaurantId"
-          defaultValue={value(values, "restaurantId")}
-        >
-          <option value="">Qualquer restaurante</option>
-          {options.restaurants.map((restaurant) => (
-            <option value={restaurant.id} key={restaurant.id}>
-              {restaurant.name}
-            </option>
-          ))}
-        </select>
-        {showPeople && (
-          <select
-            aria-label="Responsável"
-            className={field}
-            name="responsibleId"
-            defaultValue={value(values, "responsibleId")}
-          >
-            <option value="">Qualquer responsável</option>
-            {options.people.map((person) => (
-              <option value={person.id} key={person.id}>
-                {person.name}
-              </option>
-            ))}
-          </select>
-        )}
+        {selector("status")}
+        {selector("restaurantId")}
+        {showPeople && selector("responsibleId")}
         {showPeople && (
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               name="overdue"
               value="true"
-              defaultChecked={value(values, "overdue") === "true"}
+              defaultChecked={singleParam(values, "overdue") === "true"}
             />
             Só atrasados
           </label>
@@ -115,64 +154,31 @@ export function ListFilters({
           Mais filtros
         </summary>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
-          {showPeople && (
-            <select
-              aria-label="Owner"
-              className={field}
-              name="ownerId"
-              defaultValue={value(values, "ownerId")}
-            >
-              <option value="">Qualquer Owner</option>
-              {options.people.map((person) => (
-                <option value={person.id} key={person.id}>
-                  {person.name}
-                </option>
-              ))}
-            </select>
-          )}
-          {showPriority && (
-            <select
-              aria-label="Prioridade"
-              className={field}
-              name="priority"
-              defaultValue={value(values, "priority")}
-            >
-              <option value="">Qualquer prioridade</option>
-              {["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((priority) => (
-                <option key={priority} value={priority}>
-                  {priorityLabel(priority)}
-                </option>
-              ))}
-            </select>
-          )}
-          <select
-            aria-label="Área"
-            className={field}
-            name="unitId"
-            defaultValue={value(values, "unitId")}
-          >
-            <option value="">Qualquer área</option>
-            {departments.length > 0 && (
-              <optgroup label="Departamentos">
-                {departments.map((unit) => (
-                  <option value={unit.id} key={unit.id}>
-                    {unit.name}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            {services.length > 0 && (
-              <optgroup label="Serviços partilhados">
-                {services.map((unit) => (
-                  <option value={unit.id} key={unit.id}>
-                    {unit.name}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-          </select>
+          {showPeople && selector("ownerId")}
+          {showPriority && selector("priority")}
+          {selector("unitId")}
         </div>
       </details>
+      {chips.length > 0 && (
+        <ul
+          className="mt-3 flex flex-wrap gap-2"
+          data-testid="filter-chips"
+          aria-label="Filtros aplicados"
+        >
+          {chips.map((chip) => (
+            <li key={chip.key}>
+              <Link
+                className="inline-flex items-center gap-1.5 rounded-full border bg-neutral-50 px-3 py-1 text-xs hover:bg-neutral-100"
+                href={chip.href}
+                aria-label={`Retirar ${chip.label}`}
+              >
+                {chip.label}
+                <span aria-hidden>×</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="mt-3 flex flex-wrap items-center gap-4">
         <button className="rounded-full bg-black px-4 py-2 text-sm text-white">
           Filtrar
@@ -180,7 +186,16 @@ export function ListFilters({
         {active > 0 && (
           <Link
             className="text-muted-foreground text-sm underline underline-offset-4"
-            href={basePath}
+            href={listHref(basePath, values, {
+              query: null,
+              overdue: null,
+              status: null,
+              restaurantId: null,
+              responsibleId: null,
+              ownerId: null,
+              priority: null,
+              unitId: null,
+            })}
           >
             Limpar filtros ({active})
           </Link>
