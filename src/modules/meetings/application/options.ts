@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@/platform/supabase/server";
 export async function loadMeetingCreationOptions() {
   const base = await loadCreationOptions("meeting.create");
   const client = await createSupabaseServerClient();
-  const [profiles, series, auth] = await Promise.all([
+  const [profiles, series, templates, auth] = await Promise.all([
     client
       .from("profiles")
       .select("id,display_name")
@@ -17,6 +17,14 @@ export async function loadMeetingCreationOptions() {
       .select("id,title,company_id")
       .eq("is_active", true)
       .order("title"),
+    client
+      .from("meeting_templates")
+      .select(
+        "id,name,default_duration_minutes,visibility,participant_profile_ids,unit_ids,restaurant_ids,all_restaurants,agenda,recurrence,meeting_type",
+      )
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("name"),
     client.auth.getUser(),
   ]);
   const authUserId = auth.data.user?.id;
@@ -31,6 +39,23 @@ export async function loadMeetingCreationOptions() {
     ...base,
     profiles: profiles.data ?? [],
     series: series.data ?? [],
+    templates: (templates.data ?? []).map((template) => ({
+      id: template.id,
+      name: template.name,
+      durationMinutes: template.default_duration_minutes,
+      visibility: template.visibility,
+      participantIds: template.participant_profile_ids,
+      unitIds: template.unit_ids,
+      restaurantIds: template.restaurant_ids,
+      allRestaurants: template.all_restaurants,
+      agenda: Array.isArray(template.agenda)
+        ? (template.agenda as unknown[]).filter(
+            (item): item is string => typeof item === "string",
+          )
+        : [],
+      recurrence: JSON.stringify(template.recurrence ?? { freq: "NONE" }),
+      meetingType: template.meeting_type,
+    })),
     currentProfileId: currentProfile?.id ?? null,
   };
 }

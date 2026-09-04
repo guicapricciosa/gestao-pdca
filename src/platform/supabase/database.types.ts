@@ -1343,6 +1343,7 @@ export type Database = {
           id: string;
           is_active: boolean;
           meeting_type: string;
+          recurrence: Json;
           recurrence_metadata: Json;
           recurrence_rule: string | null;
           security_object_id: string;
@@ -1360,6 +1361,7 @@ export type Database = {
           id?: string;
           is_active?: boolean;
           meeting_type: string;
+          recurrence?: Json;
           recurrence_metadata?: Json;
           recurrence_rule?: string | null;
           security_object_id: string;
@@ -1377,6 +1379,7 @@ export type Database = {
           id?: string;
           is_active?: boolean;
           meeting_type?: string;
+          recurrence?: Json;
           recurrence_metadata?: Json;
           recurrence_rule?: string | null;
           security_object_id?: string;
@@ -1676,6 +1679,91 @@ export type Database = {
           sort_order?: number;
         };
         Relationships: [];
+      };
+      meeting_templates: {
+        Row: {
+          agenda: Json;
+          all_restaurants: boolean;
+          company_id: string;
+          created_at: string;
+          created_by_profile_id: string;
+          default_duration_minutes: number;
+          id: string;
+          is_active: boolean;
+          meeting_type: string;
+          name: string;
+          participant_profile_ids: string[];
+          recurrence: Json;
+          restaurant_ids: string[];
+          sort_order: number;
+          unit_ids: string[];
+          updated_at: string;
+          version: number;
+          visibility: Database["public"]["Enums"]["visibility_mode"];
+        };
+        Insert: {
+          agenda?: Json;
+          all_restaurants?: boolean;
+          company_id: string;
+          created_at?: string;
+          created_by_profile_id: string;
+          default_duration_minutes?: number;
+          id?: string;
+          is_active?: boolean;
+          meeting_type?: string;
+          name: string;
+          participant_profile_ids?: string[];
+          recurrence?: Json;
+          restaurant_ids?: string[];
+          sort_order?: number;
+          unit_ids?: string[];
+          updated_at?: string;
+          version?: number;
+          visibility?: Database["public"]["Enums"]["visibility_mode"];
+        };
+        Update: {
+          agenda?: Json;
+          all_restaurants?: boolean;
+          company_id?: string;
+          created_at?: string;
+          created_by_profile_id?: string;
+          default_duration_minutes?: number;
+          id?: string;
+          is_active?: boolean;
+          meeting_type?: string;
+          name?: string;
+          participant_profile_ids?: string[];
+          recurrence?: Json;
+          restaurant_ids?: string[];
+          sort_order?: number;
+          unit_ids?: string[];
+          updated_at?: string;
+          version?: number;
+          visibility?: Database["public"]["Enums"]["visibility_mode"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "meeting_templates_company_id_fkey";
+            columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_templates_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_templates_meeting_type_fkey";
+            columns: ["meeting_type"];
+            isOneToOne: false;
+            referencedRelation: "meeting_type_definitions";
+            referencedColumns: ["code"];
+          },
+        ];
       };
       meeting_type_definitions: {
         Row: {
@@ -4811,6 +4899,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      deactivate_meeting_template: {
+        Args: { expected_version: number; template_id: string };
+        Returns: undefined;
+      };
       edit_comment: {
         Args: { body: string; comment_id: string };
         Returns: {
@@ -5086,6 +5178,24 @@ export type Database = {
         Args: { subscription_id: string };
         Returns: boolean;
       };
+      save_meeting_template: {
+        Args: {
+          agenda: Json;
+          all_restaurants: boolean;
+          company_id: string;
+          default_duration_minutes: number;
+          expected_version: number;
+          meeting_type: string;
+          name: string;
+          participant_profile_ids: string[];
+          recurrence: Json;
+          restaurant_ids: string[];
+          template_id: string;
+          unit_ids: string[];
+          visibility: Database["public"]["Enums"]["visibility_mode"];
+        };
+        Returns: string;
+      };
       save_notification_preferences: {
         Args: {
           collaboration: boolean;
@@ -5144,6 +5254,15 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      set_meeting_series_recurrence: {
+        Args: {
+          expected_version: number;
+          meeting_series_id: string;
+          recurrence: Json;
+          recurrence_rule: string;
+        };
+        Returns: undefined;
       };
       start_ai_run: {
         Args: {
@@ -5364,6 +5483,7 @@ export type Database = {
           id: string;
           is_active: boolean;
           meeting_type: string;
+          recurrence: Json;
           recurrence_metadata: Json;
           recurrence_rule: string | null;
           security_object_id: string;

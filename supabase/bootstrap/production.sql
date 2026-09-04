@@ -91,6 +91,13 @@ on conflict do nothing;
 insert into public.role_permissions (role_id, permission_id)
 select role.id, permission.id
 from public.roles role
+join public.permissions permission on permission.permission_key = 'meeting.template.manage'
+where role.code in ('GLOBAL_EXECUTIVE', 'SUPPORT_DIRECTOR', 'DOL_DIRECTOR', 'DOL_SUBDIRECTOR')
+on conflict do nothing;
+
+insert into public.role_permissions (role_id, permission_id)
+select role.id, permission.id
+from public.roles role
 join public.permissions permission on permission.permission_key = 'work_item.scope.update'
 where role.code in ('OPS_SUPERVISOR', 'RESTAURANT_MANAGER', 'KITCHEN_SUPERVISOR', 'KITCHEN_MANAGER')
 on conflict do nothing;
