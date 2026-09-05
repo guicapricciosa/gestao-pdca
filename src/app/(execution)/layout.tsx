@@ -13,6 +13,8 @@ import {
   createSupabaseServerClient,
   currentAuthUser,
 } from "@/platform/supabase/server";
+import { AccountMenu } from "@/ui/components/account-menu";
+import { BottomNav } from "@/ui/components/bottom-nav";
 import { NavLink } from "@/ui/components/nav-link";
 import { NotificationBell } from "@/ui/components/notification-bell";
 import { Notice } from "@/ui/components/notice";
@@ -81,9 +83,42 @@ export default async function ExecutionLayout({
     ),
   ];
 
+  const viewerName = viewer.profile?.display_name ?? viewer.email;
+  const functions = assignments.map(
+    (assignment) =>
+      `${assignment.title ?? "Função"}${assignment.unit ? ` · ${assignment.unit.name}` : ""}`,
+  );
+
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[248px_1fr]">
-      <aside className="flex flex-col border-b bg-[#151714] text-white lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
+      {/* Phone: one slim bar on top, navigation at the bottom. */}
+      <header
+        className="sticky top-0 z-30 flex items-center justify-between bg-[#151714] px-4 py-2.5 text-white lg:hidden"
+        data-testid="mobile-top-bar"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.625rem)" }}
+      >
+        <Link
+          href="/my-work"
+          className="text-sm font-semibold tracking-[0.18em] uppercase"
+        >
+          Execution
+        </Link>
+        <div className="flex items-center gap-2">
+          <NotificationBell
+            profileId={viewer.profile?.id ?? null}
+            initialCount={viewer.unread}
+            variant="compact"
+            testId="notification-bell-mobile"
+          />
+          <AccountMenu
+            name={viewerName}
+            functions={functions}
+            restaurants={restaurants}
+            logout={logoutAction}
+          />
+        </div>
+      </header>
+      <aside className="hidden flex-col border-b bg-[#151714] text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:border-r lg:border-b-0">
         <div className="px-6 pt-6">
           <Link
             href="/my-work"
@@ -117,7 +152,7 @@ export default async function ExecutionLayout({
         </nav>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 px-4 py-3 lg:block lg:px-6 lg:py-5">
           <p className="truncate text-sm font-medium" data-testid="viewer-name">
-            {viewer.profile?.display_name ?? viewer.email}
+            {viewerName}
           </p>
           <ul className="mt-2 hidden space-y-1 text-xs text-white/55 lg:block">
             {assignments.length === 0 && <li>Sem função activa</li>}
@@ -157,10 +192,11 @@ export default async function ExecutionLayout({
           </form>
         </div>
       </aside>
-      <main className="mx-auto w-full max-w-7xl p-5 sm:p-8 lg:p-12">
+      <main className="mx-auto w-full max-w-7xl p-5 pb-28 sm:p-8 sm:pb-28 lg:p-12">
         <Notice />
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 }

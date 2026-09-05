@@ -155,7 +155,7 @@ export default async function MyWorkPage() {
       href: `/meetings/${meeting.meeting_session_id}/finish`,
       title: meeting.title,
       why: "reunião por terminar e distribuir",
-      tone: "text-amber-300",
+      tone: "text-amber-200",
     })),
     ...live.map((meeting) => ({
       key: `l-${meeting.meeting_session_id}`,
@@ -169,7 +169,7 @@ export default async function MyWorkPage() {
       href: hrefOf(item),
       title: item.title,
       why: relativeDue(item.due_date),
-      tone: "text-red-300",
+      tone: "text-[#ffb4a2]",
     })),
     ...blocked
       .filter((item) => !overdue.includes(item))
@@ -178,7 +178,7 @@ export default async function MyWorkPage() {
         href: hrefOf(item),
         title: item.title,
         why: "bloqueado",
-        tone: "text-amber-300",
+        tone: "text-amber-200",
       })),
     ...dueToday
       .filter((item) => !overdue.includes(item) && !blocked.includes(item))
@@ -231,8 +231,17 @@ export default async function MyWorkPage() {
         </p>
       </header>
 
+      {/* On a phone the header sentence already says how many are late; the
+          items themselves are one scroll below, marked in red. Only meetings
+          (not in the lists) keep a card there. */}
       <section
-        className="mb-8 rounded-2xl bg-[#21100d] text-white"
+        className={`mb-8 rounded-2xl bg-[#21100d] text-white ${
+          attention.some(
+            (entry) => entry.key.startsWith("m-") || entry.key.startsWith("l-"),
+          )
+            ? ""
+            : "hidden lg:block"
+        }`}
         data-testid="attention"
       >
         <div className="border-b border-white/10 p-5">
@@ -244,7 +253,11 @@ export default async function MyWorkPage() {
           <ul className="divide-y divide-white/10">
             {attention.map((entry) => (
               <li
-                className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
+                className={`items-center justify-between gap-3 px-5 py-3 text-sm ${
+                  entry.key.startsWith("m-") || entry.key.startsWith("l-")
+                    ? "flex"
+                    : "hidden lg:flex"
+                }`}
                 key={entry.key}
               >
                 <Link

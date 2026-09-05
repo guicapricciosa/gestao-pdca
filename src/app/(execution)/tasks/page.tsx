@@ -31,7 +31,7 @@ export default async function TasksPage({
     id === null ? null : (people.get(id) ?? "—");
   return (
     <>
-      <header className="mb-10 flex items-end justify-between gap-6">
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4 lg:mb-10">
         <div>
           <p className="text-accent text-sm font-medium">Execução</p>
           <h1 className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
@@ -42,7 +42,7 @@ export default async function TasksPage({
           </p>
         </div>
         <Link
-          className="rounded-full bg-black px-5 py-2.5 text-sm text-white"
+          className="rounded-full bg-black px-5 py-2.5 text-sm whitespace-nowrap text-white"
           href="/tasks/new"
         >
           Nova tarefa

@@ -11,9 +11,14 @@ import { createSupabaseBrowserClient } from "@/platform/supabase/browser";
 export function NotificationBell({
   profileId,
   initialCount,
+  variant = "full",
+  testId = "notification-bell",
 }: {
   readonly profileId: string | null;
   readonly initialCount: number;
+  /** `compact`: icon and badge only, for the phone top bar. */
+  readonly variant?: "full" | "compact";
+  readonly testId?: string;
 }) {
   const [count, setCount] = useState(initialCount);
 
@@ -53,11 +58,31 @@ export function NotificationBell({
     count === 0
       ? "Notificações"
       : `Notificações, ${count} ${count === 1 ? "não lida" : "não lidas"}`;
+  if (variant === "compact")
+    return (
+      <Link
+        aria-label={label}
+        className="relative grid size-9 place-items-center rounded-full text-white/85 hover:bg-white/10"
+        data-testid={testId}
+        href="/notificacoes"
+        title={label}
+      >
+        <Bell aria-hidden className="size-5" />
+        {count > 0 && (
+          <span
+            className="absolute -top-0.5 -right-0.5 min-w-[18px] rounded-full bg-[#d9481f] px-1 text-center text-[10px] leading-[18px] font-semibold text-white"
+            data-testid={`${testId}-count`}
+          >
+            {count > 99 ? "99+" : count}
+          </span>
+        )}
+      </Link>
+    );
   return (
     <Link
       aria-label={label}
       className="relative inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-      data-testid="notification-bell"
+      data-testid={testId}
       href="/notificacoes"
       title={label}
     >

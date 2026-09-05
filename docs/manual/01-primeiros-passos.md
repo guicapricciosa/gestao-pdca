@@ -38,6 +38,13 @@ barra lateral tem cinco entradas:
 | Decisões       | O que ficou decidido e onde se aplica                   |
 
 No fundo da barra vês o teu nome, a tua função e os restaurantes que cobres.
+
+No telemóvel a barra lateral dá lugar a uma barra fina no topo (nome da
+aplicação, sino das notificações e o teu avatar) e a uma barra de navegação no
+fundo do ecrã com as mesmas cinco entradas. O avatar abre a tua função, os
+restaurantes que cobres, **Definições** e **Terminar sessão**. Em «O meu
+trabalho», o bloco escuro mostra só reuniões que precisam de ti; os itens
+atrasados aparecem uma vez, na lista, marcados a vermelho.
 Isso define o que consegues ver e fazer; não há nada para configurar.
 
 ## Vocabulário
