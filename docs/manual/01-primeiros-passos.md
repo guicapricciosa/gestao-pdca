@@ -39,6 +39,8 @@ barra lateral tem cinco entradas:
 
 No fundo da barra vês o teu nome, a tua função e os restaurantes que cobres.
 
+![Telemóvel](../screenshots/30-account-menu-mobile.png)
+
 No telemóvel a barra lateral dá lugar a uma barra fina no topo (nome da
 aplicação, sino das notificações e o teu avatar) e a uma barra de navegação no
 fundo do ecrã com as mesmas cinco entradas. O avatar abre a tua função, os

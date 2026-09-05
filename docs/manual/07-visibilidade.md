@@ -18,6 +18,8 @@ restaurante, incluindo os que criaste com visibilidade restrita.
 
 ## Convidar pessoas
 
+![Pessoas](../screenshots/26-people.png)
+
 Quem gere a organização vê em **Definições › Pessoas** quem tem acesso, com
 que papel, departamento e restaurantes, e se a pessoa já entrou.
 
@@ -32,6 +34,8 @@ vê: não há permissões avulsas por registo (excepto os acessos explícitos
 descritos acima).
 
 ## Editar, desactivar e organizar
+
+![Organização](../screenshots/27-organization.png)
 
 Em **Definições › Pessoas**, o botão **Editar** de cada pessoa abre um painel
 para mudar o papel, o cargo, o departamento, os departamentos que vê (todos ou

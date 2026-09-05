@@ -20,6 +20,8 @@ Os filtros e a ordenação funcionam como nas tarefas (ver capítulo 3): cada
 filtro aceita várias escolhas, as escolhas aparecem como etiquetas e os
 cabeçalhos PDCA, Responsável, Fase, Prazo e Estado ordenam a lista.
 
+![Painel do PDCA](../screenshots/25-pdcas-panel.png)
+
 Ao carregar num PDCA abre-se um **painel à direita** com o resumo: estado e
 fase, Responsável, Owner, prazo, onde se aplica, o problema e o objectivo, as
 três últimas actualizações e os botões de acção (avançar de fase, concluir,
