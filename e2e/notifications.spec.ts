@@ -105,12 +105,17 @@ test.describe.serial("Notification Center", () => {
   }) => {
     await login(page, "manager.a@example.test");
     // Start clean: demo data may already have produced notifications.
-    await page.goto("/notificacoes");
-    const markAll = page.getByRole("button", {
-      name: "Marcar todas como lidas",
-    });
-    if ((await markAll.count()) > 0) await submitAction(page, markAll);
-    await page.goto("/my-work");
+    // The local scheduler may deliver a reminder in between: clear until
+    // the badge is really empty.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await page.goto("/notificacoes");
+      const markAll = page.getByRole("button", {
+        name: "Marcar todas como lidas",
+      });
+      if ((await markAll.count()) > 0) await submitAction(page, markAll);
+      await page.goto("/my-work");
+      if ((await page.getByTestId("notification-count").count()) === 0) break;
+    }
     await expect(page.getByTestId("notification-count")).toHaveCount(0);
 
     // The CEO comments with a mention from their own browser.

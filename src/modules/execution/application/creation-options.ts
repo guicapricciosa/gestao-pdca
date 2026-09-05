@@ -99,14 +99,17 @@ export async function loadCreationOptions(
 export async function loadListOptions(
   permissionKey: PermissionKey,
 ): Promise<ListOptions> {
-  const base = await loadCreationOptions(permissionKey);
-  if (base.companies.length === 0) return { ...base, people: [] };
+  // People do not depend on the scope: load them alongside, not after.
   const client = await createSupabaseServerClient();
-  const { data } = await client
-    .from("profiles")
-    .select("id,display_name")
-    .eq("is_active", true)
-    .order("display_name");
+  const [base, { data }] = await Promise.all([
+    loadCreationOptions(permissionKey),
+    client
+      .from("profiles")
+      .select("id,display_name")
+      .eq("is_active", true)
+      .order("display_name"),
+  ]);
+  if (base.companies.length === 0) return { ...base, people: [] };
   return {
     ...base,
     people: (data ?? []).map((profile) => ({

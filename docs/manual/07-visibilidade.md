@@ -30,3 +30,22 @@ botão **Reenviar convite**; depois de entrar aparece «Visto» com a data.
 O papel e o âmbito escolhidos aqui são a única coisa que define o que a pessoa
 vê: não há permissões avulsas por registo (excepto os acessos explícitos
 descritos acima).
+
+## Editar, desactivar e organizar
+
+Em **Definições › Pessoas**, o botão **Editar** de cada pessoa abre um painel
+para mudar o papel, o cargo, o departamento, os departamentos que vê (todos ou
+só o seu), os restaurantes (todos, só alguns, os das pessoas que lhe reportam,
+ou nenhum) e **Reporta a**. Quem está acima na cadeia de chefia cobre os
+restaurantes de quem está abaixo quando tem «Os das pessoas que lhe reportam».
+**Desactivar acesso** termina as atribuições e bloqueia a entrada; o histórico
+mantém-se e ninguém pode desactivar-se a si próprio.
+
+Em **Definições › Organização** criam-se, renomeiam-se e desactivam-se
+restaurantes, departamentos e serviços partilhados. Nada se apaga: o que deixa
+de existir fica inactivo e sai das escolhas, mas os registos antigos continuam
+a apontar para ele. O código de um restaurante (por exemplo `SOPHIA_LX`) é
+gerado a partir do nome e serve para integrações.
+
+Papéis e permissões não se editam na aplicação de propósito: mudam o que toda
+a gente vê e são revistos no código.

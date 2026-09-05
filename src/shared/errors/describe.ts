@@ -79,6 +79,15 @@ const RULES: readonly (readonly [RegExp, string])[] = [
     "O envio do email de convite falhou (limite de envios atingido). Espera uns minutos e tenta de novo.",
   ],
   [
+    /hierarchy cycle/i,
+    "Essa cadeia de chefia fecha um ciclo: a pessoa escolhida já reporta a esta.",
+  ],
+  [/cannot deactivate yourself/i, "Não podes desactivar o teu próprio acesso."],
+  [
+    /restaurants_code|organizational_units_code|duplicate key.*(restaurants|organizational_units)/i,
+    "Já existe um restaurante ou departamento com esse código. Escolhe outro.",
+  ],
+  [
     /at least one restaurant is required/i,
     "Escolhe pelo menos um restaurante, ou muda o âmbito para «Todos» ou «Nenhum».",
   ],

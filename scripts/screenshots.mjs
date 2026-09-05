@@ -83,6 +83,16 @@ if (live)
   });
 await shot("21-notifications", "/notificacoes?tab=all");
 await shot("22-settings", "/definicoes");
+await shot("25-pdcas-panel", "/pdcas", {
+  fullPage: false,
+  after: async () => {
+    await page.getByTestId("list-item").first().click();
+    await page.getByTestId("record-panel").waitFor();
+  },
+});
+await shot("26-people", "/definicoes/pessoas");
+await shot("27-organization", "/definicoes/organizacao");
+await shot("28-meeting-templates", "/definicoes/modelos-de-reuniao");
 if (live)
   await shot("23-meeting-mode-presence", `${live}/run`, {
     fullPage: false,
@@ -99,5 +109,10 @@ if (live) await shot("18-meeting-mode-mobile", `${live}/run`);
 if (task) await shot("19-task-detail-mobile", task);
 if (review) await shot("20-finish-meeting-mobile", `${review}/finish`);
 await shot("24-notifications-mobile", "/notificacoes?tab=all");
+await shot("29-pdcas-mobile", "/pdcas", { fullPage: false });
+await shot("30-account-menu-mobile", "/my-work", {
+  fullPage: false,
+  after: () => page.getByTestId("account-menu").click(),
+});
 
 await browser.close();

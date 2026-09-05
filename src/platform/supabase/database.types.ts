@@ -4894,12 +4894,17 @@ export type Database = {
           is_active: boolean | null;
           last_seen_at: string | null;
           profile_id: string | null;
+          reports_to_assignment_id: string | null;
+          reports_to_name: string | null;
+          restaurant_ids: string[] | null;
           restaurant_names: string[] | null;
           restaurant_scope_mode:
             Database["public"]["Enums"]["restaurant_scope_mode"] | null;
           role_code: string | null;
+          role_id: string | null;
           role_name: string | null;
           title: string | null;
+          unit_id: string | null;
           unit_name: string | null;
           unit_scope_mode:
             Database["public"]["Enums"]["unit_scope_mode"] | null;
@@ -4910,6 +4915,20 @@ export type Database = {
             columns: ["company_id"];
             isOneToOne: false;
             referencedRelation: "companies";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "organizational_assignments_organizational_unit_id_fkey";
+            columns: ["unit_id"];
+            isOneToOne: false;
+            referencedRelation: "organizational_units";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "organizational_assignments_role_id_fkey";
+            columns: ["role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
             referencedColumns: ["id"];
           },
         ];
@@ -5533,6 +5552,7 @@ export type Database = {
         Args: { expected_version: number; template_id: string };
         Returns: undefined;
       };
+      deactivate_person: { Args: { p_profile_id: string }; Returns: undefined };
       edit_comment: {
         Args: { body: string; comment_id: string };
         Returns: {
@@ -5721,6 +5741,15 @@ export type Database = {
           processed: number;
         }[];
       };
+      purge_old_records: {
+        Args: never;
+        Returns: {
+          deliveries: number;
+          notifications: number;
+          outbox: number;
+          subscriptions: number;
+        }[];
+      };
       record_ai_run_sources: {
         Args: { ai_run_id: string; sources: Json };
         Returns: undefined;
@@ -5870,6 +5899,27 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      save_organizational_unit: {
+        Args: {
+          p_code: string;
+          p_company_id: string;
+          p_is_active?: boolean;
+          p_name: string;
+          p_unit_id: string;
+          p_unit_type: Database["public"]["Enums"]["organizational_unit_type"];
+        };
+        Returns: string;
+      };
+      save_restaurant: {
+        Args: {
+          p_code: string;
+          p_company_id: string;
+          p_is_active?: boolean;
+          p_name: string;
+          p_restaurant_id: string;
+        };
+        Returns: string;
       };
       set_meeting_agenda_status: {
         Args: {
@@ -6246,6 +6296,19 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      update_person_assignment: {
+        Args: {
+          p_assignment_id: string;
+          p_organizational_unit_id: string;
+          p_reports_to_assignment_id?: string;
+          p_restaurant_ids?: string[];
+          p_restaurant_scope_mode: Database["public"]["Enums"]["restaurant_scope_mode"];
+          p_role_id: string;
+          p_title: string;
+          p_unit_scope_mode: Database["public"]["Enums"]["unit_scope_mode"];
+        };
+        Returns: undefined;
       };
       update_task: {
         Args: {

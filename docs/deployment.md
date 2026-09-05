@@ -180,6 +180,17 @@ Nothing below has been executed yet. No real users are created by these steps.
   SMTP settings) and, optionally, translate the "Invite user" and "Reset
   password" templates; `{{ .ConfirmationURL }}` must stay in the templates.
   Redirect URLs already allow `https://pdca.gcpai.pt/**`.
+- **Organization from the app (2026-09-05).** Definições › Organização
+  (restaurants, departments/services) and the People edit panel (role, scope,
+  reports-to, deactivate) run through `save_restaurant`,
+  `save_organizational_unit`, `update_person_assignment` and
+  `deactivate_person` (migration `202609050002`), all under
+  `organization.manage`. Deactivation also bans the Auth user (service key).
+- **Retention (2026-09-05).** `public.purge_old_records()` runs nightly at
+  03:30 through pg_cron (`retention-purge-old-records`): notifications read
+  for more than 90 days or unread for more than 180, deliveries older than 90
+  days, processed outbox events older than 30 days, subscriptions revoked for
+  more than 90 days. Audit events and domain tables are never purged.
 
 ## 7. Importação histórica excepcional (04/09/2026)
 

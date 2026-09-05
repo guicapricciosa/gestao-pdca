@@ -2,9 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { invitePersonAction, resendInviteAction } from "@/app/actions/people";
-import { createSupabaseServerClient } from "@/platform/supabase/server";
+import {
+  createSupabaseServerClient,
+  currentAuthUser,
+} from "@/platform/supabase/server";
 import { SubmitButton } from "@/ui/components/submit-button";
 import { formatDateTime, organizationalRoleLabel } from "@/ui/labels";
+import { PersonEditPanel } from "@/ui/patterns/person-edit-panel";
 
 export const dynamic = "force-dynamic";
 const input = "mt-1.5 w-full rounded-lg border bg-white px-3 py-2 text-sm";
@@ -13,7 +17,12 @@ const input = "mt-1.5 w-full rounded-lg border bg-white px-3 py-2 text-sm";
  * Definições › Pessoas: who has access, with what role and scope, and the
  * invite form. Only for people who manage the organization.
  */
-export default async function PeoplePage() {
+export default async function PeoplePage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ editar?: string }>;
+}) {
+  const { editar } = await searchParams;
   const client = await createSupabaseServerClient();
   const { data: scope } = await client.rpc("get_accessible_scope");
   const companyIds = [
@@ -50,6 +59,11 @@ export default async function PeoplePage() {
         .order("name"),
     ]);
   const company = companyIds[0]!;
+  const me = await currentAuthUser(client);
+  const editing = (people ?? []).find((row) => row.assignment_id === editar);
+  const visibleRoles = (roles ?? []).filter(
+    (role) => role.company_id === null || role.company_id === company,
+  );
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
@@ -100,9 +114,20 @@ export default async function PeoplePage() {
                         ? "sem restaurantes"
                         : (person.restaurant_names ?? []).join(", ") ||
                           "restaurantes herdados"}
+                    {person.reports_to_name
+                      ? ` · reporta a ${person.reports_to_name}`
+                      : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Link
+                    className="rounded-full border bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
+                    data-testid="edit-person"
+                    href={`/definicoes/pessoas?editar=${person.assignment_id}`}
+                    scroll={false}
+                  >
+                    Editar
+                  </Link>
                   <span className="text-muted-foreground text-xs">
                     {person.last_seen_at
                       ? `Visto ${formatDateTime(person.last_seen_at)}`
@@ -249,6 +274,17 @@ export default async function PeoplePage() {
           </div>
         </form>
       </section>
+      {editing && (
+        <PersonEditPanel
+          person={editing}
+          people={people ?? []}
+          roles={visibleRoles}
+          units={units ?? []}
+          restaurants={rests ?? []}
+          closeHref="/definicoes/pessoas"
+          isSelf={editing.auth_user_id === me?.id}
+        />
+      )}
     </div>
   );
 }

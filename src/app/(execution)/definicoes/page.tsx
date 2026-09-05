@@ -64,6 +64,21 @@ export default async function SettingsPage() {
           </Link>
         </section>
       )}
+      {canManagePeople && (
+        <section className="rounded-2xl border bg-white p-5">
+          <h2 className="font-semibold">Organização</h2>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Restaurantes, departamentos e serviços partilhados: criar, renomear,
+            desactivar.
+          </p>
+          <Link
+            className="mt-3 inline-flex rounded-full border bg-white px-4 py-2 text-sm"
+            href="/definicoes/organizacao"
+          >
+            Gerir organização
+          </Link>
+        </section>
+      )}
       {canManageTemplates && (
         <section className="rounded-2xl border bg-white p-5">
           <h2 className="font-semibold">Modelos de reunião</h2>
