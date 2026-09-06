@@ -222,6 +222,12 @@ export default async function MyWorkPage() {
         <h1 className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
           O meu trabalho
         </h1>
+        <Link
+          className="mt-3 inline-flex rounded-full border bg-white px-4 py-2 text-sm lg:hidden"
+          href="/painel"
+        >
+          Painel operacional
+        </Link>
         <p className="text-muted-foreground mt-3" data-testid="my-work-summary">
           {summary.length > 0
             ? `Tens ${summary.join(", ")}.`

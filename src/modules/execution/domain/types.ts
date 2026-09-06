@@ -55,6 +55,8 @@ export interface ListFilters {
   readonly restaurantId?: readonly string[] | undefined;
   readonly unitId?: readonly string[] | undefined;
   readonly overdue?: boolean | undefined;
+  /** Only records without a responsible (open ones). */
+  readonly unassigned?: boolean | undefined;
   readonly sort?: ListSortKey | undefined;
   readonly direction?: SortDirection | undefined;
   readonly page?: number | undefined;

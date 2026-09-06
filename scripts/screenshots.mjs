@@ -93,6 +93,8 @@ await shot("25-pdcas-panel", "/pdcas", {
 await shot("26-people", "/definicoes/pessoas");
 await shot("27-organization", "/definicoes/organizacao");
 await shot("28-meeting-templates", "/definicoes/modelos-de-reuniao");
+await shot("31-dashboard", "/painel");
+await shot("32-search", "/pesquisa?q=vendas");
 if (live)
   await shot("23-meeting-mode-presence", `${live}/run`, {
     fullPage: false,

@@ -128,7 +128,7 @@ export function ListFilters({
       ))}
       <div className="grid gap-3 md:grid-cols-4">
         <input
-          aria-label="Pesquisar"
+          aria-label="Pesquisar por título"
           className={`${field} md:col-span-2`}
           name="query"
           placeholder="Pesquisar por título…"
@@ -138,15 +138,26 @@ export function ListFilters({
         {selector("restaurantId")}
         {showPeople && selector("responsibleId")}
         {showPeople && (
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="overdue"
-              value="true"
-              defaultChecked={singleParam(values, "overdue") === "true"}
-            />
-            Só atrasados
-          </label>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="overdue"
+                value="true"
+                defaultChecked={singleParam(values, "overdue") === "true"}
+              />
+              Só atrasados
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="unassigned"
+                value="true"
+                defaultChecked={singleParam(values, "unassigned") === "true"}
+              />
+              Sem responsável
+            </label>
+          </div>
         )}
       </div>
       <details className="mt-3" open={advancedActive}>
@@ -189,6 +200,7 @@ export function ListFilters({
             href={listHref(basePath, values, {
               query: null,
               overdue: null,
+              unassigned: null,
               status: null,
               restaurantId: null,
               responsibleId: null,

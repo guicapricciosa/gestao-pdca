@@ -17,3 +17,15 @@ por terminar»). Depois tem quatro blocos:
 Em telemóvel a página é a mesma, empilhada.
 
 ![O meu trabalho no telemóvel](../screenshots/16-my-work-mobile.png)
+
+## Painel operacional
+
+![Painel operacional](../screenshots/31-dashboard.png)
+
+Em **Painel operacional** (barra lateral, ou o botão em «O meu trabalho» no
+telemóvel) vês oito números: tarefas em aberto, atrasadas, bloqueadas e sem
+responsável; PDCAs em curso, atrasados e concluídos; reuniões nos próximos 7
+dias. Escolhe um restaurante ou uma área para restringir. Cada número é um
+link para a lista com exactamente os filtros que o produziram, por isso o
+total do cartão é sempre o número de linhas da lista. Por baixo, as cinco
+tarefas e os cinco PDCAs mais atrasados.

@@ -261,6 +261,10 @@ export class SupabaseExecutionRepository implements ExecutionRepository {
       query = query
         .lt("due_date", new Date().toISOString().slice(0, 10))
         .not("status", "in", "(COMPLETED,CANCELLED,ARCHIVED)");
+    if (filters.unassigned === true)
+      query = query
+        .is("responsible_profile_id", null)
+        .not("status", "in", "(COMPLETED,CANCELLED,ARCHIVED)");
     const { data, error, count } = await query;
     throwIfError(error);
     return {
@@ -336,6 +340,10 @@ export class SupabaseExecutionRepository implements ExecutionRepository {
     if (filters.overdue === true)
       query = query
         .lt("due_date", new Date().toISOString().slice(0, 10))
+        .not("status", "in", "(COMPLETED,CANCELLED,ARCHIVED)");
+    if (filters.unassigned === true)
+      query = query
+        .is("responsible_profile_id", null)
         .not("status", "in", "(COMPLETED,CANCELLED,ARCHIVED)");
     const { data, error, count } = await query;
     throwIfError(error);

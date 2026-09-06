@@ -30,6 +30,7 @@ export const listFiltersSchema = z.object({
   restaurantId: many(uuid),
   unitId: many(uuid),
   overdue: z.boolean().optional(),
+  unassigned: z.boolean().optional(),
   sort: z.enum(listSortKeys).optional(),
   direction: z.enum(["asc", "desc"]).optional(),
   page: z.number().int().min(1).default(1),

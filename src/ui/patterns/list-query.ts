@@ -64,6 +64,7 @@ export function parseListSearch(values: SearchValues) {
     restaurantId: many("restaurantId"),
     unitId: many("unitId"),
     overdue: singleParam(values, "overdue") === "true",
+    unassigned: singleParam(values, "unassigned") === "true",
     ...sortOf(values),
     page: Number.isInteger(page) && page > 0 ? page : 1,
   };
@@ -74,12 +75,13 @@ const filterKeys = new Set<string>([
   ...multiKeys,
   "query",
   "overdue",
+  "unassigned",
   "sort",
   "dir",
 ]);
 
 export function activeFilterCount(values: SearchValues) {
-  return [...multiKeys, "query", "overdue"].reduce(
+  return [...multiKeys, "query", "overdue", "unassigned"].reduce(
     (total, key) => total + listParam(values, key).length,
     0,
   );

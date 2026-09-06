@@ -3,7 +3,9 @@ import {
   CheckSquare2,
   ClipboardCheck,
   Gauge,
+  LayoutDashboard,
   Scale,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -26,7 +28,10 @@ export const dynamic = "force-dynamic";
 const groups = [
   {
     label: "Trabalho",
-    items: [{ href: "/my-work", label: "O meu trabalho", icon: Gauge }],
+    items: [
+      { href: "/my-work", label: "O meu trabalho", icon: Gauge },
+      { href: "/painel", label: "Painel operacional", icon: LayoutDashboard },
+    ],
   },
   {
     label: "Reuniões",
@@ -104,6 +109,14 @@ export default async function ExecutionLayout({
           Execution
         </Link>
         <div className="flex items-center gap-2">
+          <Link
+            aria-label="Pesquisar"
+            className="grid size-9 place-items-center rounded-full text-white/85 hover:bg-white/10"
+            data-testid="search-link-mobile"
+            href="/pesquisa"
+          >
+            <Search aria-hidden className="size-5" />
+          </Link>
           <NotificationBell
             profileId={viewer.profile?.id ?? null}
             initialCount={viewer.unread}
@@ -127,6 +140,23 @@ export default async function ExecutionLayout({
             Execution
           </Link>
           <p className="mt-1 text-xs text-white/40">Grupo Capricciosa</p>
+          <form action="/pesquisa" className="mt-4" role="search">
+            <label className="relative block">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute top-2.5 left-3 size-4 text-white/45"
+              />
+              <input
+                aria-label="Pesquisar"
+                className="w-full rounded-lg border border-white/15 bg-white/8 py-2 pr-3 pl-9 text-sm text-white placeholder:text-white/40 focus:border-white/40 focus:outline-none"
+                data-testid="search-box"
+                minLength={2}
+                name="q"
+                placeholder="Pesquisar…"
+                type="search"
+              />
+            </label>
+          </form>
         </div>
         <nav
           aria-label="Principal"

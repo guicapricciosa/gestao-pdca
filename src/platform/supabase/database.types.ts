@@ -5733,6 +5733,13 @@ export type Database = {
           title: string;
         }[];
       };
+      operational_dashboard: {
+        Args: { p_restaurant_id?: string; p_unit_id?: string };
+        Returns: {
+          metric: string;
+          value: number;
+        }[];
+      };
       process_outbox: {
         Args: { p_limit?: number };
         Returns: {
@@ -5920,6 +5927,19 @@ export type Database = {
           p_restaurant_id: string;
         };
         Returns: string;
+      };
+      search_everything: {
+        Args: { p_limit?: number; p_query: string };
+        Returns: {
+          id: string;
+          kind: string;
+          occurred_on: string;
+          rank: number;
+          snippet: string;
+          status: string;
+          title: string;
+          updated_at: string;
+        }[];
       };
       set_meeting_agenda_status: {
         Args: {

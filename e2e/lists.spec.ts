@@ -66,7 +66,7 @@ test.describe("execution lists", () => {
 
   test("keeps sort while filtering and paging", async ({ page }) => {
     await page.goto("/pdcas?sort=due_date&dir=desc");
-    await page.getByLabel("Pesquisar").fill("a");
+    await page.getByLabel("Pesquisar por título").fill("a");
     await page.getByRole("button", { name: "Filtrar" }).click();
     await page.waitForURL(/query=a/);
     expect(page.url()).toContain("sort=due_date");

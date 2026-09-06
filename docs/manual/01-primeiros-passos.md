@@ -49,6 +49,13 @@ trabalho», o bloco escuro mostra só reuniões que precisam de ti; os itens
 atrasados aparecem uma vez, na lista, marcados a vermelho.
 Isso define o que consegues ver e fazer; não há nada para configurar.
 
+## Pesquisar
+
+A caixa **Pesquisar** na barra lateral (a lupa no telemóvel) procura em
+tarefas, PDCAs, decisões e reuniões pelo título, problema, objectivo e
+descrição. Só aparece o que podes abrir: o que está fora do teu âmbito não
+entra na pesquisa, nem em contagens. Duas letras no mínimo.
+
 ## Vocabulário
 
 - **Responsável**: quem executa. É obrigatório em tarefas e PDCAs.
