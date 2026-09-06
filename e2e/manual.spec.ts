@@ -27,7 +27,11 @@ test("the manual is readable inside the app with its screenshots", async ({
   await page.waitForURL(/\/manual\/02-/);
 });
 
-test("the manual needs a session", async ({ page }) => {
+test("the manual and its images need a session", async ({ page }) => {
   await page.goto("/manual");
   await expect(page).toHaveURL(/\/login\?next=/);
+  const image = await page.request.get("/manual/imagem/01-login", {
+    maxRedirects: 0,
+  });
+  expect(image.status()).toBe(307);
 });

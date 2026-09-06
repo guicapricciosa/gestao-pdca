@@ -56,7 +56,7 @@ export async function renderChapter(slug: string) {
   }
   const rewritten = markdown
     .replace(
-      /\]\(\.\.\/screenshots\/([a-z0-9-]+\.png)\)/g,
+      /\]\(\.\.\/screenshots\/([a-z0-9-]+)\.png\)/g,
       "](/manual/imagem/$1)",
     )
     .replace(/\]\((\d{2}-[a-z0-9-]+)\.md\)/g, "](/manual/$1)")
