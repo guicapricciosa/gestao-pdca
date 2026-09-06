@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { replaceScopeAction } from "@/app/actions/execution";
 import {
+  deleteMeetingAction,
   addMeetingParticipantAction,
   changeMeetingChairAction,
   removeMeetingParticipantAction,
@@ -410,6 +411,33 @@ export default async function MeetingDetailPage({
               </div>
             </form>
           )}
+          <form
+            action={deleteMeetingAction}
+            className="grid gap-3"
+            data-testid="delete-meeting-form"
+          >
+            <h3 className="font-semibold">Apagar reunião</h3>
+            <p className="text-muted-foreground text-xs">
+              Só o Chair ou quem a marcou. A reunião sai de todas as listas;
+              agenda, notas, decisões e ligações ficam guardadas no registo de
+              auditoria. As tarefas, PDCAs e decisões criados nela continuam a
+              existir.
+            </p>
+            <input type="hidden" name="meetingSessionId" value={id} />
+            <input type="hidden" name="version" value={session.version} />
+            <input
+              className={field}
+              name="reason"
+              minLength={3}
+              required
+              placeholder="Motivo (ex.: marcada por engano)"
+            />
+            <div>
+              <SubmitButton variant="danger" pendingLabel="A apagar…">
+                Apagar reunião
+              </SubmitButton>
+            </div>
+          </form>
           {active && (
             <form action={transitionMeetingAction} className="grid gap-3">
               <h3 className="font-semibold">Cancelar reunião</h3>

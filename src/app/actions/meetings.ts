@@ -213,6 +213,19 @@ export async function transitionMeetingAction(formData: FormData) {
   ]);
 }
 
+/** Marks a meeting deleted (snapshot kept in the audit trail). */
+export async function deleteMeetingAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const id = String(formData.get("meetingSessionId"));
+  const { error } = await client.rpc("delete_meeting_session", {
+    meeting_session_id: id,
+    expected_version: Number(formData.get("version")),
+    reason: String(formData.get("reason")),
+  });
+  if (error !== null) finish(`/meetings/${id}`, error);
+  finish("/meetings", null, ["/my-work", "/painel"]);
+}
+
 export async function reopenMeetingAction(formData: FormData) {
   const client = await createSupabaseServerClient();
   const id = String(formData.get("meetingSessionId"));

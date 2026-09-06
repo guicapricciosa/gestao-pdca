@@ -52,6 +52,14 @@ ecrã sem recarregar (ver o capítulo 10).
 **Mais** leva à página da reunião: participantes, Chair, repetição, assistente e
 opções avançadas.
 
+**Apagar uma reunião.** Em «Opções avançadas», o Chair ou quem a marcou pode
+apagar a reunião em qualquer estado, com um motivo. Ela sai de todas as
+listas, da pesquisa, do painel e de «O meu trabalho». Nada se perde: a agenda
+com os resultados, as notas, as decisões e as ligações ficam guardadas no
+registo de auditoria, e as tarefas, PDCAs e decisões criados nela continuam a
+existir como registos próprios. Para uma reunião que não vai acontecer mas
+deve ficar visível no histórico, usa **Cancelar reunião**.
+
 ## Terminar e distribuir
 
 ![Terminar reunião](../screenshots/12-finish-meeting.png)

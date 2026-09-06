@@ -79,6 +79,10 @@ const RULES: readonly (readonly [RegExp, string])[] = [
     "O envio do email de convite falhou (limite de envios atingido). Espera uns minutos e tenta de novo.",
   ],
   [
+    /only the chair or the person who scheduled the meeting can delete it/i,
+    "Só o Chair ou quem marcou a reunião a pode apagar.",
+  ],
+  [
     /hierarchy cycle/i,
     "Essa cadeia de chefia fecha um ciclo: a pessoa escolhida já reporta a esta.",
   ],

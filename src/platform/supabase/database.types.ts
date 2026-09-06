@@ -1800,6 +1800,9 @@ export type Database = {
           company_id: string;
           created_at: string;
           created_by_profile_id: string;
+          deleted_at: string | null;
+          deleted_by_profile_id: string | null;
+          deleted_reason: string | null;
           id: string;
           meeting_series_id: string | null;
           published_at: string | null;
@@ -1820,6 +1823,9 @@ export type Database = {
           company_id: string;
           created_at?: string;
           created_by_profile_id: string;
+          deleted_at?: string | null;
+          deleted_by_profile_id?: string | null;
+          deleted_reason?: string | null;
           id?: string;
           meeting_series_id?: string | null;
           published_at?: string | null;
@@ -1840,6 +1846,9 @@ export type Database = {
           company_id?: string;
           created_at?: string;
           created_by_profile_id?: string;
+          deleted_at?: string | null;
+          deleted_by_profile_id?: string | null;
+          deleted_reason?: string | null;
           id?: string;
           meeting_series_id?: string | null;
           published_at?: string | null;
@@ -1884,6 +1893,20 @@ export type Database = {
           {
             foreignKeyName: "meeting_sessions_created_by_profile_id_fkey";
             columns: ["created_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meeting_sessions_deleted_by_profile_id_fkey";
+            columns: ["deleted_by_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "people_directory";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "meeting_sessions_deleted_by_profile_id_fkey";
+            columns: ["deleted_by_profile_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -5170,6 +5193,9 @@ export type Database = {
           company_id: string;
           created_at: string;
           created_by_profile_id: string;
+          deleted_at: string | null;
+          deleted_by_profile_id: string | null;
+          deleted_reason: string | null;
           id: string;
           meeting_series_id: string | null;
           published_at: string | null;
@@ -5553,6 +5579,14 @@ export type Database = {
         Returns: undefined;
       };
       deactivate_person: { Args: { p_profile_id: string }; Returns: undefined };
+      delete_meeting_session: {
+        Args: {
+          expected_version: number;
+          meeting_session_id: string;
+          reason: string;
+        };
+        Returns: undefined;
+      };
       edit_comment: {
         Args: { body: string; comment_id: string };
         Returns: {
@@ -5590,6 +5624,9 @@ export type Database = {
           company_id: string;
           created_at: string;
           created_by_profile_id: string;
+          deleted_at: string | null;
+          deleted_by_profile_id: string | null;
+          deleted_reason: string | null;
           id: string;
           meeting_series_id: string | null;
           published_at: string | null;
@@ -5806,6 +5843,9 @@ export type Database = {
           company_id: string;
           created_at: string;
           created_by_profile_id: string;
+          deleted_at: string | null;
+          deleted_by_profile_id: string | null;
+          deleted_reason: string | null;
           id: string;
           meeting_series_id: string | null;
           published_at: string | null;
@@ -6006,6 +6046,9 @@ export type Database = {
           company_id: string;
           created_at: string;
           created_by_profile_id: string;
+          deleted_at: string | null;
+          deleted_by_profile_id: string | null;
+          deleted_reason: string | null;
           id: string;
           meeting_series_id: string | null;
           published_at: string | null;
@@ -6230,6 +6273,9 @@ export type Database = {
           company_id: string;
           created_at: string;
           created_by_profile_id: string;
+          deleted_at: string | null;
+          deleted_by_profile_id: string | null;
+          deleted_reason: string | null;
           id: string;
           meeting_series_id: string | null;
           published_at: string | null;
