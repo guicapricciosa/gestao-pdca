@@ -88,6 +88,14 @@ export function AccountMenu({
             >
               Definições
             </Link>
+            <Link
+              className="rounded-lg px-2 py-1.5 text-sm hover:bg-black/[0.04]"
+              href="/manual"
+              onClick={() => setOpen(false)}
+              role="menuitem"
+            >
+              Manual
+            </Link>
             <form action={logout}>
               <SubmitButton
                 className="w-full !justify-start !border-0 !bg-transparent !px-2 !py-1.5 !text-sm !font-normal hover:!bg-black/[0.04]"

@@ -23,6 +23,15 @@ Os modelos criam-se em **Definições › Modelos de reunião** (quem tem essa
 permissão): nome, duração, participantes habituais, onde se aplica, agenda
 habitual, periodicidade e visibilidade.
 
+## Antes da reunião
+
+A página da reunião abre-se antes da hora com a agenda do modelo já
+preenchida. Podes preparar tudo aí: acrescentar ou reordenar temas na
+**Agenda**, e escrever **Notas** ligadas a cada tema (o selector por baixo da
+caixa de notas diz a que tema a nota pertence). Um ponto de situação semanal
+prepara-se bem assim: cada pessoa escreve os seus pontos no tema certo antes
+de a reunião começar, e a reunião serve para decidir, não para relatar.
+
 ## A reunião
 
 ![Reunião](../screenshots/11-meeting-mode.png)

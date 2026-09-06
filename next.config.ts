@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  // The in-app manual reads docs/manual and docs/screenshots at request time.
+  outputFileTracingIncludes: {
+    "/manual": ["./docs/manual/**", "./docs/screenshots/**"],
+    "/manual/[chapter]": ["./docs/manual/**"],
+    "/manual/imagem/[file]": ["./docs/screenshots/**"],
+  },
   async headers() {
     return [
       {

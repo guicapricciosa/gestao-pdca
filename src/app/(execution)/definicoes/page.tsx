@@ -85,6 +85,18 @@ export default async function SettingsPage() {
           />
         }
       />
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="font-semibold">Manual</h2>
+        <p className="text-muted-foreground mt-2 text-sm">
+          Como usar a plataforma, capítulo a capítulo, com imagens de cada ecrã.
+        </p>
+        <Link
+          className="mt-3 inline-flex rounded-full border bg-white px-4 py-2 text-sm"
+          href="/manual"
+        >
+          Abrir o manual
+        </Link>
+      </section>
       <InstallApp appName={branding.name} />
       {canManagePeople && (
         <section className="rounded-2xl border bg-white p-5">

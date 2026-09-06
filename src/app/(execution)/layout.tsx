@@ -210,6 +210,12 @@ export default async function ExecutionLayout({
           >
             Definições
           </Link>
+          <Link
+            className="text-xs text-white/70 hover:text-white lg:mb-2 lg:block"
+            href="/manual"
+          >
+            Manual
+          </Link>
           <form action={logoutAction} className="lg:mt-4">
             <SubmitButton
               className="!px-0 !py-0 !text-xs !font-normal !text-white/50 hover:!text-white"
