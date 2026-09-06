@@ -78,17 +78,30 @@ export default async function MeetingTemplatesPage() {
                     · {visibilityLabel(template.visibility)}
                   </p>
                 </div>
-                <form action={deactivateMeetingTemplateAction}>
-                  <input type="hidden" name="templateId" value={template.id} />
-                  <input
-                    type="hidden"
-                    name="version"
-                    value={template.version}
-                  />
-                  <SubmitButton variant="secondary" pendingLabel="…">
-                    Remover
-                  </SubmitButton>
-                </form>
+                <div className="flex items-center gap-2">
+                  <Link
+                    className="rounded-full border bg-white px-4 py-2 text-sm"
+                    data-testid="edit-template"
+                    href={`/definicoes/modelos-de-reuniao/${template.id}`}
+                  >
+                    Editar
+                  </Link>
+                  <form action={deactivateMeetingTemplateAction}>
+                    <input
+                      type="hidden"
+                      name="templateId"
+                      value={template.id}
+                    />
+                    <input
+                      type="hidden"
+                      name="version"
+                      value={template.version}
+                    />
+                    <SubmitButton variant="secondary" pendingLabel="…">
+                      Remover
+                    </SubmitButton>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>
