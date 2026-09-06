@@ -26,6 +26,9 @@ const units = {
   MARKETING: "30000000-0000-0000-0000-000000000004",
   HAPPY_PEOPLE: "30000000-0000-0000-0000-000000000005",
   CONTROL_PURCHASING: "30000000-0000-0000-0000-000000000012",
+  HACCP: "30000000-0000-0000-0000-000000000011",
+  MAINTENANCE: "30000000-0000-0000-0000-000000000013",
+  DAF: "30000000-0000-0000-0000-000000000014",
 };
 const r = (n) =>
   `40000000-0000-0000-0000-0000000001${String(n).padStart(2, "0")}`;
@@ -143,6 +146,37 @@ export const people = [
     unitScope: "COMPANY_WIDE",
     restScope: "ASSIGNED",
     restaurants: [r(11), r(15), r(14)],
+  },
+  // Shared services of the holding (added 2026-09-06, no e-mail sent).
+  {
+    name: "Ricardo Torrão",
+    email: "ricardo.torrao@cb2020.pt",
+    role: "SHARED_SERVICE",
+    unit: "HACCP",
+    title: "HACCP",
+    unitScope: "ASSIGNED",
+    restScope: "COMPANY_WIDE",
+    restaurants: [],
+  },
+  {
+    name: "André Stoffel",
+    email: "andre.stoffel@cb2020.pt",
+    role: "SHARED_SERVICE",
+    unit: "MAINTENANCE",
+    title: "Manutenção",
+    unitScope: "ASSIGNED",
+    restScope: "COMPANY_WIDE",
+    restaurants: [],
+  },
+  {
+    name: "Bruno Henriques",
+    email: "bruno.henriques@cb2020.pt",
+    role: "SHARED_SERVICE",
+    unit: "DAF",
+    title: "DAF",
+    unitScope: "ASSIGNED",
+    restScope: "COMPANY_WIDE",
+    restaurants: [],
   },
 ];
 
