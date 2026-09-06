@@ -571,3 +571,20 @@ Still excluded and blocked pending approval: Executive Analytics, global Managem
 
 - Production: Supabase Cloud (Ireland, Pro) with migrations only, bootstrap of the real organization (15 restaurants), first admin, Vercel Pro with cron; health, login, PWA, Notification Center and deep links validated on the temporary URL; push and the domain still pending.
 - Meeting form: templates (Definições → Modelos de reunião), 10-minute times with the end following the start, participants right after the template, calendar-style custom recurrence stored structurally, visibility copy simplified and moved to advanced options.
+
+## 2026-09-06 — Increment 10 delivered without Projects
+
+Approved by Gui Rainho on 2026-09-06: global search and operational
+dashboards. Projects stay out until a real case (after the first technical
+visit) says what a project must be.
+
+- `public.search_everything(query, limit)`: security-invoker search over
+  tasks, PDCAs, decisions and meeting sessions; hidden rows never enter the
+  query, so no snippet or count can leak. `/pesquisa`, sidebar search box,
+  phone search icon.
+- `public.operational_dashboard(restaurant, unit)`: eight counts computed on
+  the list views with the list predicates; `/painel` cards link to the list
+  with the same filters (parity asserted in pgTAP and e2e).
+- Lists: `unassigned=true` filter ("Sem responsável").
+- Keyset pagination not needed yet (offset pagination on 25-row pages with
+  indexed sorts); revisit when a list passes a few thousand rows.
