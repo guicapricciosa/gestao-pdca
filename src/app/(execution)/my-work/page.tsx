@@ -226,7 +226,7 @@ export default async function MyWorkPage() {
           className="mt-3 inline-flex rounded-full border bg-white px-4 py-2 text-sm lg:hidden"
           href="/painel"
         >
-          Painel operacional
+          Dashboard geral
         </Link>
         <p className="text-muted-foreground mt-3" data-testid="my-work-summary">
           {summary.length > 0

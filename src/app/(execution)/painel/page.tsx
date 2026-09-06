@@ -4,6 +4,12 @@ import { loadCreationOptions } from "@/modules/execution/application/creation-op
 import { createExecutionService } from "@/modules/execution/application/factory";
 import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { DueDate } from "@/ui/components/status-badge";
+import { phaseLabel, taskStatusLabel } from "@/ui/labels";
+import {
+  BarChart,
+  LineChart,
+  type BreakdownRow,
+} from "@/ui/patterns/dashboard-charts";
 import { listHref } from "@/ui/patterns/list-query";
 
 export const dynamic = "force-dynamic";
@@ -32,30 +38,37 @@ export default async function DashboardPage({
   const options = await loadCreationOptions("task.read");
   const restaurant = options.restaurants.find((row) => row.id === restaurante);
   const unit = options.units.find((row) => row.id === area);
-  const [{ data: metrics }, overdueTasks, overduePdcas] = await Promise.all([
-    client.rpc("operational_dashboard", {
-      p_restaurant_id: (restaurant?.id ?? null) as never,
-      p_unit_id: (unit?.id ?? null) as never,
-    }),
-    (await createExecutionService()).listTasks({
-      restaurantId: restaurant ? [restaurant.id] : undefined,
-      unitId: unit ? [unit.id] : undefined,
-      overdue: true,
-      sort: "due_date",
-      direction: "asc",
-      pageSize: 5,
-    }),
-    (await createExecutionService()).listPdcas({
-      restaurantId: restaurant ? [restaurant.id] : undefined,
-      unitId: unit ? [unit.id] : undefined,
-      overdue: true,
-      sort: "due_date",
-      direction: "asc",
-      pageSize: 5,
-    }),
-  ]);
+  const [{ data: metrics }, { data: breakdowns }, overdueTasks, overduePdcas] =
+    await Promise.all([
+      client.rpc("operational_dashboard", {
+        p_restaurant_id: (restaurant?.id ?? null) as never,
+        p_unit_id: (unit?.id ?? null) as never,
+      }),
+      client.rpc("dashboard_breakdowns", {
+        p_restaurant_id: (restaurant?.id ?? null) as never,
+        p_unit_id: (unit?.id ?? null) as never,
+      }),
+      (await createExecutionService()).listTasks({
+        restaurantId: restaurant ? [restaurant.id] : undefined,
+        unitId: unit ? [unit.id] : undefined,
+        overdue: true,
+        sort: "due_date",
+        direction: "asc",
+        pageSize: 5,
+      }),
+      (await createExecutionService()).listPdcas({
+        restaurantId: restaurant ? [restaurant.id] : undefined,
+        unitId: unit ? [unit.id] : undefined,
+        overdue: true,
+        sort: "due_date",
+        direction: "asc",
+        pageSize: 5,
+      }),
+    ]);
   const value = (metric: string) =>
     (metrics ?? []).find((row) => row.metric === metric)?.value ?? 0;
+  const chart = (name: string): BreakdownRow[] =>
+    (breakdowns ?? []).filter((row) => row.chart === name);
   const scopeParams = {
     ...(restaurant ? { restaurantId: restaurant.id } : {}),
     ...(unit ? { unitId: unit.id } : {}),
@@ -127,7 +140,7 @@ export default async function DashboardPage({
         <div>
           <p className="text-accent text-sm font-medium">Execução</p>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight">
-            Painel operacional
+            Dashboard geral
           </h1>
           <p className="text-muted-foreground mt-2 text-sm">
             {scopeLabel}. Cada número abre a lista que o produziu.
@@ -187,6 +200,38 @@ export default async function DashboardPage({
             <p className="text-muted-foreground mt-1 text-sm">{card.label}</p>
           </Link>
         ))}
+      </section>
+
+      <section
+        className="grid gap-6 lg:grid-cols-2"
+        data-testid="dashboard-charts"
+      >
+        <BarChart
+          labelHeading="Estado"
+          labelOf={taskStatusLabel}
+          rows={chart("tasks_by_status")}
+          testId="chart-tasks_by_status"
+          title="Tarefas por estado"
+        />
+        <BarChart
+          labelHeading="Fase"
+          labelOf={phaseLabel}
+          rows={chart("pdcas_by_phase")}
+          testId="chart-pdcas_by_phase"
+          title="PDCAs em curso por fase"
+        />
+        <BarChart
+          labelHeading="Restaurante"
+          rows={chart("overdue_by_restaurant")}
+          testId="chart-overdue_by_restaurant"
+          title="Atrasados por restaurante"
+        />
+        <LineChart
+          labelHeading="Semana"
+          rows={chart("completed_by_week")}
+          testId="chart-completed_by_week"
+          title="Concluídos por semana (últimas 8)"
+        />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">

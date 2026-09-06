@@ -30,7 +30,7 @@ const groups = [
     label: "Trabalho",
     items: [
       { href: "/my-work", label: "O meu trabalho", icon: Gauge },
-      { href: "/painel", label: "Painel operacional", icon: LayoutDashboard },
+      { href: "/painel", label: "Dashboard geral", icon: LayoutDashboard },
     ],
   },
   {

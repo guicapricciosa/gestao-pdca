@@ -5566,6 +5566,16 @@ export type Database = {
         };
         Returns: string;
       };
+      dashboard_breakdowns: {
+        Args: { p_restaurant_id?: string; p_unit_id?: string };
+        Returns: {
+          chart: string;
+          label: string;
+          series: string;
+          sort: number;
+          value: number;
+        }[];
+      };
       deactivate_meeting_series: {
         Args: {
           expected_version: number;

@@ -43,6 +43,21 @@ test.describe("search and operational dashboard", () => {
     await page.goto("/painel");
     const cards = page.getByTestId("dashboard-cards");
     await expect(cards.getByRole("link")).toHaveCount(8);
+    for (const chart of [
+      "tasks_by_status",
+      "pdcas_by_phase",
+      "overdue_by_restaurant",
+      "completed_by_week",
+    ])
+      await expect(page.getByTestId(`chart-${chart}`)).toBeVisible();
+    // Chart and table agree: the tasks-by-status table sums to open + done.
+    const statusChart = page.getByTestId("chart-tasks_by_status");
+    await statusChart.getByText("Ver como tabela").click();
+    const cells = await statusChart
+      .locator("tbody td:last-child")
+      .allInnerTexts();
+    const total = cells.reduce((sum, cell) => sum + Number(cell), 0);
+    expect(total).toBeGreaterThan(0);
     for (const label of [
       "Tarefas atrasadas",
       "PDCAs em curso",
@@ -66,7 +81,7 @@ test.describe("search and operational dashboard", () => {
     await login(page);
     await page.goto("/painel");
     await page
-      .getByLabel("Restaurante")
+      .getByRole("combobox", { name: "Restaurante" })
       .selectOption({ label: "Restaurant A" });
     await page.getByRole("button", { name: "Ver" }).click();
     await page.waitForURL(/restaurante=/);
