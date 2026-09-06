@@ -100,6 +100,9 @@ export function MeetingForm({
   );
   const [titleTouched, setTitleTouched] = useState(false);
   const [participants, setParticipants] = useState<readonly string[]>([]);
+  const eligible = options.profiles.filter(
+    (profile) => profile.id !== options.currentProfileId,
+  );
   const [units, setUnits] = useState<readonly string[]>(contextUnitIds);
   const [visibilityValue, setVisibilityValue] = useState("NORMAL");
 
@@ -255,27 +258,42 @@ export function MeetingForm({
           Só aparecem pessoas com acesso ao âmbito escolhido. Participar não dá
           acesso a nada.
         </p>
+        <label className="mt-2 flex gap-2 text-sm font-medium">
+          <input
+            aria-label="Todos"
+            checked={
+              eligible.length > 0 &&
+              eligible.every((profile) => participants.includes(profile.id))
+            }
+            data-testid="participants-all"
+            onChange={(event) =>
+              setParticipants(
+                event.target.checked ? eligible.map((p) => p.id) : [],
+              )
+            }
+            type="checkbox"
+          />
+          Todos ({eligible.length})
+        </label>
         <div className="mt-2 grid gap-1 sm:grid-cols-2">
-          {options.profiles
-            .filter((profile) => profile.id !== options.currentProfileId)
-            .map((profile) => (
-              <label className="flex gap-2 text-sm" key={profile.id}>
-                <input
-                  type="checkbox"
-                  name="participantIds"
-                  value={profile.id}
-                  checked={participants.includes(profile.id)}
-                  onChange={(event) =>
-                    setParticipants((current) =>
-                      event.target.checked
-                        ? [...current, profile.id]
-                        : current.filter((id) => id !== profile.id),
-                    )
-                  }
-                />
-                {profile.display_name}
-              </label>
-            ))}
+          {eligible.map((profile) => (
+            <label className="flex gap-2 text-sm" key={profile.id}>
+              <input
+                type="checkbox"
+                name="participantIds"
+                value={profile.id}
+                checked={participants.includes(profile.id)}
+                onChange={(event) =>
+                  setParticipants((current) =>
+                    event.target.checked
+                      ? [...current, profile.id]
+                      : current.filter((id) => id !== profile.id),
+                  )
+                }
+              />
+              {profile.display_name}
+            </label>
+          ))}
         </div>
       </fieldset>
 
