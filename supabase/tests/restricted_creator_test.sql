@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(16);
 
 -- Fixtures: support director (0003) creates a RESTRICTED object inside their
 -- own domain (unit 3, restaurant A). Only GLOBAL_EXECUTIVE holds
@@ -35,7 +35,9 @@ select extensions.is((select count(*)::integer from public.explicit_access_grant
 
 -- PRIVATE is unchanged: creator read only, no update without a grant.
 select extensions.ok(private.can_access_security_object('21000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'work_item.read'), 'PRIVATE creator reads');
-select extensions.ok(not private.can_access_security_object('21000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'work_item.update'), 'PRIVATE creator does not update without a grant');
+select extensions.ok(private.can_access_security_object('21000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'work_item.update'), 'PRIVATE creator keeps the functional permissions they hold (rule of 2026-09-06)');
+select extensions.ok(not private.can_access_security_object('21000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'work_item.archive'), 'PRIVATE creator gains no permission they do not hold');
+select extensions.ok(not private.can_access_security_object('21000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000003', 'work_item.read'), 'nobody else reads a PRIVATE object without a grant, not even the executive');
 
 -- RLS and the list filter agree with the central rule.
 select set_config('request.jwt.claim.sub', '20000000-0000-0000-0000-000000000003', true);

@@ -109,7 +109,11 @@ Read access is limited to:
 - users with valid explicit grants; or
 - no other access path in the MVP.
 
-Ordinary administrators do not automatically receive private content. The schema and authorization boundary may later support a break-glass operation, but that path is disabled in the MVP. A future implementation must require a specific administrative permission, mandatory reason, actor identity, timestamp and immutable audit event. Private metadata should also be minimized in lists and audit projections.
+The creator may also act on their private object with whatever functional
+permissions their current assignments hold (activate, edit, complete, comment);
+they gain nothing they do not already hold, and nobody else gains anything
+(decision of 2026-09-06, migration `202609060005`). Ordinary administrators do
+not automatically receive private content. The schema and authorization boundary may later support a break-glass operation, but that path is disabled in the MVP. A future implementation must require a specific administrative permission, mandatory reason, actor identity, timestamp and immutable audit event. Private metadata should also be minimized in lists and audit projections.
 
 Changing an object from NORMAL to RESTRICTED/PRIVATE must validate the retained access list and prevent accidental orphaning. Changing to a broader mode is a high-impact audited action.
 
@@ -240,6 +244,10 @@ function can(user, action, object): Decision
     return allow if grantPolicyAllows(action, object.visibility)
 
   if object.visibility == PRIVATE:
+    # Rule of 2026-09-06 (approved): the creator keeps the functional
+    # permissions a current assignment of theirs grants; nobody else.
+    return allow if user is object.createdBy
+                 and (action is a read or some current path holds the action)
     return DENY
 
   if object.visibility == RESTRICTED:
