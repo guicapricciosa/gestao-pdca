@@ -6305,6 +6305,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      update_my_name: { Args: { p_display_name: string }; Returns: undefined };
       update_pdca: {
         Args: {
           actual_result: string;
@@ -6384,6 +6385,10 @@ export type Database = {
           p_title: string;
           p_unit_scope_mode: Database["public"]["Enums"]["unit_scope_mode"];
         };
+        Returns: undefined;
+      };
+      update_person_identity: {
+        Args: { p_display_name: string; p_email: string; p_profile_id: string };
         Returns: undefined;
       };
       update_task: {

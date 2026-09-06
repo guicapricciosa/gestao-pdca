@@ -16,6 +16,11 @@ acessos escondidos.
 Se deixares de cobrir um restaurante, deixas de ver os assuntos desse
 restaurante, incluindo os que criaste com visibilidade restrita.
 
+## O teu nome
+
+Em **Definições › O teu nome** mudas como apareces nas listas, reuniões e
+notificações. O email de entrada só quem gere a organização o muda.
+
 ## Convidar pessoas
 
 ![Pessoas](../screenshots/26-people.png)
@@ -38,7 +43,8 @@ descritos acima).
 ![Organização](../screenshots/27-organization.png)
 
 Em **Definições › Pessoas**, o botão **Editar** de cada pessoa abre um painel
-para mudar o papel, o cargo, o departamento, os departamentos que vê (todos ou
+com os **dados da pessoa** (nome e email; mudar o email muda o login) e, por
+baixo, o papel, o cargo, o departamento, os departamentos que vê (todos ou
 só o seu), os restaurantes (todos, só alguns, os das pessoas que lhe reportam,
 ou nenhum) e **Reporta a**. Quem está acima na cadeia de chefia cobre os
 restaurantes de quem está abaixo quando tem «Os das pessoas que lhe reportam».

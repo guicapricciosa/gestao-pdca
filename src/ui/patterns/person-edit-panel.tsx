@@ -1,6 +1,7 @@
 import {
   deactivatePersonAction,
   updatePersonAction,
+  updatePersonIdentityAction,
 } from "@/app/actions/organization";
 import { RecordPanel } from "@/ui/components/record-panel";
 import { SubmitButton } from "@/ui/components/submit-button";
@@ -54,10 +55,57 @@ export function PersonEditPanel({
       title={person.display_name ?? ""}
     >
       <form
+        action={updatePersonIdentityAction}
+        className="grid gap-3 rounded-2xl border bg-white p-4"
+        data-testid="person-identity-form"
+      >
+        <p className="text-sm font-semibold">Dados da pessoa</p>
+        <input type="hidden" name="profileId" value={person.profile_id ?? ""} />
+        <input
+          type="hidden"
+          name="authUserId"
+          value={person.auth_user_id ?? ""}
+        />
+        <input
+          type="hidden"
+          name="assignmentId"
+          value={person.assignment_id ?? ""}
+        />
+        <label className="block text-sm font-medium">
+          Nome
+          <input
+            className={input}
+            defaultValue={person.display_name ?? ""}
+            minLength={2}
+            name="displayName"
+            required
+          />
+        </label>
+        <label className="block text-sm font-medium">
+          Email
+          <input
+            className={input}
+            defaultValue={person.email ?? ""}
+            name="email"
+            required
+            type="email"
+          />
+          <span className="text-muted-foreground mt-1 block text-xs">
+            Mudar o email muda o login. A pessoa passa a entrar com o novo.
+          </span>
+        </label>
+        <div>
+          <SubmitButton variant="secondary" pendingLabel="A guardar…">
+            Guardar dados
+          </SubmitButton>
+        </div>
+      </form>
+      <form
         action={updatePersonAction}
         className="grid gap-4"
         data-testid="person-edit-form"
       >
+        <p className="text-sm font-semibold">Papel e âmbito</p>
         <input
           type="hidden"
           name="assignmentId"

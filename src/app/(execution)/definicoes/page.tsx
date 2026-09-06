@@ -1,8 +1,13 @@
 import Link from "next/link";
 
 import { getBranding } from "@/platform/pwa/branding";
-import { createSupabaseServerClient } from "@/platform/supabase/server";
+import { updateMyNameAction } from "@/app/actions/organization";
+import {
+  createSupabaseServerClient,
+  currentAuthUser,
+} from "@/platform/supabase/server";
 import { InstallApp } from "@/ui/components/install-app";
+import { SubmitButton } from "@/ui/components/submit-button";
 import { PushSettings } from "@/ui/components/push-settings";
 import { NotificationPreferences } from "@/ui/patterns/notification-preferences";
 
@@ -10,10 +15,17 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const branding = getBranding();
   const client = await createSupabaseServerClient();
-  const [{ data: preferences }, { data: scope }] = await Promise.all([
-    client.rpc("get_notification_preferences"),
-    client.rpc("get_accessible_scope"),
-  ]);
+  const me = await currentAuthUser(client);
+  const [{ data: preferences }, { data: scope }, { data: profile }] =
+    await Promise.all([
+      client.rpc("get_notification_preferences"),
+      client.rpc("get_accessible_scope"),
+      client
+        .from("profiles")
+        .select("display_name")
+        .eq("auth_user_id", me?.id ?? "")
+        .maybeSingle(),
+    ]);
   const canManageTemplates = (scope ?? []).some(
     (path) => path.permission_key === "meeting.template.manage",
   );
@@ -28,6 +40,32 @@ export default async function SettingsPage() {
           Definições
         </h1>
       </header>
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="font-semibold">O teu nome</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Como apareces nas listas, reuniões e notificações. Entras com{" "}
+          {me?.email}.
+        </p>
+        <form
+          action={updateMyNameAction}
+          className="mt-3 flex flex-wrap items-end gap-3"
+          data-testid="my-name-form"
+        >
+          <label className="block text-sm font-medium">
+            Nome
+            <input
+              className="mt-1.5 rounded-lg border bg-white px-3 py-2 text-sm"
+              defaultValue={profile?.display_name ?? ""}
+              minLength={2}
+              name="displayName"
+              required
+            />
+          </label>
+          <SubmitButton variant="secondary" pendingLabel="A guardar…">
+            Guardar
+          </SubmitButton>
+        </form>
+      </section>
       <NotificationPreferences
         preferences={
           preferences ?? {

@@ -103,3 +103,56 @@ export async function deactivatePersonAction(formData: FormData) {
   }
   finish("/definicoes/pessoas", error);
 }
+
+/** Name and e-mail of a person (Auth e-mail first, then the profile). */
+export async function updatePersonIdentityAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const profileId = text(formData, "profileId");
+  const authUserId = text(formData, "authUserId");
+  const assignmentId = text(formData, "assignmentId");
+  const name = text(formData, "displayName");
+  const email = text(formData, "email").toLowerCase();
+  const back = `/definicoes/pessoas?editar=${assignmentId}`;
+  if (name.length < 2 || !email.includes("@"))
+    finish(back, new Error("invalid input"));
+  const admin = createSupabaseAdminClient();
+  const current = await admin.auth.admin.getUserById(authUserId);
+  const previousEmail = current.data.user?.email?.toLowerCase() ?? "";
+  if (previousEmail !== email) {
+    const changed = await admin.auth.admin.updateUserById(authUserId, {
+      email,
+      email_confirm: true,
+    });
+    if (changed.error) {
+      console.error("e-mail change failed", { status: changed.error.status });
+      finish(
+        back,
+        new Error(
+          changed.error.code === "email_exists"
+            ? "email already invited"
+            : `invite failed: ${changed.error.message}`,
+        ),
+      );
+    }
+  }
+  const { error } = await client.rpc("update_person_identity", {
+    p_profile_id: profileId,
+    p_display_name: name,
+    p_email: email,
+  });
+  if (error !== null && previousEmail !== email)
+    await admin.auth.admin.updateUserById(authUserId, {
+      email: previousEmail,
+      email_confirm: true,
+    });
+  finish(error ? back : "/definicoes/pessoas", error);
+}
+
+/** One's own display name, from Definições. */
+export async function updateMyNameAction(formData: FormData) {
+  const client = await createSupabaseServerClient();
+  const { error } = await client.rpc("update_my_name", {
+    p_display_name: text(formData, "displayName"),
+  });
+  finish("/definicoes", error, ["/my-work"]);
+}

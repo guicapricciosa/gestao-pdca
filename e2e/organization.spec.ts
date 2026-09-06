@@ -88,6 +88,39 @@ test.describe("Definições › Organização", () => {
     await expect(updated).toContainText("reporta a Supervisor Operations B");
   });
 
+  test("name and e-mail can be corrected; people can rename themselves", async ({
+    page,
+  }) => {
+    await login(page);
+    await page.goto("/definicoes/pessoas");
+    await page
+      .getByTestId("people-list")
+      .locator("li", { hasText: "supervisor.ops.b@example.test" })
+      .getByTestId("edit-person")
+      .click();
+    await page.waitForURL(/editar=/);
+    const identity = page.getByTestId("person-identity-form");
+    await identity.getByLabel("Nome").fill("Supervisora Operações B");
+    await identity.getByLabel("Email").fill("supervisora.b@example.test");
+    await clickAndSettle(
+      page,
+      identity.getByRole("button", { name: "Guardar dados" }),
+    );
+    const row = page
+      .getByTestId("people-list")
+      .locator("li", { hasText: "supervisora.b@example.test" });
+    await expect(row).toContainText("Supervisora Operações B");
+
+    await page.goto("/definicoes");
+    const mine = page.getByTestId("my-name-form");
+    await mine.getByLabel("Nome").fill("CEO Renomeado");
+    await clickAndSettle(page, mine.getByRole("button", { name: "Guardar" }));
+    await expect(page.getByTestId("viewer-name")).toHaveText("CEO Renomeado");
+    await mine.getByLabel("Nome").fill("CEO");
+    await clickAndSettle(page, mine.getByRole("button", { name: "Guardar" }));
+    await expect(page.getByTestId("viewer-name")).toHaveText("CEO");
+  });
+
   test("deactivating a person ends their access", async ({ page, browser }) => {
     await login(page);
     await page.goto("/definicoes/pessoas");
