@@ -4,6 +4,14 @@ As gravações Plaud são pessoais. O que sai delas entra na plataforma como
 **PDCAs privados teus**, com as subtarefas ligadas e a referência à gravação,
 para que a mesma acção nunca seja importada duas vezes.
 
+## Sem copiar nada
+
+Com o conector Plaud ligado ao Claude (Definições do Claude › Conectores ›
+Plaud, com o Plaud Cloud Sync activo), basta pedir: «importa a gravação de
+hoje para o PDCA». O assistente lê a gravação, extrai as acções e faz a
+importação directamente, com as mesmas regras abaixo. O ecrã fica como
+alternativa manual.
+
 ## Como
 
 1. Pede ao assistente as pendências de uma gravação e depois «prepara estas

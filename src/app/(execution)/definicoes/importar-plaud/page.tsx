@@ -1,7 +1,11 @@
 import Link from "next/link";
 
 import { importPlaudAction } from "@/app/actions/plaud";
-import { loadCreationOptions } from "@/modules/execution/application/creation-options";
+import {
+  loadCreationOptions,
+  loadViewerContext,
+} from "@/modules/execution/application/creation-options";
+import { createSupabaseServerClient } from "@/platform/supabase/server";
 import { PlaudImportForm } from "@/ui/patterns/plaud-import-form";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +21,25 @@ export default async function PlaudImportPage({
   readonly searchParams: Promise<{ criados?: string; ignorados?: string }>;
 }) {
   const { criados, ignorados } = await searchParams;
-  const options = await loadCreationOptions("pdca.create");
+  const [options, viewer] = await Promise.all([
+    loadCreationOptions("pdca.create"),
+    loadViewerContext("pdca.create"),
+  ]);
   const company = options.companies[0];
+  // Default area: the importer's own department, so the private PDCAs stay
+  // inside their scope even for people who only cover one department.
+  const client = await createSupabaseServerClient();
+  const { data: assignment } = viewer.profileId
+    ? await client
+        .from("organizational_assignments")
+        .select("organizational_unit_id")
+        .eq("profile_id", viewer.profileId)
+        .eq("is_active", true)
+        .not("organizational_unit_id", "is", null)
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+  const defaultUnitId = assignment?.organizational_unit_id ?? "";
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header>
@@ -59,6 +80,7 @@ export default async function PlaudImportPage({
           companyId={company.id}
           restaurants={options.restaurants}
           units={options.units}
+          defaultUnitId={defaultUnitId}
         />
       ) : (
         <p className="text-muted-foreground text-sm">

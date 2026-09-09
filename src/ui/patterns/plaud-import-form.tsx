@@ -18,11 +18,13 @@ export function PlaudImportForm({
   companyId,
   restaurants,
   units,
+  defaultUnitId = "",
 }: {
   readonly action: (formData: FormData) => Promise<void>;
   readonly companyId: string;
   readonly restaurants: readonly { id: string; name: string }[];
   readonly units: readonly { id: string; name: string }[];
+  readonly defaultUnitId?: string;
 }) {
   const [text, setText] = useState("");
   const [items, setItems] = useState<readonly PlannedItem[] | null>(null);
@@ -126,7 +128,11 @@ export function PlaudImportForm({
             </label>
             <label className="block text-sm font-medium">
               Área
-              <select className={input} name="unitId" defaultValue="">
+              <select
+                className={input}
+                name="unitId"
+                defaultValue={defaultUnitId}
+              >
                 <option value="">Sem área</option>
                 {units.map((unit) => (
                   <option key={unit.id} value={unit.id}>
