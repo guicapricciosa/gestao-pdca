@@ -9,6 +9,7 @@ test("the manual is readable inside the app with its screenshots", async ({
   await page.goto("/definicoes");
   await page.getByRole("link", { name: "Abrir o manual" }).click();
   await page.waitForURL("**/manual");
+  await expect(page.getByTestId("manual-chapters")).toBeVisible();
   const chapters = page.getByTestId("manual-chapters").getByRole("link");
   expect(await chapters.count()).toBeGreaterThanOrEqual(12);
   await chapters.first().click();

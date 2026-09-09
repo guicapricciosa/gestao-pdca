@@ -588,3 +588,15 @@ visit) says what a project must be.
 - Lists: `unassigned=true` filter ("Sem responsável").
 - Keyset pagination not needed yet (offset pagination on 25-row pages with
   indexed sorts); revisit when a list passes a few thousand rows.
+
+## 2026-09-09 — Plaud import
+
+Decision of Gui Rainho: Plaud recordings are always his and private, so the
+import from the previous app returns in the shape this platform uses. Paste
+the JSON in Definições › Importar Plaud, preview, choose the reference
+restaurant, import. Each action becomes a PRIVATE PDCA of the importer
+(owner and responsible), with subtasks as PRIVATE tasks linked to it, the
+phase from the recording, and "Done" actions closed with a closure note.
+The recording reference (`plaud:<recording_id>:<title-slug>`) lives in the
+problem statement and stops re-imports. No new tables: the domain commands
+do all the writing, so audit and outbox behave as for any PDCA.
